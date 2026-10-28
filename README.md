@@ -1,1 +1,681 @@
-# cardapio-digital-marmitaria
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempero da Ilma - Cardápio de Combos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#FFD482',
+                            secondary: '#5F935D',
+                            accent: '#4C7A4A',
+                            dark: '#222222',
+                            light: '#FAF8F5'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FAF8F5;
+            color: #222222;
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- HEADER / LOGO -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-brand-secondary shadow-sm bg-white shrink-0">
+                    <img src="LOGO.jpg" alt="Tempero da Ilma" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-stone-800 leading-tight">Tempero da Ilma</h1>
+                    <p class="text-xs text-stone-500 flex items-center gap-1">
+                        <i class="fa-solid fa-location-dot text-brand-secondary"></i> Salvador e Região
+                    </p>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Aberto
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="bg-gradient-to-r from-stone-900 to-stone-800 text-white py-8 px-4 relative">
+        <div class="max-w-4xl mx-auto text-center space-y-2">
+            <span class="bg-brand-primary text-stone-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Combos Semanais</span>
+            <h2 class="text-2xl md:text-3xl font-extrabold">Monte o seu Pacote de Marmitas</h2>
+            <p class="text-stone-300 text-xs md:text-sm max-w-md mx-auto">Escolha seus combos de 5 ou 10 marmitas e monte o cardápio da sua preferência!</p>
+        </div>
+    </section>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <main class="max-w-4xl mx-auto px-4 pt-8 space-y-10">
+
+        <!-- 1. ÁREA DE EXIBIÇÃO APENAS DE SABORES (INFORMATIVA) -->
+        <section class="space-y-4">
+            <div class="border-b border-stone-200 pb-2 flex items-center justify-between">
+                <h3 class="font-bold text-lg text-stone-800 flex items-center gap-2">
+                    <i class="fa-solid fa-fire text-amber-500"></i> Cardápio da Semana
+                </h3>
+                <span class="text-xs text-stone-500 bg-stone-200 px-2.5 py-1 rounded-full font-medium">Apenas consulta</span>
+            </div>
+            <p class="text-xs text-stone-500">Consulte os pratos disponíveis nesta semana. A seleção dos sabores é feita ao montar o seu combo abaixo:</p>
+
+            <div id="flavors-display-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- Renderizado via JS -->
+            </div>
+        </section>
+
+        <!-- 2. SEÇÃO DE ESCOLHA DOS COMBOS -->
+        <section class="space-y-4 pt-4">
+            <h3 class="font-bold text-lg text-stone-800 border-b border-stone-200 pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-box-open text-brand-secondary"></i> Escolha seus Combos
+            </h3>
+
+            <div id="combos-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Combos renderizados via JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-stone-900 text-stone-300 mt-16 pt-8 pb-20 border-t border-stone-800 text-center text-xs space-y-3">
+        <p class="font-bold text-white text-sm">Tempero da Ilma - Marmitaria</p>
+        <p class="text-stone-400">Atendimento e Pedidos via WhatsApp: (71) 99412-5510</p>
+        <p class="text-stone-500">&copy; Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- BARRA FLUTUANTE DO CARRINHO -->
+    <div id="cart-bar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone-200 p-3 z-40 shadow-2xl transition-transform transform translate-y-full">
+        <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="relative bg-stone-100 p-2.5 rounded-xl">
+                    <i class="fa-solid fa-cart-shopping text-brand-secondary text-xl"></i>
+                    <span id="cart-count" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+                </div>
+                <div>
+                    <p class="text-[11px] text-stone-500 font-medium">Seu Pedido</p>
+                    <p id="cart-total" class="text-lg font-bold text-stone-800">R$ 0,00</p>
+                </div>
+            </div>
+            <button onclick="openCheckoutModal()" class="bg-brand-secondary hover:bg-brand-accent text-white font-bold text-sm px-6 py-3 rounded-xl transition flex items-center gap-2 shadow-md">
+                Ver Pedido / Finalizar <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DE SELEÇÃO DE SABORES PARA O COMBO -->
+    <div id="flavors-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-end sm:items-center hidden">
+        <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            
+            <div class="p-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+                <div>
+                    <h3 id="modal-combo-title" class="font-bold text-stone-800 text-base">Monte seu Combo</h3>
+                    <p id="modal-combo-subtitle" class="text-xs text-brand-secondary font-semibold">Escolha os sabores</p>
+                </div>
+                <button onclick="closeFlavorsModal()" class="text-stone-400 hover:text-stone-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Contador de Sabores -->
+            <div class="bg-brand-primary/20 px-4 py-2 text-center border-b border-brand-primary/30">
+                <p class="text-xs font-bold text-stone-800">
+                    Marmitas selecionadas: <span id="selected-count" class="text-brand-secondary font-extrabold text-sm">0</span> de <span id="max-count">0</span>
+                </p>
+            </div>
+
+            <!-- Lista de Sabores Disponíveis -->
+            <div class="p-4 overflow-y-auto space-y-3 flex-1" id="flavors-selection-list">
+                <!-- Sabores via JS -->
+            </div>
+
+            <div class="p-4 border-t border-stone-200 bg-stone-50 flex gap-2">
+                <button onclick="closeFlavorsModal()" class="w-1/3 bg-stone-200 text-stone-700 font-bold py-3 rounded-xl text-xs">Cancelar</button>
+                <button id="btn-confirm-combo" onclick="confirmComboSelection()" disabled class="w-2/3 bg-stone-300 text-stone-500 font-bold py-3 rounded-xl text-xs transition">Adicionar Combo ao Pedido</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE FINALIZAÇÃO (CHECKOUT / MEU PEDIDO) -->
+    <div id="checkout-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-end sm:items-center hidden">
+        <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            
+            <div class="p-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+                <h3 class="font-bold text-stone-800 text-base">Resumo do Pedido</h3>
+                <button onclick="closeCheckoutModal()" class="text-stone-400 hover:text-stone-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-4 overflow-y-auto space-y-4 flex-1">
+                
+                <!-- Lista de Combos Adicionados -->
+                <div class="space-y-3">
+                    <p class="text-xs font-bold text-stone-500 uppercase tracking-wider">Combos no Carrinho</p>
+                    <div id="cart-combos-container" class="space-y-3">
+                        <!-- Itens do carrinho via JS -->
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-stone-200 flex justify-between items-center font-bold text-stone-800 text-base">
+                    <span>Total do Pedido:</span>
+                    <span id="summary-total-price" class="text-brand-accent text-lg">R$ 0,00</span>
+                </div>
+
+                <!-- Formulário de Contato e Endereço estilo profissional -->
+                <form id="checkout-form" class="space-y-4 pt-3 border-t border-stone-200">
+                    <h4 class="font-bold text-stone-800 text-sm">Seus dados para contato e entrega</h4>
+                    
+                    <!-- Nome Completo -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 mb-1">Nome completo</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none">
+                                <i class="fa-regular fa-user"></i>
+                            </span>
+                            <input type="text" id="cust-name" required placeholder="Digite seu nome completo" class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Telefone de contato -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 mb-1">Telefone de contato</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none">
+                                <i class="fa-solid fa-phone"></i>
+                            </span>
+                            <input type="tel" id="cust-phone" required placeholder="(71) 99999-9999" class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                        </div>
+                        <p class="text-[10px] text-stone-400 mt-1">Informe um número de telefone/WhatsApp para contato.</p>
+                    </div>
+
+                    <!-- Endereço completo da residência -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 mb-1">Endereço completo da residência</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none">
+                                <i class="fa-solid fa-house"></i>
+                            </span>
+                            <input type="text" id="cust-address" required placeholder="Rua/Avenida, número, complemento, bairro, cidade..." class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                        </div>
+                        <p class="text-[10px] text-stone-400 mt-1">Você pode ajustar o endereço caso o GPS não traga o número exato.</p>
+                    </div>
+
+                    <!-- Localização da residência (GPS ou Link do Maps) -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 mb-1">Localização da residência <span class="text-stone-400 font-normal">(opcional)</span></label>
+                        <button type="button" onclick="getLocation()" class="w-full bg-white border-2 border-brand-secondary/80 hover:bg-stone-50 text-brand-accent font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm text-xs">
+                            <i class="fa-solid fa-location-crosshairs text-base"></i> Usar minha localização
+                        </button>
+                        <p id="location-status" class="text-[10px] text-stone-400 mt-1 text-center"></p>
+
+                        <div class="relative flex py-2 items-center">
+                            <div class="flex-grow border-t border-stone-200"></div>
+                            <span class="flex-shrink mx-4 text-stone-400 text-[10px] uppercase font-medium">ou cole o link do Google Maps</span>
+                            <div class="flex-grow border-t border-stone-200"></div>
+                        </div>
+
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none">
+                                <i class="fa-solid fa-link"></i>
+                            </span>
+                            <input type="url" id="cust-maps-link" placeholder="https://maps.app.goo.gl/..." class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Forma de Pagamento -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 mb-1">Forma de Pagamento *</label>
+                        <select id="cust-payment" onchange="toggleTrocoField()" required class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                            <option value="Pix">Pix</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                        </select>
+                    </div>
+
+                    <!-- Troco -->
+                    <div id="troco-container" class="hidden">
+                        <label class="block text-xs font-semibold text-stone-700 mb-1">Troco para quanto?</label>
+                        <input type="text" id="cust-troco" placeholder="Ex: R$ 100,00" class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                    </div>
+
+                    <!-- Observações -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-700 mb-1">Observações gerais</label>
+                        <textarea id="cust-obs" rows="2" placeholder="Ex: Sem salada, retirar cebola..." class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-4 border-t border-stone-200 bg-stone-50">
+                <button type="button" onclick="sendToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                    <i class="fa-brands fa-whatsapp text-xl"></i> Enviar Pedido no WhatsApp
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // COMBOS DISPONÍVEIS
+        const combos = [
+            { 
+                id: 'combo-5', 
+                name: "Combo 5 Marmitas", 
+                qty: 5, 
+                price: 95.00, 
+                description: "Escolha 5 marmitas do cardápio para a sua semana.",
+                image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=500&q=80"
+            },
+            { 
+                id: 'combo-10', 
+                name: "Combo 10 Marmitas", 
+                qty: 10, 
+                price: 180.00, 
+                description: "Escolha 10 marmitas variadas para garantir suas refeições.",
+                image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=500&q=80"
+            }
+        ];
+
+        // SABORES DA SEMANA (Apenas visualização e seleção de combo)
+        const availableFlavors = [
+            { id: 'f1', name: 'Feijoada Completa', desc: 'Arroz, feijoada, farofa, couve e laranja', tag: 'Tradicional', img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80' },
+            { id: 'f2', name: 'Strogonoff de Frango', desc: 'Arroz branco soltinho e batata palha', tag: 'Tradicional', img: 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=300&q=80' },
+            { id: 'f3', name: 'Bife Acebolado', desc: 'Arroz, feijão caseiro e salada de maionese', tag: 'Tradicional', img: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80' },
+            { id: 'f4', name: 'Frango Grelhado Fit', desc: 'Frango em ervas, arroz integral e legumes', tag: 'Linha Fit', img: 'https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80' },
+            { id: 'f5', name: 'Patinho Moído Fit', desc: 'Carne magra, purê de batata doce e brócolis', tag: 'Linha Fit', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=300&q=80' },
+            { id: 'f6', name: 'Escondidinho de Mandioquinha', desc: 'Massa leve com frango desfiado temperado', tag: 'Linha Fit', img: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=300&q=80' }
+        ];
+
+        let cartCombos = []; 
+        let currentEditingCombo = null;
+        let selectedFlavors = {}; 
+
+        // CAPTURAR LOCALIZAÇÃO VIA GPS E FORMATAR LINK NO PADRÃO MAPS
+        function getLocation() {
+            const statusEl = document.getElementById('location-status');
+            const addressInput = document.getElementById('cust-address');
+            const mapsLinkInput = document.getElementById('cust-maps-link');
+
+            if (!navigator.geolocation) {
+                statusEl.innerText = "Seu navegador não suporta geolocalização.";
+                return;
+            }
+
+            statusEl.innerHTML = `<span class="text-amber-600"><i class="fa-solid fa-spinner animate-spin"></i> Obtendo sua localização via GPS...</span>`;
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    const mapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
+                    mapsLinkInput.value = mapsUrl;
+                    
+                    try {
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`);
+                        const data = await response.json();
+
+                        if (data && data.address) {
+                            const road = data.address.road || data.address.pedestrian || "";
+                            const houseNumber = data.address.house_number ? `, nº ${data.address.house_number}` : "";
+                            const suburb = data.address.suburb || data.address.neighbourhood || "";
+                            const city = data.address.city || data.address.town || "";
+
+                            let fullAddressParts = [];
+                            if (road) fullAddressParts.push(road + houseNumber);
+                            if (suburb) fullAddressParts.push("Bairro: " + suburb);
+                            if (city) fullAddressParts.push(city);
+
+                            if (fullAddressParts.length > 0) {
+                                addressInput.value = fullAddressParts.join(" - ");
+                            } else {
+                                addressInput.value = "Localização GPS obtida";
+                            }
+
+                            statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i> Localização obtida! Revise o número se necessário.</span>`;
+                        } else {
+                            addressInput.value = "Localização GPS obtida";
+                            statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i> Coordenadas obtidas com sucesso!</span>`;
+                        }
+                    } catch (error) {
+                        addressInput.value = "Localização GPS obtida";
+                        statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i> Coordenadas obtidas com sucesso!</span>`;
+                    }
+                },
+                (error) => {
+                    statusEl.innerHTML = `<span class="text-red-500">Não foi possível obter a localização. Verifique as permissões de GPS.</span>`;
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        // RENDERIZAR A SEÇÃO APENAS INFORMATIVA DOS SABORES
+        function renderFlavorsDisplay() {
+            const grid = document.getElementById('flavors-display-grid');
+            grid.innerHTML = '';
+
+            availableFlavors.forEach(flavor => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-3 rounded-xl border border-stone-200 flex gap-3 items-center shadow-sm";
+                card.innerHTML = `
+                    <img src="${flavor.img}" alt="${flavor.name}" class="w-16 h-16 rounded-lg object-cover shrink-0">
+                    <div>
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-2 py-0.5 rounded">${flavor.tag}</span>
+                        <h4 class="font-bold text-stone-800 text-xs mt-0.5">${flavor.name}</h4>
+                        <p class="text-[10px] text-stone-500 leading-tight mt-0.5 line-clamp-2">${flavor.desc}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // RENDERIZAR COMBOS NA TELA
+        function renderCombos() {
+            const grid = document.getElementById('combos-grid');
+            grid.innerHTML = '';
+
+            combos.forEach(combo => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="h-44 w-full overflow-hidden relative">
+                            <img src="${combo.image}" alt="${combo.name}" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-stone-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                                ${combo.qty} Marmitas
+                            </span>
+                        </div>
+                        <div class="p-4 space-y-2">
+                            <h3 class="font-bold text-stone-800 text-lg">${combo.name}</h3>
+                            <p class="text-stone-500 text-xs leading-relaxed">${combo.description}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0 flex items-center justify-between border-t border-stone-100 mt-2">
+                        <div>
+                            <span class="text-[10px] text-stone-400 block font-medium">Valor do Pacote</span>
+                            <span class="text-base font-extrabold text-stone-800">
+                                R$ ${combo.price.toFixed(2).replace('.', ',')}
+                            </span>
+                        </div>
+                        <button onclick="openFlavorsModal('${combo.id}')" class="bg-brand-secondary hover:bg-brand-accent text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-plus text-xs"></i> Montar & Adicionar
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ABRIR MODAL DE SELEÇÃO DE SABORES PARA O COMBO
+        function openFlavorsModal(comboId) {
+            currentEditingCombo = combos.find(c => c.id === comboId);
+            selectedFlavors = {};
+
+            document.getElementById('modal-combo-title').innerText = currentEditingCombo.name;
+            document.getElementById('modal-combo-subtitle').innerText = `Escolha ${currentEditingCombo.qty} marmitas para este combo`;
+            document.getElementById('max-count').innerText = currentEditingCombo.qty;
+            
+            renderFlavorsSelectionList();
+            updateFlavorSelectionState();
+
+            document.getElementById('flavors-modal').classList.remove('hidden');
+        }
+
+        function closeFlavorsModal() {
+            document.getElementById('flavors-modal').classList.add('hidden');
+        }
+
+        // RENDERIZAR SELEÇÃO DE SABORES
+        function renderFlavorsSelectionList() {
+            const container = document.getElementById('flavors-selection-list');
+            container.innerHTML = '';
+
+            availableFlavors.forEach(flavor => {
+                const count = selectedFlavors[flavor.id] || 0;
+                const item = document.createElement('div');
+                item.className = "flex items-center justify-between bg-stone-50 p-3 rounded-xl border border-stone-200";
+                item.innerHTML = `
+                    <div class="max-w-[60%]">
+                        <p class="font-bold text-stone-800 text-xs">${flavor.name}</p>
+                        <p class="text-[10px] text-stone-500">${flavor.desc}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="changeFlavorCount('${flavor.id}', -1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">
+                            -
+                        </button>
+                        <span class="font-bold text-stone-800 w-5 text-center text-sm">${count}</span>
+                        <button onclick="changeFlavorCount('${flavor.id}', 1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">
+                            +
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function changeFlavorCount(flavorId, delta) {
+            const currentTotal = Object.values(selectedFlavors).reduce((a, b) => a + b, 0);
+            const flavorCount = selectedFlavors[flavorId] || 0;
+
+            if(delta > 0 && currentTotal >= currentEditingCombo.qty) {
+                alert(`Você já atingiu o limite de ${currentEditingCombo.qty} marmitas para este combo!`);
+                return;
+            }
+
+            const newCount = flavorCount + delta;
+            if(newCount <= 0) {
+                delete selectedFlavors[flavorId];
+            } else {
+                selectedFlavors[flavorId] = newCount;
+            }
+
+            renderFlavorsSelectionList();
+            updateFlavorSelectionState();
+        }
+
+        function updateFlavorSelectionState() {
+            const currentTotal = Object.values(selectedFlavors).reduce((a, b) => a + b, 0);
+            document.getElementById('selected-count').innerText = currentTotal;
+
+            const btnConfirm = document.getElementById('btn-confirm-combo');
+            if(currentTotal === currentEditingCombo.qty) {
+                btnConfirm.disabled = false;
+                btnConfirm.classList.remove('bg-stone-300', 'text-stone-500');
+                btnConfirm.classList.add('bg-brand-secondary', 'text-white', 'hover:bg-brand-accent');
+            } else {
+                btnConfirm.disabled = true;
+                btnConfirm.classList.add('bg-stone-300', 'text-stone-500');
+                btnConfirm.classList.remove('bg-brand-secondary', 'text-white', 'hover:bg-brand-accent');
+            }
+        }
+
+        // CONFIRMAR E ADICIONAR COMBO AO CARRINHO
+        function confirmComboSelection() {
+            let details = [];
+            for(let flavorId in selectedFlavors) {
+                const flavor = availableFlavors.find(f => f.id === flavorId);
+                details.push(`${selectedFlavors[flavorId]}x ${flavor.name}`);
+            }
+
+            cartCombos.push({
+                cartItemId: Date.now(),
+                comboName: currentEditingCombo.name,
+                price: currentEditingCombo.price,
+                flavors: details
+            });
+
+            updateCartUI();
+            closeFlavorsModal();
+        }
+
+        function removeComboFromCart(cartItemId) {
+            cartCombos = cartCombos.filter(item => item.cartItemId !== cartItemId);
+            updateCartUI();
+            renderCartModalItems();
+        }
+
+        function updateCartUI() {
+            const totalCombos = cartCombos.length;
+            const totalPrice = cartCombos.reduce((acc, item) => acc + item.price, 0);
+
+            document.getElementById('cart-count').innerText = totalCombos;
+            document.getElementById('cart-total').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+
+            const cartBar = document.getElementById('cart-bar');
+            if(totalCombos > 0) {
+                cartBar.classList.remove('translate-y-full');
+            } else {
+                cartBar.classList.add('translate-y-full');
+                closeCheckoutModal();
+            }
+        }
+
+        function renderCartModalItems() {
+            const container = document.getElementById('cart-combos-container');
+            container.innerHTML = '';
+
+            if(cartCombos.length === 0) {
+                container.innerHTML = `<p class="text-xs text-stone-400 text-center py-4">Nenhum combo adicionado.</p>`;
+                return;
+            }
+
+            cartCombos.forEach((item, index) => {
+                const comboEl = document.createElement('div');
+                comboEl.className = "bg-stone-50 p-3 rounded-xl border border-stone-200 relative space-y-1 text-xs";
+                
+                let flavorsHTML = item.flavors.map(f => `<p class="text-stone-600">• ${f}</p>`).join('');
+
+                comboEl.innerHTML = `
+                    <div class="flex justify-between items-start border-b border-stone-200 pb-1.5">
+                        <span class="font-bold text-stone-800">${index + 1}. ${item.comboName}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-brand-accent">R$ ${item.price.toFixed(2).replace('.', ',')}</span>
+                            <button onclick="removeComboFromCart(${item.cartItemId})" class="text-red-500 hover:text-red-700 p-0.5">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="pt-1 space-y-0.5">
+                        ${flavorsHTML}
+                    </div>
+                `;
+                container.appendChild(comboEl);
+            });
+
+            const totalPrice = cartCombos.reduce((acc, item) => acc + item.price, 0);
+            document.getElementById('summary-total-price').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+        }
+
+        function openCheckoutModal() {
+            if(cartCombos.length === 0) return;
+            renderCartModalItems();
+            document.getElementById('checkout-modal').classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkout-modal').classList.add('hidden');
+        }
+
+        function toggleTrocoField() {
+            const payment = document.getElementById('cust-payment').value;
+            const trocoContainer = document.getElementById('troco-container');
+            if(payment === 'Dinheiro') {
+                trocoContainer.classList.remove('hidden');
+            } else {
+                trocoContainer.classList.add('hidden');
+            }
+        }
+
+        // ENVIAR PEDIDO COMPLETO PARA O WHATSAPP
+        function sendToWhatsApp() {
+            const form = document.getElementById('checkout-form');
+            if(!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const name = document.getElementById('cust-name').value;
+            const phone = document.getElementById('cust-phone').value;
+            const address = document.getElementById('cust-address').value;
+            const mapsLink = document.getElementById('cust-maps-link').value;
+            const payment = document.getElementById('cust-payment').value;
+            const troco = document.getElementById('cust-troco').value;
+            const obs = document.getElementById('cust-obs').value;
+
+            const totalPrice = cartCombos.reduce((acc, item) => acc + item.price, 0);
+
+            let message = `*--- NOVO PEDIDO: TEMPERO DA ILMA ---*\n\n`;
+            message += `👤 *CLIENTE:* ${name}\n`;
+            message += `📞 *TELEFONE:* ${phone}\n`;
+            message += `🏠 *ENDEREÇO:* ${address}\n`;
+
+            if (mapsLink) {
+                message += `📍 *LOCALIZAÇÃO (MAPS):* ${mapsLink}\n`;
+            }
+
+            message += `\n*COMBOS SELECIONADOS (${cartCombos.length}):*\n`;
+
+            cartCombos.forEach((item, index) => {
+                message += `\n*${index + 1}. ${item.comboName}* - R$ ${item.price.toFixed(2).replace('.', ',')}\n`;
+                item.flavors.forEach(f => {
+                    message += `  ${f}\n`;
+                });
+            });
+
+            message += `\n*TOTAL DO PEDIDO:* R$ ${totalPrice.toFixed(2).replace('.', ',')}\n`;
+            message += `💳 *FORMA DE PAGAMENTO:* ${payment}\n`;
+
+            if(payment === 'Dinheiro' && troco) {
+                message += `💵 *TROCO PARA:* ${troco}\n`;
+            }
+
+            if(obs) {
+                message += `📝 *OBSERVAÇÕES:* ${obs}\n`;
+            }
+
+            message += `\n_Pedido gerado via Cardápio Digital_`;
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappNumber = "5571994125510";
+            window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+        }
+
+        // INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFlavorsDisplay();
+            renderCombos();
+        });
+    </script>
+</body>
+</html>
