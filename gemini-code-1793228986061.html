@@ -47,8 +47,8 @@
     <header class="bg-white border-b border-stone-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full bg-brand-primary flex items-center justify-center font-bold text-stone-800 text-lg border-2 border-brand-secondary shadow-sm">
-                    <i class="fa-solid font-bold text-brand-secondary text-xl fa-utensils"></i>
+                <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-brand-secondary shadow-sm bg-white shrink-0">
+                    <img src="LOGO.jpg" alt="Tempero da Ilma" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h1 class="font-bold text-lg text-stone-800 leading-tight">Tempero da Ilma</h1>
@@ -321,7 +321,7 @@
         let currentEditingCombo = null;
         let selectedFlavors = {}; 
 
-        // CAPTURAR LOCALIZAÇÃO VIA GPS E FORMATAR LINK NO PADRÃO MAPS.APP.GOO.GL / MAPS
+        // CAPTURAR LOCALIZAÇÃO VIA GPS E FORMATAR LINK NO PADRÃO MAPS
         function getLocation() {
             const statusEl = document.getElementById('location-status');
             const addressInput = document.getElementById('cust-address');
@@ -339,7 +339,6 @@
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     
-                    // Formato de link limpo do Maps com as coordenadas exatas
                     const mapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
                     mapsLinkInput.value = mapsUrl;
                     
@@ -636,13 +635,13 @@
 
             const totalPrice = cartCombos.reduce((acc, item) => acc + item.price, 0);
 
-            let message = `📝*--- NOVO PEDIDO: TEMPERO DA ILMA ---*\n\n`;
-            message += `👤*CLIENTE:* ${name}\n`;
-            message += `📞*TELEFONE:* ${phone}\n`;
-            message += `🏠*ENDEREÇO:* ${address}\n`;
+            let message = `*--- NOVO PEDIDO: TEMPERO DA ILMA ---*\n\n`;
+            message += `👤 *CLIENTE:* ${name}\n`;
+            message += `📞 *TELEFONE:* ${phone}\n`;
+            message += `🏠 *ENDEREÇO:* ${address}\n`;
 
             if (mapsLink) {
-                message += `📌*LOCALIZAÇÃO (MAPS):* ${mapsLink}\n`;
+                message += `📍 *LOCALIZAÇÃO (MAPS):* ${mapsLink}\n`;
             }
 
             message += `\n*COMBOS SELECIONADOS (${cartCombos.length}):*\n`;
@@ -655,17 +654,17 @@
             });
 
             message += `\n*TOTAL DO PEDIDO:* R$ ${totalPrice.toFixed(2).replace('.', ',')}\n`;
-            message += `*FORMA DE PAGAMENTO:* ${payment}\n`;
+            message += `💳 *FORMA DE PAGAMENTO:* ${payment}\n`;
 
             if(payment === 'Dinheiro' && troco) {
-                message += `*TROCO PARA:* ${troco}\n`;
+                message += `💵 *TROCO PARA:* ${troco}\n`;
             }
 
             if(obs) {
-                message += `*OBSERVAÇÕES:* ${obs}\n`;
+                message += `📝 *OBSERVAÇÕES:* ${obs}\n`;
             }
 
-            message += `\nPedido gerado via Cardápio Digital`;
+            message += `\n_Pedido gerado via Cardápio Digital_`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappNumber = "5571994125510";
