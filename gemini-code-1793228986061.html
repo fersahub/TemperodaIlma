@@ -636,13 +636,13 @@
 
             const totalPrice = cartCombos.reduce((acc, item) => acc + item.price, 0);
 
-            let message = `*--- NOVO PEDIDO: TEMPERO DA ILMA ---*\n\n`;
-            message += `*CLIENTE:* ${name}\n`;
-            message += `*TELEFONE:* ${phone}\n`;
-            message += `*ENDEREÇO:* ${address}\n`;
+            let message = `📝*--- NOVO PEDIDO: TEMPERO DA ILMA ---*\n\n`;
+            message += `👤*CLIENTE:* ${name}\n`;
+            message += `📞*TELEFONE:* ${phone}\n`;
+            message += `🏠*ENDEREÇO:* ${address}\n`;
 
             if (mapsLink) {
-                message += `*LOCALIZAÇÃO (MAPS):* ${mapsLink}\n`;
+                message += `📌*LOCALIZAÇÃO (MAPS):* ${mapsLink}\n`;
             }
 
             message += `\n*COMBOS SELECIONADOS (${cartCombos.length}):*\n`;
@@ -665,7 +665,7 @@
                 message += `*OBSERVAÇÕES:* ${obs}\n`;
             }
 
-            message += `\n_Pedido gerado via Cardápio Digital_`;
+            message += `\nPedido gerado via Cardápio Digital`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappNumber = "5571994125510";
