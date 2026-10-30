@@ -58,10 +58,9 @@
                     </p>
                 </div>
             </div>
-            <div class="text-right">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Aberto
-                </span>
+            <!-- STATUS AUTOMÁTICO DINÂMICO -->
+            <div class="text-right" id="business-status-container">
+                <!-- Preenchido via JS conforme dia e hora -->
             </div>
         </div>
     </header>
@@ -279,6 +278,43 @@
     </div>
 
     <script>
+        // LÓGICA AUTOMÁTICA DE STATUS DE FUNCIONAMENTO
+        function checkBusinessStatus() {
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+            const currentHour = now.getHours();
+            const container = document.getElementById('business-status-container');
+
+            // Segunda a Sexta: 08:00 às 17:00
+            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                if (currentHour >= 8 && currentHour < 17) {
+                    container.innerHTML = `
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Aberto
+                        </span>
+                    `;
+                    return;
+                }
+            } 
+            
+            // Sábado: Apenas entregas
+            if (dayOfWeek === 6) {
+                container.innerHTML = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                        <i class="fa-solid fa-truck text-[10px]"></i> Apenas Entregas
+                    </span>
+                `;
+                return;
+            }
+
+            // Fora de horário (Seg-Sexta fora das 8-17h) OU Domingo
+            container.innerHTML = `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-200 text-stone-600">
+                    <span class="w-2 h-2 rounded-full bg-stone-400"></span> Fechado
+                </span>
+            `;
+        }
+
         // COMBOS DISPONÍVEIS (IDs com nomes únicos)
         const combos = [
             { 
@@ -338,9 +374,7 @@
             { id: 'f20', name: 'Frango com Purê de Mandiquinha', desc: 'Frango desfiado, Purê de mandiquinha e Legumes assados', tag: 'Linha Fit', img: 'Frango mandioquinha.jpg' },
             { id: 'f21', name: 'Escondidinho Fit', desc: 'Purê de batata doce e Frango desfiado', tag: 'Linha Fit', img: 'Escondidinho.jpg' },
             { id: 'f22', name: 'Macarrão Integral com Almondegas', desc: 'Massa integral, Molho de tomate e Almondegas', tag: 'Linha Fit', img: 'Integral almondegas.jpg' },
-            { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'Arroz funcional.jpg' } 
-           
-                
+            { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'Arroz funcional.jpg' }
         ];
 
         let cartCombos = []; 
@@ -542,78 +576,69 @@
         }
 
         function confirmComboSelection() {
-            let details = [];
-            for(let flavorId in selectedFlavors) {
+            const summaryFlavors = Object.entries(selectedFlavors).map(([flavorId, count]) => {
                 const flavor = availableFlavors.find(f => f.id === flavorId);
-                details.push(`${selectedFlavors[flavorId]}x ${flavor.name}`);
-            }
+                return `${count}x ${flavor.name}`;
+            }).join(', ');
 
-            cartCombos.push({
-                cartItemId: Date.now(),
-                comboName: currentEditingCombo.name,
+            const cartItem = {
+                cartId: Date.now().toString(),
+                comboId: currentEditingCombo.id,
+                name: currentEditingCombo.name,
                 price: currentEditingCombo.price,
-                flavors: details
-            });
+                qty: currentEditingCombo.qty,
+                flavorsSummary: summaryFlavors
+            };
 
-            updateCartUI();
+            cartCombos.push(cartItem);
             closeFlavorsModal();
-        }
-
-        function removeComboFromCart(cartItemId) {
-            cartCombos = cartCombos.filter(item => item.cartItemId !== cartItemId);
             updateCartUI();
-            renderCartModalItems();
         }
 
         function updateCartUI() {
-            const totalCombos = cartCombos.length;
-            const totalPrice = cartCombos.reduce((acc, item) => acc + item.price, 0);
-
-            document.getElementById('cart-count').innerText = totalCombos;
-            document.getElementById('cart-total').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
-
+            const countEl = document.getElementById('cart-count');
+            const totalEl = document.getElementById('cart-total');
+            const summaryTotalEl = document.getElementById('summary-total-price');
             const cartBar = document.getElementById('cart-bar');
-            if(totalCombos > 0) {
+            const container = document.getElementById('cart-combos-container');
+
+            const totalCount = cartCombos.length;
+            countEl.innerText = totalCount;
+
+            const totalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
+            totalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+            summaryTotalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+
+            if(totalCount > 0) {
                 cartBar.classList.remove('translate-y-full');
             } else {
                 cartBar.classList.add('translate-y-full');
-                closeCheckoutModal();
             }
-        }
 
-        function renderCartModalItems() {
-            const container = document.getElementById('cart-combos-container');
             container.innerHTML = '';
-
-            if(cartCombos.length === 0) {
-                container.innerHTML = `<p class="text-xs text-stone-400 text-center py-4">Seu carrinho está vazio.</p>`;
-                document.getElementById('summary-total-price').innerText = "R$ 0,00";
-                return;
-            }
-
-            let totalPrice = 0;
-            cartCombos.forEach(item => {
-                totalPrice += item.price;
+            cartCombos.forEach((item, index) => {
                 const div = document.createElement('div');
-                div.className = "bg-stone-50 p-3 rounded-xl border border-stone-200 text-xs space-y-1 relative";
+                div.className = "bg-stone-50 p-3 rounded-xl border border-stone-200 flex justify-between items-start gap-2";
                 div.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <span class="font-bold text-stone-800">${item.comboName}</span>
-                        <span class="font-bold text-brand-accent">R$ ${item.price.toFixed(2).replace('.', ',')}</span>
+                    <div>
+                        <h5 class="font-bold text-stone-800 text-xs">${item.name}</h5>
+                        <p class="text-[10px] text-stone-500 mt-0.5"><span class="font-semibold">Sabores:</span> ${item.flavorsSummary}</p>
+                        <p class="text-xs font-bold text-brand-accent mt-1">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
                     </div>
-                    <p class="text-stone-500 text-[11px] leading-relaxed">${item.flavors.join(', ')}</p>
-                    <button onclick="removeComboFromCart(${item.cartItemId})" class="text-red-500 font-semibold text-[10px] hover:underline mt-1 block">
-                        <i class="fa-solid fa-trash"></i> Remover combo
+                    <button onclick="removeCartItem(${index})" class="text-stone-400 hover:text-red-500 p-1">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
                     </button>
                 `;
                 container.appendChild(div);
             });
+        }
 
-            document.getElementById('summary-total-price').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+        function removeCartItem(index) {
+            cartCombos.splice(index, 1);
+            updateCartUI();
         }
 
         function openCheckoutModal() {
-            renderCartModalItems();
             document.getElementById('checkout-modal').classList.remove('hidden');
         }
 
@@ -641,50 +666,38 @@
             const obs = document.getElementById('cust-obs').value.trim();
 
             if(!name || !phone || !address) {
-                alert('Por favor, preencha seu nome, telefone e endereço.');
+                alert('Por favor, preencha seu nome, telefone e endereço completo.');
                 return;
             }
 
-            if(cartCombos.length === 0) {
-                alert('Seu carrinho está vazio.');
-                return;
-            }
+            let message = `*NOVO PEDIDO - TEMPERO DA ILMA*%0A%0A`;
+            message += `*Cliente:* ${name}%0A`;
+            message += `*Telefone:* ${phone}%0A`;
+            message += `*Endereço:* ${address}%0A`;
+            if(mapsLink) message += `*Localização Maps:* ${mapsLink}%0A`;
+            message += `%0A*ITENS DO PEDIDO:*%0A`;
 
-            let message = `*📦 NOVO PEDIDO - TEMPERO DA ILMA*\n\n`;
-            message += `👤 *Nome:* ${name}\n`;
-            message += `📞 *Telefone:* ${phone}\n`;
-            message += `🏠 *Endereço:* ${address}\n`;
-            if(mapsLink) {
-                message += `📍 *Maps:* ${mapsLink}\n`;
-            }
-            message += `💳 *Pagamento:* ${payment}\n`;
-            if(payment === 'Dinheiro' && troco) {
-                message += `💵 *Troco para:* ${troco}\n`;
-            }
-            if(obs) {
-                message += `📝 *Obs:* ${obs}\n`;
-            }
-            message += `\n*--- ITENS DO PEDIDO ---*\n`;
-
-            let totalPrice = 0;
             cartCombos.forEach((item, index) => {
-                totalPrice += item.price;
-                message += `\n*${index + 1}. ${item.comboName}* (R$ ${item.price.toFixed(2).replace('.', ',')})\n`;
-                item.flavors.forEach(f => {
-                    message += `   - ${f}\n`;
-                });
+                message += `${index + 1}. *${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})%0A`;
+                message += `   _Sabores:_ ${item.flavorsSummary}%0A`;
             });
 
-            message += `\n*VALOR TOTAL: R$ ${totalPrice.toFixed(2).replace('.', ',')}*`;
+            const totalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
+            message += `%0A*Total a pagar:* R$ ${totalPrice.toFixed(2).replace('.', ',')}%0A`;
+            message += `*Forma de Pagamento:* ${payment}%0A`;
+            if(payment === 'Dinheiro' && troco) message += `*Troco para:* ${troco}%0A`;
+            if(obs) message += `*Observações:* ${obs}%0A`;
 
-            const whatsappNumber = "5571994125510";
-            const encoded = encodeURIComponent(message);
-            window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encoded}`, '_blank');
+            const whatsappUrl = `https://wa.me/5571994125510?text=${message}`;
+            window.open(whatsappUrl, '_blank');
         }
 
-        // Inicializar aplicação
-        renderFlavorsDisplay();
-        renderCombos();
+        // Executar ao carregar a página
+        window.onload = function() {
+            checkBusinessStatus();
+            renderFlavorsDisplay();
+            renderCombos();
+        };
     </script>
 </body>
 </html>
