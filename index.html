@@ -645,4 +645,25 @@
                 message += `   _Sabores:_ ${item.flavorsSummary}%0A`;
             });
 
-            const subtotalPrice = cart
+            const subtotalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
+            const totalPrice = subtotalPrice + currentShippingFee;
+
+            message += `%0A*Subtotal:* R$ ${subtotalPrice.toFixed(2).replace('.', ',')}%0A`;
+            message += `*Taxa de Entrega:* R$ ${currentShippingFee.toFixed(2).replace('.', ',')}%0A`;
+            message += `*TOTAL GERAL:* R$ ${totalPrice.toFixed(2).replace('.', ',')}%0A`;
+            message += `*Forma de Pagamento:* ${payment}%0A`;
+            if(payment === 'Dinheiro' && troco) message += `*Troco para:* ${troco}%0A`;
+            if(obs) message += `*Observações:* ${obs}%0A`;
+
+            const whatsappUrl = `https://wa.me/5571994125510?text=${message}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        window.onload = function() {
+            checkBusinessStatus();
+            renderFlavorsDisplay();
+            renderCombos();
+        };
+    </script>
+</body>
+</html>
