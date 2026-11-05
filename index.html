@@ -47,21 +47,17 @@
     <header class="bg-white border-b border-stone-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <!-- LOGO COM AJUSTE AUTOMÁTICO -->
                 <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-brand-secondary shadow-sm bg-white shrink-0 flex items-center justify-center">
                     <img src="LOGO.PNG" alt="Tempero da Ilma" class="w-full h-full object-contain bg-white">
                 </div>
                 <div>
                     <h1 class="font-bold text-lg text-stone-800 leading-tight">Tempero da Ilma - Sabor Caseiro</h1>
                     <p class="text-xs text-stone-500 flex items-center gap-1">
-                        <i class="fa-solid fa-location-dot text-brand-secondary"></i> Salvador e Região
+                        <i class="fa-solid fa-location-dot text-brand-secondary"></i> São Caetano, Salvador - BA
                     </p>
                 </div>
             </div>
-            <!-- STATUS AUTOMÁTICO DINÂMICO -->
-            <div class="text-right" id="business-status-container">
-                <!-- Preenchido via JS conforme dia e hora -->
-            </div>
+            <div class="text-right" id="business-status-container"></div>
         </div>
     </header>
 
@@ -77,7 +73,6 @@
     <!-- CONTAINER PRINCIPAL -->
     <main class="max-w-4xl mx-auto px-4 pt-8 space-y-10">
 
-        <!-- 1. ÁREA DE EXIBIÇÃO APENAS DE SABORES (INFORMATIVA) -->
         <section class="space-y-4">
             <div class="border-b border-stone-200 pb-2 flex items-center justify-between">
                 <h3 class="font-bold text-lg text-stone-800 flex items-center gap-2">
@@ -87,20 +82,14 @@
             </div>
             <p class="text-xs text-stone-500">Consulte os pratos disponíveis nesta semana. A seleção dos sabores é feita ao montar o seu combo abaixo:</p>
 
-            <div id="flavors-display-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <!-- Renderizado via JS -->
-            </div>
+            <div id="flavors-display-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- 2. SEÇÃO DE ESCOLHA DOS COMBOS -->
         <section class="space-y-4 pt-4">
             <h3 class="font-bold text-lg text-stone-800 border-b border-stone-200 pb-2 flex items-center gap-2">
                 <i class="fa-solid fa-box-open text-brand-secondary"></i> Escolha seus Combos
             </h3>
-
-            <div id="combos-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Combos renderizados via JS -->
-            </div>
+            <div id="combos-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
     </main>
@@ -131,10 +120,9 @@
         </div>
     </div>
 
-    <!-- MODAL DE SELEÇÃO DE SABORES PARA O COMBO -->
+    <!-- MODAL DE SELEÇÃO DE SABORES -->
     <div id="flavors-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-end sm:items-center hidden">
         <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            
             <div class="p-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
                 <div>
                     <h3 id="modal-combo-title" class="font-bold text-stone-800 text-base">Monte seu Combo</h3>
@@ -144,31 +132,22 @@
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-
-            <!-- Contador de Sabores -->
             <div class="bg-brand-primary/20 px-4 py-2 text-center border-b border-brand-primary/30">
                 <p class="text-xs font-bold text-stone-800">
                     Marmitas selecionadas: <span id="selected-count" class="text-brand-secondary font-extrabold text-sm">0</span> de <span id="max-count">0</span>
                 </p>
             </div>
-
-            <!-- Lista de Sabores Disponíveis -->
-            <div class="p-4 overflow-y-auto space-y-3 flex-1" id="flavors-selection-list">
-                <!-- Sabores via JS -->
-            </div>
-
+            <div class="p-4 overflow-y-auto space-y-3 flex-1" id="flavors-selection-list"></div>
             <div class="p-4 border-t border-stone-200 bg-stone-50 flex gap-2">
                 <button onclick="closeFlavorsModal()" class="w-1/3 bg-stone-200 text-stone-700 font-bold py-3 rounded-xl text-xs">Cancelar</button>
                 <button id="btn-confirm-combo" onclick="confirmComboSelection()" disabled class="w-2/3 bg-stone-300 text-stone-500 font-bold py-3 rounded-xl text-xs transition">Adicionar Combo ao Pedido</button>
             </div>
-
         </div>
     </div>
 
-    <!-- MODAL DE FINALIZAÇÃO (CHECKOUT / MEU PEDIDO) -->
+    <!-- MODAL DE FINALIZAÇÃO -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-end sm:items-center hidden">
         <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            
             <div class="p-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
                 <h3 class="font-bold text-stone-800 text-base">Resumo do Pedido</h3>
                 <button onclick="closeCheckoutModal()" class="text-stone-400 hover:text-stone-600 p-1">
@@ -177,30 +156,33 @@
             </div>
 
             <div class="p-4 overflow-y-auto space-y-4 flex-1">
-                
-                <!-- Lista de Combos Adicionados -->
                 <div class="space-y-3">
                     <p class="text-xs font-bold text-stone-500 uppercase tracking-wider">Combos no Carrinho</p>
-                    <div id="cart-combos-container" class="space-y-3">
-                        <!-- Itens do carrinho via JS -->
+                    <div id="cart-combos-container" class="space-y-3"></div>
+                </div>
+
+                <div class="pt-3 border-t border-stone-200 space-y-1.5 text-xs">
+                    <div class="flex justify-between text-stone-600">
+                        <span>Subtotal dos Combos:</span>
+                        <span id="summary-subtotal-price" class="font-bold text-stone-800">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-stone-600">
+                        <span>Taxa de Entrega (por KM):</span>
+                        <span id="summary-shipping-price" class="font-bold text-stone-800">R$ 0,00</span>
+                    </div>
+                    <div class="pt-2 border-t border-stone-200 flex justify-between items-center font-bold text-stone-800 text-base">
+                        <span>Total do Pedido:</span>
+                        <span id="summary-total-price" class="text-brand-accent text-lg">R$ 0,00</span>
                     </div>
                 </div>
 
-                <div class="pt-2 border-t border-stone-200 flex justify-between items-center font-bold text-stone-800 text-base">
-                    <span>Total do Pedido:</span>
-                    <span id="summary-total-price" class="text-brand-accent text-lg">R$ 0,00</span>
-                </div>
-
-                <!-- Formulário de Contato e Endereço -->
                 <form id="checkout-form" class="space-y-4 pt-3 border-t border-stone-200">
                     <h4 class="font-bold text-stone-800 text-sm">Seus dados para contato e entrega</h4>
                     
                     <div>
                         <label class="block text-xs font-semibold text-stone-700 mb-1">Nome completo</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none">
-                                <i class="fa-regular fa-user"></i>
-                            </span>
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none"><i class="fa-regular fa-user"></i></span>
                             <input type="text" id="cust-name" required placeholder="Digite seu nome completo" class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                         </div>
                     </div>
@@ -208,42 +190,28 @@
                     <div>
                         <label class="block text-xs font-semibold text-stone-700 mb-1">Telefone de contato</label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none">
-                                <i class="fa-solid fa-phone"></i>
-                            </span>
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none"><i class="fa-solid fa-phone"></i></span>
                             <input type="tel" id="cust-phone" required placeholder="(71) 99999-9999" class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-stone-700 mb-1">Endereço completo da residência</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none">
-                                <i class="fa-solid fa-house"></i>
-                            </span>
-                            <input type="text" id="cust-address" required placeholder="Rua/Avenida, número, complemento, bairro..." class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-semibold text-stone-700">Endereço completo da residência</label>
+                            <button type="button" onclick="getLocation()" class="text-brand-accent hover:underline text-[11px] font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-location-crosshairs text-red-500"></i> Usar meu GPS
+                            </button>
                         </div>
-                    </div>
+                        <div class="relative">
+                            <span class="absolute top-3 left-3 text-stone-400 pointer-events-none"><i class="fa-solid fa-house"></i></span>
+                            <textarea id="cust-address" rows="2" required placeholder="Ex: Rua Direita de São Caetano, 150, São Caetano..." class="w-full bg-white border border-stone-200 rounded-lg py-2 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm"></textarea>
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-stone-700 mb-1">Localização exata <span class="text-stone-400 font-normal">(opcional)</span></label>
-                        <button type="button" onclick="getLocation()" class="w-full bg-white border-2 border-brand-secondary/80 hover:bg-stone-50 text-brand-accent font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm text-xs">
-                            <i class="fa-solid fa-location-crosshairs text-base"></i> Usar minha localização
+                        <!-- BOTÃO DE CÁLCULO DE FRETE -->
+                        <button type="button" onclick="calculateShippingAction()" class="w-full bg-amber-500 hover:bg-amber-600 text-stone-900 font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm text-xs">
+                            <i class="fa-solid fa-calculator text-sm"></i> Calcular / Recalcular Frete
                         </button>
-                        <p id="location-status" class="text-[10px] text-stone-400 mt-1 text-center"></p>
-
-                        <div class="relative flex py-2 items-center">
-                            <div class="flex-grow border-t border-stone-200"></div>
-                            <span class="flex-shrink mx-4 text-stone-400 text-[10px] uppercase font-medium">ou cole o link do Google Maps</span>
-                            <div class="flex-grow border-t border-stone-200"></div>
-                        </div>
-
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none">
-                                <i class="fa-solid fa-link"></i>
-                            </span>
-                            <input type="url" id="cust-maps-link" placeholder="https://maps.app.goo.gl/..." class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
-                        </div>
+                        <p id="location-status" class="text-[10px] text-stone-400 text-center"></p>
                     </div>
 
                     <div>
@@ -273,107 +241,151 @@
                     <i class="fa-brands fa-whatsapp text-xl"></i> Enviar Pedido no WhatsApp
                 </button>
             </div>
-
         </div>
     </div>
 
     <script>
-        // LÓGICA AUTOMÁTICA DE STATUS DE FUNCIONAMENTO
-        function checkBusinessStatus() {
-            const now = new Date();
-            const dayOfWeek = now.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
-            const currentHour = now.getHours();
-            const container = document.getElementById('business-status-container');
+        // ORIGEM FIXA DA COZINHA (RUA JUSCELINO BARRETO, SÃO CAETANO)
+        const ORIGEM_LAT = -12.936212;
+        const ORIGEM_LNG = -38.4775149;
+        let currentShippingFee = 0.00;
+        let lastUserLat = null;
+        let lastUserLng = null;
 
-            // Segunda a Sexta: 08:00 às 17:00
-            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-                if (currentHour >= 8 && currentHour < 17) {
-                    container.innerHTML = `
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Aberto
-                        </span>
-                    `;
-                    return;
-                }
-            } 
-            
-            // Sábado: Apenas entregas
-            if (dayOfWeek === 6) {
-                container.innerHTML = `
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                        <i class="fa-solid fa-truck text-[10px]"></i> Apenas Entregas
-                    </span>
-                `;
+        function calcularHaversineKM(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
+
+        function obterTabelaFrete(distanciaKm) {
+            if (distanciaKm <= 2.0) return 5.00;
+            if (distanciaKm <= 3.5) return 7.00;
+            if (distanciaKm <= 5.0) return 9.00;
+            if (distanciaKm <= 8.0) return 12.00;
+            if (distanciaKm <= 12.0) return 15.00;
+            return 20.00;
+        }
+
+        async function calculateShippingAction() {
+            const statusEl = document.getElementById('location-status');
+            const addressText = document.getElementById('cust-address').value.trim();
+
+            statusEl.innerHTML = `<span class="text-amber-600"><i class="fa-solid fa-spinner animate-spin"></i> Calculando frete...</span>`;
+
+            if (lastUserLat && lastUserLng && !addressText) {
+                finishShippingCalculation(lastUserLat, lastUserLng, "GPS");
                 return;
             }
 
-            // Fora de horário OU Domingo
-            container.innerHTML = `
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-200 text-stone-600">
-                    <span class="w-2 h-2 rounded-full bg-stone-400"></span> Fechado
-                </span>
-            `;
+            if (addressText) {
+                try {
+                    const searchAddress = encodeURIComponent(addressText + ", Salvador, Bahia, Brasil");
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${searchAddress}&limit=1`);
+                    const data = await response.json();
+
+                    if (data && data.length > 0) {
+                        lastUserLat = parseFloat(data[0].lat);
+                        lastUserLng = parseFloat(data[0].lon);
+                        finishShippingCalculation(lastUserLat, lastUserLng, "Endereço digitado");
+                    } else {
+                        statusEl.innerHTML = `<span class="text-red-500">Endereço não localizado com precisão. Tente colocar o bairro/rua com mais detalhes ou usar o GPS.</span>`;
+                    }
+                } catch (err) {
+                    statusEl.innerHTML = `<span class="text-red-500">Erro ao buscar endereço. Tente usar o botão "Usar meu GPS".</span>`;
+                }
+                return;
+            }
+
+            statusEl.innerHTML = `<span class="text-red-500">Digite seu endereço ou clique em "Usar meu GPS".</span>`;
         }
 
-        // COMBOS DISPONÍVEIS
-        const combos = [
-            { 
-                id: 'combo-5-350g', 
-                name: "Combo 5 Marmitas - 350g", 
-                qty: 5, 
-                price: 100.00, 
-                description: "Escolha 5 marmitas tradicionais de 350g para a sua semana.",
-                image: "Combo 5.1.png",
-                type: "Tradicional"
-            },
-            { 
-                id: 'combo-10-350g', 
-                name: "Combo 10 Marmitas - 350g", 
-                qty: 10, 
-                price: 200.00, 
-                description: "Escolha 10 marmitas tradicionais de 350g variadas para a sua semana.",
-                image: "Combo 10.1.png",
-                type: "Tradicional"
-            },
-            { 
-                id: 'combo-5-500g', 
-                name: "Combo 5 Marmitas - 500g", 
-                qty: 5, 
-                price: 125.00, 
-                description: "Escolha 5 marmitas tradicionais de 500g para a sua semana.",
-                image: "Combo 5.1.png",
-                type: "Tradicional"
-            },
-            { 
-                id: 'combo-10-500g', 
-                name: "Combo 10 Marmitas - 500g", 
-                qty: 10, 
-                price: 250.00, 
-                description: "Escolha 10 marmitas tradicionais de 500g variadas para a sua semana.",
-                image: "Combo 10.png",
-                type: "Tradicional"
-            },
-            { 
-                id: 'combo-5-300g-fit', 
-                name: "Combo 5 Marmitas FIT - 300g", 
-                qty: 5, 
-                price: 130.00, 
-                description: "Escolha 5 marmitas da nossa linha fit leve de 300g.",
-                image: "Combo 5.1.png",
-                type: "Linha Fit"
-            },
-            { 
-                id: 'combo-10-300g-fit', 
-                name: "Combo 10 Marmitas FIT - 300g", 
-                qty: 10, 
-                price: 260.00, 
-                description: "Escolha 10 marmitas da nossa linha fit leve de 300g variadas.",
-                image: "Combo 10.1.png",
-                type: "Linha Fit"
+        function finishShippingCalculation(lat, lng, source) {
+            const statusEl = document.getElementById('location-status');
+            const distanciaDireta = calcularHaversineKM(ORIGEM_LAT, ORIGEM_LNG, lat, lng);
+            const distanciaRota = distanciaDireta * 1.25;
+            currentShippingFee = obterTabelaFrete(distanciaRota);
+            
+            updateCartUI();
+            statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i> Frete recalculado: R$ ${currentShippingFee.toFixed(2).replace('.', ',')} (${distanciaRota.toFixed(1)} km - via ${source})</span>`;
+        }
+
+        function getLocation() {
+            const statusEl = document.getElementById('location-status');
+            const addressInput = document.getElementById('cust-address');
+
+            if (!navigator.geolocation) {
+                statusEl.innerText = "Seu navegador não suporta geolocalização.";
+                return;
             }
+
+            statusEl.innerHTML = `<span class="text-amber-600"><i class="fa-solid fa-spinner animate-spin"></i> Obtendo GPS...</span>`;
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    lastUserLat = position.coords.latitude;
+                    lastUserLng = position.coords.longitude;
+                    
+                    finishShippingCalculation(lastUserLat, lastUserLng, "GPS");
+                    
+                    try {
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lastUserLat}&lon=${lastUserLng}&addressdetails=1`);
+                        const data = await response.json();
+
+                        if (data && data.address) {
+                            const road = data.address.road || data.address.pedestrian || "";
+                            const houseNumber = data.address.house_number ? `, nº ${data.address.house_number}` : "";
+                            const suburb = data.address.suburb || data.address.neighbourhood || "";
+                            const city = data.address.city || data.address.town || "";
+
+                            let fullAddressParts = [];
+                            if (road) fullAddressParts.push(road + houseNumber);
+                            if (suburb) fullAddressParts.push("Bairro: " + suburb);
+                            if (city) fullAddressParts.push(city);
+
+                            if (fullAddressParts.length > 0) {
+                                addressInput.value = fullAddressParts.join(" - ");
+                            }
+                        }
+                    } catch (error) {}
+                },
+                (error) => {
+                    statusEl.innerHTML = `<span class="text-red-500">Erro de permissão de GPS. Digite seu endereço e clique em "Calcular / Recalcular Frete".</span>`;
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            );
+        }
+
+        function checkBusinessStatus() {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const currentHour = now.getHours();
+            const container = document.getElementById('business-status-container');
+
+            if (dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 8 && currentHour < 17) {
+                container.innerHTML = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Aberto</span>`;
+                return;
+            } 
+            if (dayOfWeek === 6) {
+                container.innerHTML = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800"><i class="fa-solid fa-truck text-[10px]"></i> Apenas Entregas</span>`;
+                return;
+            }
+            container.innerHTML = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-200 text-stone-600"><span class="w-2 h-2 rounded-full bg-stone-400"></span> Fechado</span>`;
+        }
+
+        const combos = [
+            { id: 'combo-5-350g', name: "Combo 5 Marmitas - 350g", qty: 5, price: 100.00, description: "Escolha 5 marmitas tradicionais de 350g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional" },
+            { id: 'combo-10-350g', name: "Combo 10 Marmitas - 350g", qty: 10, price: 200.00, description: "Escolha 10 marmitas tradicionais de 350g variadas para a sua semana.", image: "Combo 10.1.png", type: "Tradicional" },
+            { id: 'combo-5-500g', name: "Combo 5 Marmitas - 500g", qty: 5, price: 125.00, description: "Escolha 5 marmitas tradicionais de 500g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional" },
+            { id: 'combo-10-500g', name: "Combo 10 Marmitas - 500g", qty: 10, price: 250.00, description: "Escolha 10 marmitas tradicionais de 500g variadas para a sua semana.", image: "Combo 10.png", type: "Tradicional" },
+            { id: 'combo-5-300g-fit', name: "Combo 5 Marmitas FIT - 300g", qty: 5, price: 130.00, description: "Escolha 5 marmitas da nossa linha fit leve de 300g.", image: "Combo 5.1.png", type: "Linha Fit" },
+            { id: 'combo-10-300g-fit', name: "Combo 10 Marmitas FIT - 300g", qty: 10, price: 260.00, description: "Escolha 10 marmitas da nossa linha fit leve de 300g variadas.", image: "Combo 10.1.png", type: "Linha Fit" }
         ];
 
-        // SABORES DA SEMANA
         const availableFlavors = [
             { id: 'f1', name: 'Panqueca de Frango', desc: 'Frango desfiado, molho de tomate e queijo parmesão', tag: 'Tradicional', img: 'Panqueca frango.png' },
             { id: 'f2', name: 'Bife de Carne Temperada', desc: 'Feijão preto, Arroz branco e Camponata', tag: 'Tradicional', img: 'Bife carne temparada.png' },
@@ -403,69 +415,9 @@
         let currentEditingCombo = null;
         let selectedFlavors = {}; 
 
-        // FUNÇÃO DE GEOLOCALIZAÇÃO VIA GPS
-        function getLocation() {
-            const statusEl = document.getElementById('location-status');
-            const addressInput = document.getElementById('cust-address');
-            const mapsLinkInput = document.getElementById('cust-maps-link');
-
-            if (!navigator.geolocation) {
-                statusEl.innerText = "Seu navegador não suporta geolocalização.";
-                return;
-            }
-
-            statusEl.innerHTML = `<span class="text-amber-600"><i class="fa-solid fa-spinner animate-spin"></i> Obtendo sua localização via GPS...</span>`;
-
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    
-                    const mapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
-                    mapsLinkInput.value = mapsUrl;
-                    
-                    try {
-                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`);
-                        const data = await response.json();
-
-                        if (data && data.address) {
-                            const road = data.address.road || data.address.pedestrian || "";
-                            const houseNumber = data.address.house_number ? `, nº ${data.address.house_number}` : "";
-                            const suburb = data.address.suburb || data.address.neighbourhood || "";
-                            const city = data.address.city || data.address.town || "";
-
-                            let fullAddressParts = [];
-                            if (road) fullAddressParts.push(road + houseNumber);
-                            if (suburb) fullAddressParts.push("Bairro: " + suburb);
-                            if (city) fullAddressParts.push(city);
-
-                            if (fullAddressParts.length > 0) {
-                                addressInput.value = fullAddressParts.join(" - ");
-                            } else {
-                                addressInput.value = "Localização GPS obtida";
-                            }
-
-                            statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i> Localização obtida! Revise se necessário.</span>`;
-                        } else {
-                            addressInput.value = "Localização GPS obtida";
-                            statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i> Coordenadas obtidas com sucesso!</span>`;
-                        }
-                    } catch (error) {
-                        addressInput.value = "Localização GPS obtida";
-                        statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i> Coordenadas obtidas com sucesso!</span>`;
-                    }
-                },
-                (error) => {
-                    statusEl.innerHTML = `<span class="text-red-500">Não foi possível obter a localização. Verifique as permissões de GPS.</span>`;
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        }
-
         function renderFlavorsDisplay() {
             const grid = document.getElementById('flavors-display-grid');
             grid.innerHTML = '';
-
             availableFlavors.forEach(flavor => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-3 rounded-xl border border-stone-200 flex gap-3 items-center shadow-sm";
@@ -484,7 +436,6 @@
         function renderCombos() {
             const grid = document.getElementById('combos-grid');
             grid.innerHTML = '';
-
             combos.forEach(combo => {
                 const card = document.createElement('div');
                 card.className = "bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between";
@@ -504,9 +455,7 @@
                     <div class="p-4 pt-0 flex items-center justify-between border-t border-stone-100 mt-2">
                         <div>
                             <span class="text-[10px] text-stone-400 block font-medium">Valor do Pacote</span>
-                            <span class="text-base font-extrabold text-stone-800">
-                                R$ ${combo.price.toFixed(2).replace('.', ',')}
-                            </span>
+                            <span class="text-base font-extrabold text-stone-800">R$ ${combo.price.toFixed(2).replace('.', ',')}</span>
                         </div>
                         <button onclick="openFlavorsModal('${combo.id}')" class="bg-brand-secondary hover:bg-brand-accent text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-plus text-xs"></i> Montar & Adicionar
@@ -520,14 +469,11 @@
         function openFlavorsModal(comboId) {
             currentEditingCombo = combos.find(c => c.id === comboId);
             selectedFlavors = {};
-
             document.getElementById('modal-combo-title').innerText = currentEditingCombo.name;
             document.getElementById('modal-combo-subtitle').innerText = `Escolha ${currentEditingCombo.qty} marmitas para este combo (${currentEditingCombo.type})`;
             document.getElementById('max-count').innerText = currentEditingCombo.qty;
-            
             renderFlavorsSelectionList();
             updateFlavorSelectionState();
-
             document.getElementById('flavors-modal').classList.remove('hidden');
         }
 
@@ -538,10 +484,7 @@
         function renderFlavorsSelectionList() {
             const container = document.getElementById('flavors-selection-list');
             container.innerHTML = '';
-
-            // FILTRA OS SABORES CONFORME O TIPO DO COMBO (Tradicional ou Linha Fit)
             const filteredFlavors = availableFlavors.filter(flavor => flavor.tag === currentEditingCombo.type);
-
             filteredFlavors.forEach(flavor => {
                 const count = selectedFlavors[flavor.id] || 0;
                 const item = document.createElement('div');
@@ -552,13 +495,9 @@
                         <p class="text-[10px] text-stone-500">${flavor.desc}</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="changeFlavorCount('${flavor.id}', -1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">
-                            -
-                        </button>
+                        <button onclick="changeFlavorCount('${flavor.id}', -1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">-</button>
                         <span class="font-bold text-stone-800 w-5 text-center text-sm">${count}</span>
-                        <button onclick="changeFlavorCount('${flavor.id}', 1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">
-                            +
-                        </button>
+                        <button onclick="changeFlavorCount('${flavor.id}', 1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">+</button>
                     </div>
                 `;
                 container.appendChild(item);
@@ -568,19 +507,16 @@
         function changeFlavorCount(flavorId, delta) {
             const currentTotal = Object.values(selectedFlavors).reduce((a, b) => a + b, 0);
             const flavorCount = selectedFlavors[flavorId] || 0;
-
             if(delta > 0 && currentTotal >= currentEditingCombo.qty) {
                 alert(`Você já atingiu o limite de ${currentEditingCombo.qty} marmitas para este combo!`);
                 return;
             }
-
             const newCount = flavorCount + delta;
             if(newCount <= 0) {
                 delete selectedFlavors[flavorId];
             } else {
                 selectedFlavors[flavorId] = newCount;
             }
-
             renderFlavorsSelectionList();
             updateFlavorSelectionState();
         }
@@ -588,7 +524,6 @@
         function updateFlavorSelectionState() {
             const currentTotal = Object.values(selectedFlavors).reduce((a, b) => a + b, 0);
             document.getElementById('selected-count').innerText = currentTotal;
-
             const btnConfirm = document.getElementById('btn-confirm-combo');
             if(currentTotal === currentEditingCombo.qty) {
                 btnConfirm.disabled = false;
@@ -624,6 +559,8 @@
         function updateCartUI() {
             const countEl = document.getElementById('cart-count');
             const totalEl = document.getElementById('cart-total');
+            const subtotalEl = document.getElementById('summary-subtotal-price');
+            const shippingEl = document.getElementById('summary-shipping-price');
             const summaryTotalEl = document.getElementById('summary-total-price');
             const cartBar = document.getElementById('cart-bar');
             const container = document.getElementById('cart-combos-container');
@@ -631,9 +568,13 @@
             const totalCount = cartCombos.length;
             countEl.innerText = totalCount;
 
-            const totalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
+            const subtotalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
+            const totalPrice = subtotalPrice + currentShippingFee;
+
             totalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
-            summaryTotalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+            if(subtotalEl) subtotalEl.innerText = `R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`;
+            if(shippingEl) shippingEl.innerText = `R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`;
+            if(summaryTotalEl) summaryTotalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
 
             if(totalCount > 0) {
                 cartBar.classList.remove('translate-y-full');
@@ -651,9 +592,7 @@
                         <p class="text-[10px] text-stone-500 mt-0.5"><span class="font-semibold">Sabores:</span> ${item.flavorsSummary}</p>
                         <p class="text-xs font-bold text-brand-accent mt-1">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
                     </div>
-                    <button onclick="removeCartItem(${index})" class="text-stone-400 hover:text-red-500 p-1">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>
+                    <button onclick="removeCartItem(${index})" class="text-stone-400 hover:text-red-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
                 `;
                 container.appendChild(div);
             });
@@ -686,7 +625,6 @@
             const name = document.getElementById('cust-name').value.trim();
             const phone = document.getElementById('cust-phone').value.trim();
             const address = document.getElementById('cust-address').value.trim();
-            const mapsLink = document.getElementById('cust-maps-link').value.trim();
             const payment = document.getElementById('cust-payment').value;
             const troco = document.getElementById('cust-troco').value.trim();
             const obs = document.getElementById('cust-obs').value.trim();
@@ -700,7 +638,6 @@
             message += `*Cliente:* ${name}%0A`;
             message += `*Telefone:* ${phone}%0A`;
             message += `*Endereço:* ${address}%0A`;
-            if(mapsLink) message += `*Link do Maps:* ${mapsLink}%0A`;
             message += `%0A*ITENS DO PEDIDO:*%0A`;
 
             cartCombos.forEach((item, index) => {
@@ -708,22 +645,4 @@
                 message += `   _Sabores:_ ${item.flavorsSummary}%0A`;
             });
 
-            const totalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
-            message += `%0A*Total a pagar:* R$ ${totalPrice.toFixed(2).replace('.', ',')}%0A`;
-            message += `*Forma de Pagamento:* ${payment}%0A`;
-            if(payment === 'Dinheiro' && troco) message += `*Troco para:* ${troco}%0A`;
-            if(obs) message += `*Observações:* ${obs}%0A`;
-
-            const whatsappUrl = `https://wa.me/5571994125510?text=${message}`;
-            window.open(whatsappUrl, '_blank');
-        }
-
-        // Executar ao carregar a página
-        window.onload = function() {
-            checkBusinessStatus();
-            renderFlavorsDisplay();
-            renderCombos();
-        };
-    </script>
-</body>
-</html>
+            const subtotalPrice = cart
