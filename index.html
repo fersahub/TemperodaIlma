@@ -53,7 +53,7 @@
                 <div>
                     <h1 class="font-bold text-lg text-stone-800 leading-tight">Tempero da Ilma - Sabor Caseiro</h1>
                     <p class="text-xs text-stone-500 flex items-center gap-1">
-                        <i class="fa-solid fa-location-dot text-brand-secondary"></i> São Caetano, Salvador - BA
+                        <i class="fa-solid fa-location-dot text-brand-secondary"></i> Salvador - BA
                     </p>
                 </div>
             </div>
@@ -204,7 +204,7 @@
                         </div>
                         <div class="relative">
                             <span class="absolute top-3 left-3 text-stone-400 pointer-events-none"><i class="fa-solid fa-house"></i></span>
-                            <textarea id="cust-address" rows="2" required placeholder="Ex: Rua Direita de São Caetano, 150, São Caetano..." class="w-full bg-white border border-stone-200 rounded-lg py-2 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm"></textarea>
+                            <textarea id="cust-address" rows="2" required placeholder="Rua/Avenida, número, complemento, bairro..." class="w-full bg-white border border-stone-200 rounded-lg py-2 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm"></textarea>
                         </div>
 
                         <!-- BOTÃO DE CÁLCULO DE FRETE -->
@@ -245,7 +245,6 @@
     </div>
 
     <script>
-        // ORIGEM FIXA DA COZINHA (RUA JUSCELINO BARRETO, SÃO CAETANO)
         const ORIGEM_LAT = -12.936212;
         const ORIGEM_LNG = -38.4775149;
         let currentShippingFee = 0.00;
@@ -293,7 +292,7 @@
                         lastUserLng = parseFloat(data[0].lon);
                         finishShippingCalculation(lastUserLat, lastUserLng, "Endereço digitado");
                     } else {
-                        statusEl.innerHTML = `<span class="text-red-500">Endereço não localizado com precisão. Tente colocar o bairro/rua com mais detalhes ou usar o GPS.</span>`;
+                        statusEl.innerHTML = `<span class="text-red-500">Endereço não localizado com precisão. Tente colocar mais detalhes ou usar o GPS.</span>`;
                     }
                 } catch (err) {
                     statusEl.innerHTML = `<span class="text-red-500">Erro ao buscar endereço. Tente usar o botão "Usar meu GPS".</span>`;
