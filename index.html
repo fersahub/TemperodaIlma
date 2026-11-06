@@ -713,36 +713,50 @@
             fullAddress += ` - Bairro: ${bairro}, Salvador - BA`;
             if(cep) fullAddress += ` (CEP: ${cep})`;
 
-            let message = `*NOVO PEDIDO - TEMPERO DA ILMA*%0A%0A`;
-            message += `*Cliente:* ${name}%0A`;
-            message += `*Telefone:* ${phone}%0A`;
-            message += `*Endereço:* ${fullAddress}%0A`;
+            // Montagem da mensagem estruturada com emojis e comanda digital
+            let message = `🍽️ *NOVO PEDIDO - TEMPERO DA ILMA* 🍽️%0A%0A`;
+            message += `👤 *Cliente:* ${name}%0A`;
+            message += `📞 *Telefone:* ${phone}%0A`;
+            message += `📍 *Endereço:* ${fullAddress}%0A`;
             
-            // Adiciona o link do Google Maps na mensagem se a coordenada foi calculada
+            // Link do Google Maps
             if(lastCalculatedLat && lastCalculatedLng) {
                 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lastCalculatedLat},${lastCalculatedLng}`;
-                message += `*Localização no Maps:* ${mapsUrl}%0A`;
+                message += `🗺️ *Localização no Maps:* ${mapsUrl}%0A`;
             } else {
                 const mapsQuery = encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`);
-                message += `*Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${mapsQuery}%0A`;
+                message += `🗺️ *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${mapsQuery}%0A`;
             }
 
-            message += `%0A*ITENS DO PEDIDO:*%0A`;
+            message += `%0A📋 *--- COMANDA DIGITAL ---*📋%0A`;
 
             cartCombos.forEach((item, index) => {
-                message += `${index + 1}. *${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})%0A`;
-                message += `   _Sabores:_ ${item.flavorsSummary}%0A`;
+                message += `%0A📦 *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})%0A`;
+                message += `   🍲 *Sabores Escolhidos:*%0A`;
+                
+                const saboresArray = item.flavorsSummary.split(', ');
+                saboresArray.forEach(sabor => {
+                    message += `   ▪️ ${sabor}%0A`;
+                });
             });
 
             const subtotalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
             const totalPrice = subtotalPrice + currentShippingFee;
 
-            message += `%0A*Subtotal:* R$ ${subtotalPrice.toFixed(2).replace('.', ',')}%0A`;
-            message += `*Taxa de Entrega:* R$ ${currentShippingFee.toFixed(2).replace('.', ',')}%0A`;
-            message += `*TOTAL GERAL:* R$ ${totalPrice.toFixed(2).replace('.', ',')}%0A`;
-            message += `*Forma de Pagamento:* ${payment}%0A`;
-            if(payment === 'Dinheiro' && troco) message += `*Troco para:* ${troco}%0A`;
-            if(obs) message += `*Observações:* ${obs}%0A`;
+            message += `%0A💰 *RESUMO FINANCEIRO*%0A`;
+            message += `▫️ Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}%0A`;
+            message += `🛵 Taxa de Entrega: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}%0A`;
+            message += `💵 *TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*%0A`;
+            message += `%0A💳 *Forma de Pagamento:* ${payment}%0A`;
+            
+            if(payment === 'Dinheiro' && troco) {
+                message += `💵 *Troco para:* ${troco}%0A`;
+            }
+            if(obs) {
+                message += `📝 *Observações:* ${obs}%0A`;
+            }
+            
+            message += `%0A_Pedido gerado automaticamente pelo cardápio digital_ ✨`;
 
             const whatsappUrl = `https://wa.me/5571994125510?text=${message}`;
             window.open(whatsappUrl, '_blank');
