@@ -724,11 +724,11 @@
 
             // MONTAGEM DA MENSAGEM DO WHATSAPP COM EMOJIS SEGUROS (UTF-8 via encodeURIComponent)
             let lines = [];
-            lines.push(`🍽️ *NOVO PEDIDO - TEMPERO DA ILMA* 🍽️`);
+            lines.push(`📝 *NOVO PEDIDO - TEMPERO DA ILMA* 📝`);
             lines.push(``);
             lines.push(`👤 *Cliente:* ${name}`);
-            lines.push(`📞 *Telefone:* ${phone}`);
-            lines.push(`📍 *Endereço:* ${fullAddress}`);
+            lines.push(`📱 *Telefone:* ${phone}`);
+            lines.push(`📌 *Endereço:* ${fullAddress}`);
             
             if(lastCalculatedLat && lastCalculatedLng) {
                 lines.push(`🗺️ *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${lastCalculatedLat},${lastCalculatedLng}`);
@@ -737,12 +737,12 @@
             }
 
             lines.push(``);
-            lines.push(`📋 *--- COMANDA DIGITAL ---* 📋`);
+            lines.push(`🗒️ *--- COMANDA DIGITAL ---* 🗒️`);
 
             cartCombos.forEach((item, index) => {
                 lines.push(``);
                 lines.push(`📦 *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})`);
-                lines.push(`   🍲 *Sabores Escolhidos:*`);
+                lines.push(`   🍱 *Sabores Escolhidos:*`);
                 
                 const saboresArray = item.flavorsSummary.split(', ');
                 saboresArray.forEach(sabor => {
@@ -755,9 +755,9 @@
 
             lines.push(``);
             lines.push(`💰 *RESUMO FINANCEIRO*`);
-            lines.push(`▫️ Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
-            lines.push(`🛵 Taxa de Entrega: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`);
-            lines.push(`💵 *TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
+            lines.push(`💲 Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
+            lines.push(`🚘 Taxa de Entrega: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`);
+            lines.push(`💸 *TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
             lines.push(``);
             lines.push(`💳 *Forma de Pagamento:* ${payment}`);
             
