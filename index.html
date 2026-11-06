@@ -62,10 +62,10 @@
         </div>
     </header>
 
-    <!-- OPÇÃO 3: CONTADOR REGRESSIVO DE PEDIDOS -->
+    <!-- CONTADOR REGRESSIVO CORRIGIDO -->
     <div id="countdown-bar" class="bg-amber-500 text-stone-900 px-4 py-2 text-center text-xs font-bold border-b border-amber-600 shadow-inner flex items-center justify-center gap-2">
         <i class="fa-solid fa-clock animate-pulse"></i>
-        <span>Encomendas para entrega neste Sábado encerram em: <span id="timer-text" class="font-extrabold underline decoration-stone-900">Carregando...</span></span>
+        <span><span id="timer-label">Encomendas para entrega neste Sábado encerram em:</span> <span id="timer-text" class="font-extrabold underline decoration-stone-900">Carregando...</span></span>
     </div>
 
     <!-- HERO SECTION -->
@@ -96,7 +96,7 @@
             </button>
         </div>
 
-        <!-- SEÇÃO DE PRATOS COM FILTRO RÁPIDO (OPÇÃO 4) -->
+        <!-- SEÇÃO DE PRATOS COM FILTRO RÁPIDO -->
         <section class="space-y-4">
             <div class="border-b border-stone-200 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -421,28 +421,43 @@
         let selectedFlavors = {}; 
         let currentFlavorFilter = 'Todos';
 
-        /* --- OPÇÃO 3: LÓGICA DO CONTADOR REGRESSIVO --- */
+        /* --- NOVA LÓGICA DO CONTADOR CORRIGIDA --- */
         function iniciarContadorRegressivo() {
             function atualizarTimer() {
                 const now = new Date();
-                let deadline = new Date(now);
-                
-                // Define a meta para a próxima sexta-feira às 18:00
                 const dayOfWeek = now.getDay(); // 0: Dom, 1: Seg, ..., 5: Sex, 6: Sáb
-                let daysUntilFriday = (5 - dayOfWeek + 7) % 7;
-                
-                // Se já for sexta após as 18:00 ou sábado, aponta para a próxima sexta
-                if (dayOfWeek === 5 && now.getHours() >= 18) {
-                    daysUntilFriday = 7;
-                } else if (dayOfWeek === 6) {
-                    daysUntilFriday = 6;
-                }
+                const hour = now.getHours();
 
-                deadline.setDate(now.getDate() + daysUntilFriday);
-                deadline.setHours(18, 0, 0, 0);
+                let deadline = new Date(now);
+
+                // Se for SÁBADO (dia 6) ou DOMINGO (dia 0), o alvo já é o próximo sábado
+                if (dayOfWeek === 6 || dayOfWeek === 0) {
+                    let diasAteSabado = (6 - dayOfWeek + 7) % 7;
+                    if (diasAteSabado === 0) diasAteSabado = 7;
+                    deadline.setDate(now.getDate() + diasAteSabado);
+                    deadline.setHours(23, 59, 59, 999);
+                } 
+                // Se for SEXTA-FEIRA (dia 5)
+                else if (dayOfWeek === 5) {
+                    if (hour >= 23) {
+                        // Passou de 23:59 de sexta, aponta para o próximo sábado
+                        deadline.setDate(now.getDate() + 8);
+                        deadline.setHours(23, 59, 59, 999);
+                    } else {
+                        // Encerra hoje (sexta) às 23:59 para as entregas de amanhã (sábado)
+                        deadline.setHours(23, 59, 59, 999);
+                    }
+                } 
+                // De SEGUNDA a QUINTA-FEIRA (dias 1 a 4)
+                else {
+                    let diasAteSexta = 5 - dayOfWeek;
+                    deadline.setDate(now.getDate() + diasAteSexta);
+                    deadline.setHours(23, 59, 59, 999);
+                }
 
                 const diff = deadline - now;
                 const timerText = document.getElementById('timer-text');
+                const timerLabel = document.getElementById('timer-label');
 
                 if (diff <= 0) {
                     timerText.innerText = "Encerrados para esta semana!";
@@ -465,11 +480,9 @@
             setInterval(atualizarTimer, 1000);
         }
 
-        /* --- OPÇÃO 4: LÓGICA DO FILTRO RÁPIDO DE PRATOS --- */
         function filtrarPratos(tag) {
             currentFlavorFilter = tag;
             
-            // Atualiza botões
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('bg-white', 'text-stone-800', 'shadow-sm');
                 btn.classList.add('text-stone-600');
@@ -538,7 +551,7 @@
                 const option = selectBairro.options[selectBairro.selectedIndex];
                 currentShippingFee = parseFloat(option.getAttribute('data-taxa') || 0);
                 updateCartUI();
-                statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculated para ${option.value}: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}</span>`;
+                statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado para ${option.value}: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}</span>`;
                 return;
             }
 
