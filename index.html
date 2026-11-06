@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tempero da Ilma - Cardápio de Combos</title>
     <!-- Tailwind CSS CDN -->
@@ -13,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -62,10 +61,10 @@
         </div>
     </header>
 
-    <!-- CONTADOR REGRESSIVO CORRIGIDO -->
+    <!-- CONTADOR REGRESSIVO -->
     <div id="countdown-bar" class="bg-amber-500 text-stone-900 px-4 py-2 text-center text-xs font-bold border-b border-amber-600 shadow-inner flex items-center justify-center gap-2">
         <i class="fa-solid fa-clock animate-pulse"></i>
-        <span><span id="timer-label">Encomendas para entrega neste Sábado encerram em:</span> <span id="timer-text" class="font-extrabold underline decoration-stone-900">Carregando...</span></span>
+        <span>Encomendas para entrega neste Sábado encerram em: <span id="timer-text" class="font-extrabold underline decoration-stone-900">Carregando...</span></span>
     </div>
 
     <!-- HERO SECTION -->
@@ -220,7 +219,7 @@
 
                 <form id="checkout-form" class="space-y-4 pt-3 border-t border-stone-200" onsubmit="event.preventDefault(); sendToWhatsApp();">
                     <h4 class="font-bold text-stone-800 text-sm">Seus dados para contato e entrega</h4>
-                    
+
                     <div>
                         <label class="block text-xs font-semibold text-stone-700 mb-1">Nome completo *</label>
                         <div class="relative">
@@ -241,7 +240,7 @@
                     <div class="space-y-3 bg-stone-50 p-3 rounded-xl border border-stone-200">
                         <div>
                             <label class="block text-xs font-semibold text-stone-700 mb-1">CEP (Opcional)</label>
-                            <input type="text" id="cust-cep" maxlength="9" placeholder="00000-000" onkeyup="mascaraCep(this)" onblur="consultarViaCep()" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                            <input type="text" id="cust-cep" maxlength="9" placeholder="00000-000" oninput="mascaraCep(this)" onblur="consultarViaCep()" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                         </div>
 
                         <div>
@@ -266,7 +265,7 @@
                             </div>
                             <select id="cust-bairro" required onchange="aoMudarBairroManualmente()" class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-xs font-medium focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                                 <option value="" data-taxa="0">-- Selecione ou Aguarde o Cálculo --</option>
-                                
+
                                 <optgroup label="São Caetano / Liberdade">
                                     <option value="São Caetano" data-taxa="7.00">São Caetano</option>
                                     <option value="Boa Vista de São Caetano" data-taxa="7.00">Boa Vista de São Caetano</option>
@@ -416,63 +415,30 @@
 
     <script>
         let currentShippingFee = null;
-        let cartCombos = []; 
+        let cartCombos = [];
         let currentEditingCombo = null;
-        let selectedFlavors = {}; 
+        let selectedFlavors = {};
         let currentFlavorFilter = 'Todos';
 
-        /* --- NOVA LÓGICA DO CONTADOR CORRIGIDA --- */
+        /* --- CONTADOR REGRESSIVO: sempre até a próxima sexta, 23:59:59 --- */
         function iniciarContadorRegressivo() {
             function atualizarTimer() {
                 const now = new Date();
-                const dayOfWeek = now.getDay(); // 0: Dom, 1: Seg, ..., 5: Sex, 6: Sáb
-                const hour = now.getHours();
-
-                let deadline = new Date(now);
-
-                // Se for SÁBADO (dia 6) ou DOMINGO (dia 0), o alvo já é o próximo sábado
-                if (dayOfWeek === 6 || dayOfWeek === 0) {
-                    let diasAteSabado = (6 - dayOfWeek + 7) % 7;
-                    if (diasAteSabado === 0) diasAteSabado = 7;
-                    deadline.setDate(now.getDate() + diasAteSabado);
-                    deadline.setHours(23, 59, 59, 999);
-                } 
-                // Se for SEXTA-FEIRA (dia 5)
-                else if (dayOfWeek === 5) {
-                    if (hour >= 23) {
-                        // Passou de 23:59 de sexta, aponta para o próximo sábado
-                        deadline.setDate(now.getDate() + 8);
-                        deadline.setHours(23, 59, 59, 999);
-                    } else {
-                        // Encerra hoje (sexta) às 23:59 para as entregas de amanhã (sábado)
-                        deadline.setHours(23, 59, 59, 999);
-                    }
-                } 
-                // De SEGUNDA a QUINTA-FEIRA (dias 1 a 4)
-                else {
-                    let diasAteSexta = 5 - dayOfWeek;
-                    deadline.setDate(now.getDate() + diasAteSexta);
-                    deadline.setHours(23, 59, 59, 999);
-                }
+                const diasAteSexta = (5 - now.getDay() + 7) % 7; // sexta = 0 dias
+                const deadline = new Date(now);
+                deadline.setDate(now.getDate() + diasAteSexta);
+                deadline.setHours(23, 59, 59, 999);
 
                 const diff = deadline - now;
                 const timerText = document.getElementById('timer-text');
-                const timerLabel = document.getElementById('timer-label');
 
-                if (diff <= 0) {
-                    timerText.innerText = "Encerrados para esta semana!";
-                    return;
-                }
-
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const m = Math.floor((diff / 1000 / 60) % 60);
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff / 3600000) % 24);
+                const m = Math.floor((diff / 60000) % 60);
                 const s = Math.floor((diff / 1000) % 60);
 
-                let text = "";
-                if (d > 0) text += `${d}d `;
-                text += `${h.toString().padStart(2, '0')}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
-                
+                let text = d > 0 ? `${d}d ` : '';
+                text += `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
                 timerText.innerText = text;
             }
 
@@ -482,7 +448,7 @@
 
         function filtrarPratos(tag) {
             currentFlavorFilter = tag;
-            
+
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('bg-white', 'text-stone-800', 'shadow-sm');
                 btn.classList.add('text-stone-600');
@@ -511,26 +477,35 @@
             try {
                 let response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
                 let data = await response.json();
-                
+
                 if (!data.erro) {
                     if (data.logradouro) document.getElementById('cust-rua').value = data.logradouro;
                     if (data.bairro) {
-                        selecionarBairroNoSelect(data.bairro);
+                        // CORREÇÃO: ao achar o bairro, já atualiza o frete
+                        if (selecionarBairroNoSelect(data.bairro)) aoMudarBairroManualmente();
                     }
                 }
             } catch (err) {}
         }
 
+        // CORREÇÃO: correspondência exata primeiro, depois "começa com", depois "contém"
         function selecionarBairroNoSelect(nomeBairro) {
+            const norm = s => s.toLowerCase().normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "").replace(/\(.*?\)/g, "").trim();
             const select = document.getElementById('cust-bairro');
-            const termoBusca = nomeBairro.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            
-            for (let i = 0; i < select.options.length; i++) {
-                const optText = select.options[i].value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                if (optText && (optText.includes(termoBusca) || termoBusca.includes(optText))) {
-                    select.selectedIndex = i;
-                    return true;
-                }
+            const termo = norm(nomeBairro || '');
+            if (!termo) return false;
+
+            const opts = Array.from(select.options).filter(o => o.value);
+
+            const achado =
+                opts.find(o => norm(o.value) === termo) ||
+                opts.find(o => norm(o.value).startsWith(termo) || termo.startsWith(norm(o.value))) ||
+                opts.find(o => norm(o.value).includes(termo));
+
+            if (achado) {
+                select.value = achado.value;
+                return true;
             }
             return false;
         }
@@ -556,17 +531,18 @@
             }
 
             try {
-                const ruaLimpa = rua.split(',')[0].replace(/nº|n°|n/gi, '').trim();
+                // CORREÇÃO: remove só o sufixo de número ("nº 150", "n° 150"), sem apagar letras "n" do nome
+                const ruaLimpa = rua.split(',')[0].replace(/\s+(nº|n°|no\.?)\s*\d+.*$/i, '').trim();
                 const queryText = `${ruaLimpa}, Salvador, Bahia, Brasil`;
                 const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryText)}&addressdetails=1&limit=1`;
-                
+
                 const response = await fetch(url);
                 const data = await response.json();
 
                 if (data && data.length > 0 && data[0].address) {
                     const addr = data[0].address;
                     const bairroDetectado = addr.suburb || addr.neighbourhood || addr.city_district || "";
-                    
+
                     if (bairroDetectado && selecionarBairroNoSelect(bairroDetectado)) {
                         const option = selectBairro.options[selectBairro.selectedIndex];
                         currentShippingFee = parseFloat(option.getAttribute('data-taxa') || 0);
@@ -605,7 +581,7 @@
             if (dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 8 && currentHour < 17) {
                 container.innerHTML = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Aberto</span>`;
                 return;
-            } 
+            }
             if (dayOfWeek === 6) {
                 container.innerHTML = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800"><i class="fa-solid fa-truck text-[10px]"></i> Apenas Entregas</span>`;
                 return;
@@ -624,8 +600,8 @@
 
         const availableFlavors = [
             { id: 'f1', name: 'Panqueca de Frango', desc: 'Frango desfiado, molho de tomate e queijo parmesão', tag: 'Tradicional', img: 'Panqueca frango.png' },
-            { id: 'f2', name: 'Bife de Carne Temperada', desc: 'Feijão preto, Arroz branco e Camponata', tag: 'Tradicional', img: 'Bife carne temparada.png' },
-            { id: 'f3', name: 'Carne Moida com Camponata', desc: 'Carne moída, Arroz branco e Camponata', tag: 'Tradicional', img: 'Carne camponata.png' },
+            { id: 'f2', name: 'Bife de Carne Temperada', desc: 'Feijão preto, Arroz branco e Caponata', tag: 'Tradicional', img: 'Bife carne temparada.png' },
+            { id: 'f3', name: 'Carne Moída com Caponata', desc: 'Carne moída, Arroz branco e Caponata', tag: 'Tradicional', img: 'Carne camponata.png' },
             { id: 'f4', name: 'Feijoada de Feijão Preto', desc: 'Arroz branco e couve folha', tag: 'Tradicional', img: 'Feijão preto.png' },
             { id: 'f5', name: 'Carne de Panela com Batatas', desc: 'Arroz branco e Feijão carioca', tag: 'Tradicional', img: 'Bife panela.jpg' },
             { id: 'f7', name: 'Strogonoff de Frango', desc: 'Frango, Batata doce assada com páprica defumada', tag: 'Tradicional', img: 'Strogonoff.jpg' },
@@ -634,25 +610,25 @@
             { id: 'f10', name: 'Bife de Carne Acebolado', desc: 'Feijão carioca, Arroz branco e Brócolis', tag: 'Tradicional', img: 'Bife acebolado.jpg' },
             { id: 'f11', name: 'Carne Moída com Mix de Verduras', desc: 'Carne moída, Arroz branco e Mix de Verduras', tag: 'Tradicional', img: 'Carne moida mix.jpg' },
             { id: 'f12', name: 'Penne a Bolonhesa', desc: 'Massa Penne, Molho de tomate e Carne moída', tag: 'Linha Fit', img: 'Penne.jpg' },
-            { id: 'f13', name: 'Espaguete com Almondegas', desc: 'Massa Espaguete, Molho de tomate, e Almondegas de Carne', tag: 'Tradicional', img: 'Almondegas.jpg' },
+            { id: 'f13', name: 'Espaguete com Almôndegas', desc: 'Massa Espaguete, Molho de tomate e Almôndegas de Carne', tag: 'Tradicional', img: 'Almondegas.jpg' },
             { id: 'f14', name: 'Frango ao Creme de Milho', desc: 'Com milho e Arroz com Brócolis', tag: 'Tradicional', img: 'Frango milho.jpg' },
             { id: 'f15', name: 'Carne de Panela Desfiada', desc: 'Carne desfiada, Arroz branco, Purê de abóbora e Mix de verduras', tag: 'Tradicional', img: 'Carne desfiada.jpg' },
             { id: 'f16', name: 'Lombo de Boi recheado', desc: 'Lombo de boi, Arroz branco, Feijão e Brócolis', tag: 'Tradicional', img: 'Lombo de boi.jpg' },
             { id: 'f17', name: 'Omelete de Frango', desc: 'Omelete de Frango, Arroz branco, Purê de batata e Mix de Verduras', tag: 'Tradicional', img: 'Omelete frango.jpg' },
             { id: 'f18', name: 'Bife de Frango Acebolado', desc: 'Bife de frango, Feijão, Arroz branco e Cenoura', tag: 'Tradicional', img: 'Frango acebolado.jpg' },
             { id: 'f19', name: 'Panqueca de Frango (Farinha Integral)', desc: 'Frango desfiado, Molho de tomate e Queijo parmesão', tag: 'Linha Fit', img: 'Panqueca frango integral.jpg' },
-            { id: 'f20', name: 'Frango com Purê de Mandiquinha', desc: 'Frango desfiado, Purê de mandiquinha e Legumes assados', tag: 'Linha Fit', img: 'Frango mandioquinha.jpg' },
+            { id: 'f20', name: 'Frango com Purê de Mandioquinha', desc: 'Frango desfiado, Purê de mandioquinha e Legumes assados', tag: 'Linha Fit', img: 'Frango mandioquinha.jpg' },
             { id: 'f21', name: 'Escondidinho Fit', desc: 'Purê de batata doce e Frango desfiado', tag: 'Linha Fit', img: 'Escondidinho.jpg' },
-            { id: 'f22', name: 'Macarrão Integral com Almondegas', desc: 'Massa integral, Molho de tomate e Almondegas', tag: 'Linha Fit', img: 'Integral almondegas.jpg' },
+            { id: 'f22', name: 'Macarrão Integral com Almôndegas', desc: 'Massa integral, Molho de tomate e Almôndegas', tag: 'Linha Fit', img: 'Integral almondegas.jpg' },
             { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'Arroz funcional.jpg' }
         ];
 
         function renderFlavorsDisplay() {
             const grid = document.getElementById('flavors-display-grid');
             grid.innerHTML = '';
-            
-            const filtered = currentFlavorFilter === 'Todos' 
-                ? availableFlavors 
+
+            const filtered = currentFlavorFilter === 'Todos'
+                ? availableFlavors
                 : availableFlavors.filter(f => f.tag === currentFlavorFilter);
 
             filtered.forEach(flavor => {
@@ -723,7 +699,7 @@
             const container = document.getElementById('flavors-selection-list');
             container.innerHTML = '';
             const filteredFlavors = availableFlavors.filter(flavor => flavor.tag === currentEditingCombo.type);
-            
+
             filteredFlavors.forEach(flavor => {
                 const count = selectedFlavors[flavor.id] || 0;
                 const item = document.createElement('div');
@@ -746,12 +722,12 @@
         function changeFlavorCount(flavorId, delta) {
             const currentTotal = Object.values(selectedFlavors).reduce((a, b) => a + b, 0);
             const flavorCount = selectedFlavors[flavorId] || 0;
-            if(delta > 0 && currentTotal >= currentEditingCombo.qty) {
+            if (delta > 0 && currentTotal >= currentEditingCombo.qty) {
                 alert(`Você já atingiu o limite de ${currentEditingCombo.qty} marmitas para este combo!`);
                 return;
             }
             const newCount = flavorCount + delta;
-            if(newCount <= 0) {
+            if (newCount <= 0) {
                 delete selectedFlavors[flavorId];
             } else {
                 selectedFlavors[flavorId] = newCount;
@@ -764,7 +740,7 @@
             const currentTotal = Object.values(selectedFlavors).reduce((a, b) => a + b, 0);
             document.getElementById('selected-count').innerText = currentTotal;
             const btnConfirm = document.getElementById('btn-confirm-combo');
-            if(currentTotal === currentEditingCombo.qty) {
+            if (currentTotal === currentEditingCombo.qty) {
                 btnConfirm.disabled = false;
                 btnConfirm.classList.remove('bg-stone-300', 'text-stone-500');
                 btnConfirm.classList.add('bg-brand-secondary', 'text-white', 'hover:bg-brand-accent');
@@ -812,9 +788,9 @@
             const totalPrice = subtotalPrice + shippingFeeToDisplay;
 
             totalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
-            if(subtotalEl) subtotalEl.innerText = `R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`;
-            
-            if(shippingEl) {
+            if (subtotalEl) subtotalEl.innerText = `R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`;
+
+            if (shippingEl) {
                 if (currentShippingFee !== null) {
                     shippingEl.innerText = `R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`;
                     shippingEl.className = "font-bold text-stone-800";
@@ -823,10 +799,10 @@
                     shippingEl.className = "font-bold text-amber-600";
                 }
             }
-            
-            if(summaryTotalEl) summaryTotalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
 
-            if(totalCount > 0) {
+            if (summaryTotalEl) summaryTotalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+
+            if (totalCount > 0) {
                 cartBar.classList.remove('translate-y-full');
             } else {
                 cartBar.classList.add('translate-y-full');
@@ -854,7 +830,7 @@
         }
 
         function openCheckoutModal() {
-            if(cartCombos.length === 0) {
+            if (cartCombos.length === 0) {
                 alert('Seu carrinho está vazio! Adicione pelo menos um combo para prosseguir.');
                 return;
             }
@@ -868,7 +844,7 @@
         function toggleTrocoField() {
             const payment = document.getElementById('cust-payment').value;
             const trocoContainer = document.getElementById('troco-container');
-            if(payment === 'Dinheiro') {
+            if (payment === 'Dinheiro') {
                 trocoContainer.classList.remove('hidden');
             } else {
                 trocoContainer.classList.add('hidden');
@@ -880,44 +856,53 @@
                 cliente: dados,
                 itensCarrinho: cartCombos
             };
-            localStorage.setItem('tempero_ilma_historico_pedido', JSON.stringify(historicoCompleto));
+            try {
+                localStorage.setItem('tempero_ilma_historico_pedido', JSON.stringify(historicoCompleto));
+            } catch (e) {}
         }
 
         function verificarUltimoCliente() {
-            const salvo = localStorage.getItem('tempero_ilma_historico_pedido');
-            if (salvo) {
-                document.getElementById('quick-reorder-banner').classList.remove('hidden');
-            }
+            try {
+                const salvo = localStorage.getItem('tempero_ilma_historico_pedido');
+                if (salvo) {
+                    document.getElementById('quick-reorder-banner').classList.remove('hidden');
+                }
+            } catch (e) {}
         }
 
         function carregarUltimoCliente() {
-            const salvo = localStorage.getItem('tempero_ilma_historico_pedido');
-            if (salvo) {
-                const historico = JSON.parse(salvo);
-                const dados = historico.cliente || {};
-                
-                document.getElementById('cust-name').value = dados.name || '';
-                document.getElementById('cust-phone').value = dados.phone || '';
-                document.getElementById('cust-cep').value = dados.cep || '';
-                if(dados.bairro) {
-                    selecionarBairroNoSelect(dados.bairro);
-                }
-                document.getElementById('cust-rua').value = dados.rua || '';
-                document.getElementById('cust-numero').value = dados.numero || '';
-                document.getElementById('cust-comp').value = dados.comp || '';
+            let salvo = null;
+            try {
+                salvo = localStorage.getItem('tempero_ilma_historico_pedido');
+            } catch (e) {}
+            if (!salvo) return;
 
-                if (historico.itensCarrinho && historico.itensCarrinho.length > 0) {
-                    cartCombos = [...historico.itensCarrinho];
-                    updateCartUI();
-                }
+            const historico = JSON.parse(salvo);
+            const dados = historico.cliente || {};
 
-                alert('Seus dados e os combos do seu último pedido foram carregados no carrinho!');
-                openCheckoutModal();
+            document.getElementById('cust-name').value = dados.name || '';
+            document.getElementById('cust-phone').value = dados.phone || '';
+            document.getElementById('cust-cep').value = dados.cep || '';
+            document.getElementById('cust-rua').value = dados.rua || '';
+            document.getElementById('cust-numero').value = dados.numero || '';
+            document.getElementById('cust-comp').value = dados.comp || '';
+
+            // CORREÇÃO: ao carregar o bairro salvo, já atualiza o frete
+            if (dados.bairro) {
+                if (selecionarBairroNoSelect(dados.bairro)) aoMudarBairroManualmente();
             }
+
+            if (historico.itensCarrinho && historico.itensCarrinho.length > 0) {
+                cartCombos = [...historico.itensCarrinho];
+                updateCartUI();
+            }
+
+            alert('Seus dados e os combos do seu último pedido foram carregados no carrinho!');
+            openCheckoutModal();
         }
 
         function sendToWhatsApp() {
-            if(cartCombos.length === 0) {
+            if (cartCombos.length === 0) {
                 alert('Adicione pelo menos um combo ao carrinho.');
                 return;
             }
@@ -933,12 +918,12 @@
             const troco = document.getElementById('cust-troco').value.trim();
             const obs = document.getElementById('cust-obs').value.trim();
 
-            if(!name || !phone || !bairro || !rua || !numero) {
+            if (!name || !phone || !bairro || !rua || !numero) {
                 alert('Por favor, preencha os campos obrigatórios (*): Nome, Telefone, Bairro, Rua e Número.');
                 return;
             }
 
-            if(currentShippingFee === null) {
+            if (currentShippingFee === null) {
                 alert('Por favor, clique no botão "Calcular Frete" antes de enviar o pedido.');
                 return;
             }
@@ -946,9 +931,9 @@
             salvarUltimoCliente({ name, phone, cep, bairro, rua, numero, comp });
 
             let fullAddress = `${rua}, nº ${numero}`;
-            if(comp) fullAddress += ` (${comp})`;
+            if (comp) fullAddress += ` (${comp})`;
             fullAddress += ` - Bairro: ${bairro}, Salvador - BA`;
-            if(cep) fullAddress += ` (CEP: ${cep})`;
+            if (cep) fullAddress += ` (CEP: ${cep})`;
 
             const ePlate = String.fromCodePoint(0x1F37D);
             const eUser = String.fromCodePoint(0x1F464);
@@ -978,7 +963,7 @@
                 lines.push(``);
                 lines.push(`${eBox} *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})`);
                 lines.push(`   *Sabores Escolhidos:*`);
-                
+
                 const saboresArray = item.flavorsSummary.split(', ');
                 saboresArray.forEach(sabor => {
                     lines.push(`   - ${sabor}`);
@@ -995,14 +980,14 @@
             lines.push(`*TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
             lines.push(``);
             lines.push(`${eCard} *Forma de Pagamento:* ${payment}`);
-            
-            if(payment === 'Dinheiro' && troco) {
+
+            if (payment === 'Dinheiro' && troco) {
                 lines.push(`*Troco para:* ${troco}`);
             }
-            if(obs) {
+            if (obs) {
                 lines.push(`${eNote} *Observações:* ${obs}`);
             }
-            
+
             lines.push(``);
             lines.push(`_Pedido gerado automaticamente pelo cardápio digital_ ${eSparkles}`);
 
