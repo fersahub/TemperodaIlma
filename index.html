@@ -168,7 +168,7 @@
                     </div>
                     <div class="flex justify-between text-stone-600">
                         <span>Taxa de Entrega:</span>
-                        <span id="summary-shipping-price" class="font-bold text-stone-800">R$ 5,00</span>
+                        <span id="summary-shipping-price" class="font-bold text-amber-600">A calcular</span>
                     </div>
                     <div class="pt-2 border-t border-stone-200 flex justify-between items-center font-bold text-stone-800 text-base">
                         <span>Total do Pedido:</span>
@@ -195,32 +195,22 @@
                         </div>
                     </div>
 
-                    <!-- ENDEREÇO VIA CEP + BAIRROS -->
+                    <!-- ENDEREÇO VIA CEP AUTOPREENCHIDO + BOTÃO CÁLCULO KM -->
                     <div class="space-y-3 bg-stone-50 p-3 rounded-xl border border-stone-200">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-xs font-semibold text-stone-700 mb-1">CEP (Opcional)</label>
-                                <input type="text" id="cust-cep" maxlength="9" placeholder="00000-000" onblur="consultarCep()" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                                <label class="block text-xs font-semibold text-stone-700 mb-1">CEP *</label>
+                                <input type="text" id="cust-cep" maxlength="9" placeholder="40000-000" onkeyup="mascaraCep(this)" onblur="consultarCep()" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-stone-700 mb-1">Bairro de Entrega *</label>
-                                <select id="cust-bairro" onchange="atualizarFreteBairro()" required class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
-                                    <option value="" disabled selected>Selecione o bairro</option>
-                                    <option value="São Caetano" data-fee="5.00">São Caetano (R$ 5,00)</option>
-                                    <option value="Paripe" data-fee="7.00">Paripe (R$ 7,00)</option>
-                                    <option value="Periperi" data-fee="8.00">Periperi (R$ 8,00)</option>
-                                    <option value="Lobato" data-fee="7.00">Lobato (R$ 7,00)</option>
-                                    <option value="Campinas de Pirajá" data-fee="9.00">Campinas de Pirajá (R$ 9,00)</option>
-                                    <option value="Pirajá" data-fee="10.00">Pirajá (R$ 10,00)</option>
-                                    <option value="Retiro" data-fee="10.00">Retiro (R$ 10,00)</option>
-                                    <option value="Outro Bairro de Salvador" data-fee="12.00">Outro Bairro (Consulte/Taxa fixa R$ 12,00)</option>
-                                </select>
+                                <label class="block text-xs font-semibold text-stone-700 mb-1">Bairro *</label>
+                                <input type="text" id="cust-bairro" required readonly placeholder="Autopreenchido pelo CEP" class="w-full bg-stone-100 border border-stone-200 rounded-lg p-2 text-sm text-stone-600 focus:outline-none cursor-not-allowed">
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-stone-700 mb-1">Rua / Avenida *</label>
-                            <input type="text" id="cust-rua" required placeholder="Ex: Rua Direita de São Caetano" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                            <input type="text" id="cust-rua" required placeholder="Digite sua rua..." class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
@@ -233,6 +223,12 @@
                                 <input type="text" id="cust-comp" placeholder="Ex: Ap 201, Bloco B" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                             </div>
                         </div>
+
+                        <!-- BOTÃO DE CÁLCULO DE FRETE POR KM -->
+                        <button type="button" onclick="calcularFretePorKm()" class="w-full bg-amber-500 hover:bg-amber-600 text-stone-900 font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm text-xs mt-1">
+                            <i class="fa-solid fa-calculator text-sm"></i> Calcular Frete por KM
+                        </button>
+                        <p id="shipping-calc-status" class="text-[11px] text-stone-500 text-center font-medium min-h-[16px]"></p>
                     </div>
 
                     <div>
@@ -266,41 +262,120 @@
     </div>
 
     <script>
-        let currentShippingFee = 5.00;
+        // Ponto de origem fixo do veículo da marmitaria
+        const ORIGEM_LAT = -12.936212;
+        const ORIGEM_LNG = -38.4775149;
+        
+        let currentShippingFee = null; // Começa sem frete calculado
 
-        // Função ViaCEP para preencher rua e bairro automaticamente ao digitar o CEP
+        function mascaraCep(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (v.length > 5) {
+                v = v.substring(0, 5) + '-' + v.substring(5, 8);
+            }
+            input.value = v;
+        }
+
+        // Preenche Bairro e Rua via ViaCEP
         async function consultarCep() {
             let cep = document.getElementById('cust-cep').value.replace(/\D/g, '');
             if (cep.length !== 8) return;
+
+            const statusEl = document.getElementById('shipping-calc-status');
+            statusEl.innerHTML = `<span class="text-amber-600"><i class="fa-solid fa-spinner animate-spin"></i> Buscando endereço pelo CEP...</span>`;
 
             try {
                 let response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
                 let data = await response.json();
                 
                 if (!data.erro) {
+                    if (data.bairro) document.getElementById('cust-bairro').value = data.bairro;
                     if (data.logradouro) document.getElementById('cust-rua').value = data.logradouro;
-                    
-                    // Tenta selecionar o bairro correspondente na lista, se existir
-                    let selectBairro = document.getElementById('cust-bairro');
-                    for (let i = 0; i < selectBairro.options.length; i++) {
-                        if (selectBairro.options[i].value.toLowerCase() === data.bairro.toLowerCase()) {
-                            selectBairro.selectedIndex = i;
-                            atualizarFreteBairro();
-                            break;
-                        }
-                    }
+                    statusEl.innerHTML = `<span class="text-emerald-600 font-medium"><i class="fa-solid fa-check"></i> Endereço localizado! Clique em "Calcular Frete por KM".</span>`;
+                } else {
+                    statusEl.innerHTML = `<span class="text-red-500">CEP não encontrado. Digite o bairro e rua manualmente.</span>`;
+                    document.getElementById('cust-bairro').removeAttribute('readonly');
+                    document.getElementById('cust-bairro').classList.remove('bg-stone-100', 'cursor-not-allowed');
                 }
-            } catch (err) {}
+            } catch (err) {
+                statusEl.innerHTML = `<span class="text-red-500">Erro ao consultar CEP.</span>`;
+            }
         }
 
-        // Atualiza a taxa de frete de acordo com o bairro selecionado
-        function atualizarFreteBairro() {
-            const selectBairro = document.getElementById('cust-bairro');
-            const selectedOption = selectBairro.options[selectBairro.selectedIndex];
-            const fee = parseFloat(selectedOption.getAttribute('data-fee')) || 5.00;
-            
-            currentShippingFee = fee;
-            updateCartUI();
+        // Fórmula Haversine para distância em KM
+        function calcularHaversineKM(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
+
+        function obterTabelaFrete(distanciaKm) {
+            if (distanciaKm <= 2.0) return 5.00;
+            if (distanciaKm <= 3.5) return 7.00;
+            if (distanciaKm <= 5.0) return 9.00;
+            if (distanciaKm <= 8.0) return 12.00;
+            if (distanciaKm <= 12.0) return 15.00;
+            return 20.00;
+        }
+
+        // Calcula a taxa por KM combinando o ponto de partida fixo + o endereço preenchido do cliente
+        async function calcularFretePorKm() {
+            const rua = document.getElementById('cust-rua').value.trim();
+            const bairro = document.getElementById('cust-bairro').value.trim();
+            const numero = document.getElementById('cust-numero').value.trim();
+            const statusEl = document.getElementById('shipping-calc-status');
+
+            if (!rua || !bairro) {
+                alert('Preencha ao menos o CEP (ou Rua e Bairro) para calcular o frete.');
+                return;
+            }
+
+            statusEl.innerHTML = `<span class="text-amber-600"><i class="fa-solid fa-spinner animate-spin"></i> Calculando distância exata...</span>`;
+
+            try {
+                const queryText = `${rua}, ${numero ? numero + ',' : ''} ${bairro}, Salvador, Bahia, Brasil`;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryText)}&limit=1`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    const destLat = parseFloat(data[0].lat);
+                    const destLng = parseFloat(data[0].lon);
+                    
+                    const distanciaDireta = calcularHaversineKM(ORIGEM_LAT, ORIGEM_LNG, destLat, destLng);
+                    const distanciaRota = distanciaDireta * 1.25; // fator estimado de vias urbanas
+                    
+                    currentShippingFee = obterTabelaFrete(distanciaRota);
+                    updateCartUI();
+                    
+                    statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado: R$ ${currentShippingFee.toFixed(2).replace('.', ',')} (${distanciaRota.toFixed(1)} km)</span>`;
+                } else {
+                    // Caso o número específico falhe na busca de geocodificação, tenta apenas por Rua e Bairro em Salvador
+                    const queryFallback = `${rua}, ${bairro}, Salvador, Bahia, Brasil`;
+                    const resFb = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryFallback)}&limit=1`);
+                    const dataFb = await resFb.json();
+
+                    if (dataFb && dataFb.length > 0) {
+                        const destLat = parseFloat(dataFb[0].lat);
+                        const destLng = parseFloat(dataFb[0].lon);
+                        const distanciaRota = calcularHaversineKM(ORIGEM_LAT, ORIGEM_LNG, destLat, destLng) * 1.25;
+                        currentShippingFee = obterTabelaFrete(distanciaRota);
+                        updateCartUI();
+                        statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado: R$ ${currentShippingFee.toFixed(2).replace('.', ',')} (~${distanciaRota.toFixed(1)} km)</span>`;
+                    } else {
+                        statusEl.innerHTML = `<span class="text-red-500">Não foi possível calcular automaticamente por KM. O frete padrão de R$ 7,00 foi aplicado.</span>`;
+                        currentShippingFee = 7.00;
+                        updateCartUI();
+                    }
+                }
+            } catch (e) {
+                statusEl.innerHTML = `<span class="text-red-500">Erro de conexão ao calcular frete.</span>`;
+            }
         }
 
         function checkBusinessStatus() {
@@ -512,11 +587,22 @@
             countEl.innerText = totalCount;
 
             const subtotalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
-            const totalPrice = subtotalPrice + currentShippingFee;
+            const shippingFeeToDisplay = currentShippingFee !== null ? currentShippingFee : 0;
+            const totalPrice = subtotalPrice + shippingFeeToDisplay;
 
             totalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
             if(subtotalEl) subtotalEl.innerText = `R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`;
-            if(shippingEl) shippingEl.innerText = `R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`;
+            
+            if(shippingEl) {
+                if (currentShippingFee !== null) {
+                    shippingEl.innerText = `R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`;
+                    shippingEl.className = "font-bold text-stone-800";
+                } else {
+                    shippingEl.innerText = "A calcular";
+                    shippingEl.className = "font-bold text-amber-600";
+                }
+            }
+            
             if(summaryTotalEl) summaryTotalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
 
             if(totalCount > 0) {
@@ -568,7 +654,7 @@
             const name = document.getElementById('cust-name').value.trim();
             const phone = document.getElementById('cust-phone').value.trim();
             const cep = document.getElementById('cust-cep').value.trim();
-            const bairro = document.getElementById('cust-bairro').value;
+            const bairro = document.getElementById('cust-bairro').value.trim();
             const rua = document.getElementById('cust-rua').value.trim();
             const numero = document.getElementById('cust-numero').value.trim();
             const comp = document.getElementById('cust-comp').value.trim();
@@ -577,7 +663,12 @@
             const obs = document.getElementById('cust-obs').value.trim();
 
             if(!name || !phone || !bairro || !rua || !numero) {
-                alert('Por favor, preencha seu nome, telefone, bairro, rua e número.');
+                alert('Por favor, preencha nome, telefone, CEP, rua e número.');
+                return;
+            }
+
+            if(currentShippingFee === null) {
+                alert('Por favor, clique no botão "Calcular Frete por KM" antes de enviar o pedido.');
                 return;
             }
 
@@ -601,7 +692,7 @@
             const totalPrice = subtotalPrice + currentShippingFee;
 
             message += `%0A*Subtotal:* R$ ${subtotalPrice.toFixed(2).replace('.', ',')}%0A`;
-            message += `*Taxa de Entrega (${bairro}):* R$ ${currentShippingFee.toFixed(2).replace('.', ',')}%0A`;
+            message += `*Taxa de Entrega:* R$ ${currentShippingFee.toFixed(2).replace('.', ',')}%0A`;
             message += `*TOTAL GERAL:* R$ ${totalPrice.toFixed(2).replace('.', ',')}%0A`;
             message += `*Forma de Pagamento:* ${payment}%0A`;
             if(payment === 'Dinheiro' && troco) message += `*Troco para:* ${troco}%0A`;
