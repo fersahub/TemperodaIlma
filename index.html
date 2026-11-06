@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tempero da Ilma - Cardápio de Combos</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#5F935D">
+    <script>try{if(localStorage.getItem('tema')==='dark')document.documentElement.classList.add('dark')}catch(e){}</script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -39,6 +42,21 @@
             background-color: #FAF8F5;
             color: #222222;
         }
+        @keyframes bump{0%{transform:scale(1)}30%{transform:scale(1.35) rotate(-8deg)}100%{transform:scale(1)}}
+        .cart-bump{animation:bump .5s ease}
+        /* MODO ESCURO */
+        html.dark body{background:#141414;color:#eee}
+        html.dark .bg-white,html.dark .bg-white\/95{background:#1e1e1e!important}
+        html.dark .bg-stone-50,html.dark .bg-stone-100{background:#262626!important}
+        html.dark .bg-stone-200{background:#333!important}
+        html.dark .bg-emerald-50{background:#16301f!important}
+        html.dark .bg-amber-50{background:#3a2e12!important}
+        html.dark .text-stone-800,html.dark .text-stone-700{color:#f1f1f1!important}
+        html.dark .text-stone-500,html.dark .text-stone-600{color:#a8a8a8!important}
+        html.dark .text-emerald-900,html.dark .text-emerald-700{color:#a7f3d0!important}
+        html.dark .text-amber-900{color:#fde68a!important}
+        html.dark .border-stone-200,html.dark .border-stone-100,html.dark .border-stone-300,html.dark .border-emerald-200,html.dark .border-amber-200{border-color:#3a3a3a!important}
+        html.dark input,html.dark select,html.dark textarea{background:#1e1e1e!important;color:#eee}
     </style>
 </head>
 <body class="pb-28">
@@ -57,7 +75,7 @@
                     </p>
                 </div>
             </div>
-            <div class="text-right" id="business-status-container"></div>
+            <div class="flex items-center gap-2"><div class="text-right" id="business-status-container"></div><button id="theme-btn" onclick="alternarTema()" aria-label="Alternar tema" class="w-9 h-9 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center"><i class="fa-solid fa-moon"></i></button></div>
         </div>
     </header>
 
@@ -142,17 +160,21 @@
         <p class="text-stone-500">&copy; Todos os direitos reservados.</p>
     </footer>
 
+    <!-- BOTÃO FLUTUANTE WHATSAPP -->
+    <a href="https://wa.me/5571994125510?text=Ol%C3%A1!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20card%C3%A1pio." target="_blank" rel="noopener" aria-label="Tirar dúvidas no WhatsApp" class="fixed right-4 bottom-24 z-30 w-14 h-14 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-xl text-3xl"><i class="fa-brands fa-whatsapp"></i></a>
+
     <!-- BARRA FLUTUANTE DO CARRINHO -->
     <div id="cart-bar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone-200 p-3 z-40 shadow-2xl transition-transform transform translate-y-full">
         <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="relative bg-stone-100 p-2.5 rounded-xl">
+                <div id="cart-icon-wrap" class="relative bg-stone-100 p-2.5 rounded-xl">
                     <i class="fa-solid fa-cart-shopping text-brand-secondary text-xl"></i>
                     <span id="cart-count" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
                 </div>
                 <div>
                     <p class="text-[11px] text-stone-500 font-medium">Seu Pedido</p>
                     <p id="cart-total" class="text-lg font-bold text-stone-800">R$ 0,00</p>
+                    <p id="cart-ship-hint" class="text-[10px] font-semibold text-amber-600"></p>
                 </div>
             </div>
             <button onclick="openCheckoutModal()" class="bg-brand-secondary hover:bg-brand-accent text-white font-bold text-sm px-6 py-3 rounded-xl transition flex items-center gap-2 shadow-md">
@@ -175,7 +197,7 @@
             </div>
             <div class="bg-brand-primary/20 px-4 py-2 text-center border-b border-brand-primary/30">
                 <p class="text-xs font-bold text-stone-800">
-                    Marmitas selecionadas: <span id="selected-count" class="text-brand-secondary font-extrabold text-sm">0</span> de <span id="max-count">0</span>
+                    Marmitas selecionadas: <span id="selected-count" class="text-brand-secondary font-extrabold text-sm">0</span> de <span id="max-count">0</span> <button type="button" onclick="montagemAutomatica()" class="ml-2 bg-brand-secondary text-white text-[11px] font-bold px-3 py-1 rounded-full"><i class="fa-solid fa-dice"></i> Surpreenda-me</button>
                 </p>
             </div>
             <div class="p-4 overflow-y-auto space-y-3 flex-1" id="flavors-selection-list"></div>
@@ -216,6 +238,9 @@
                         <span id="summary-total-price" class="text-brand-accent text-lg">R$ 0,00</span>
                     </div>
                 </div>
+
+                <div id="free-ship-banner"></div>
+                <div class="text-xs text-stone-600 flex justify-between"><span>Entrega prevista:</span><span id="delivery-estimate" class="font-bold text-stone-800"></span></div>
 
                 <form id="checkout-form" class="space-y-4 pt-3 border-t border-stone-200" onsubmit="event.preventDefault(); sendToWhatsApp();">
                     <h4 class="font-bold text-stone-800 text-sm">Seus dados para contato e entrega</h4>
@@ -393,6 +418,13 @@
                         </select>
                     </div>
 
+                    <div id="pix-container" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-1">
+                        <p class="font-bold text-emerald-900">Pague via Pix e envie o comprovante no WhatsApp</p>
+                        <p class="text-stone-700">Valor: <span id="pix-valor" class="font-bold"></span></p>
+                        <p class="text-stone-700">Chave: <span id="pix-chave" class="font-bold break-all"></span></p>
+                        <button type="button" onclick="copiarPix()" class="bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg">Copiar chave Pix</button>
+                    </div>
+
                     <div id="troco-container" class="hidden">
                         <label class="block text-xs font-semibold text-stone-700 mb-1">Troco para quanto?</label>
                         <input type="text" id="cust-troco" placeholder="Ex: R$ 100,00" class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
@@ -419,6 +451,121 @@
         let currentEditingCombo = null;
         let selectedFlavors = {};
         let currentFlavorFilter = 'Todos';
+
+        /* --- CONFIGURAÇÕES (edite aqui) --- */
+        const CONFIG = {
+            pixChave: 'SUA-CHAVE-PIX-AQUI',
+            entregaHorario: 'entre 10h e 16h'
+        };
+
+        function temFreteGratis() { return cartCombos.some(c => c.freteGratis); }
+
+        function freteEfetivo() {
+            if (currentShippingFee === null) return null;
+            return temFreteGratis() ? 0 : currentShippingFee;
+        }
+
+        function pedidosAbertos() {
+            if (new URLSearchParams(location.search).has('teste')) return true; // use ?teste=1 para testar
+            const d = new Date().getDay();
+            return d !== 6 && d !== 0; // fechado sábado e domingo
+        }
+
+        function aplicarModoFechado() {
+            if (pedidosAbertos()) return;
+            document.getElementById('countdown-bar').classList.add('hidden');
+            document.getElementById('quick-reorder-banner').classList.add('hidden');
+            const grid = document.getElementById('combos-grid');
+            grid.className = '';
+            grid.innerHTML = `<div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center space-y-2"><i class="fa-solid fa-lock text-amber-600 text-2xl"></i><h4 class="font-bold text-stone-800">Pedidos encerrados por esta semana</h4><p class="text-xs text-stone-600">Voltamos na segunda-feira! Confira o cardápio acima e já escolha seus favoritos.</p></div>`;
+        }
+
+        function textoEntrega() {
+            const hoje = new Date();
+            let dias = (6 - hoje.getDay() + 7) % 7;
+            if (dias === 0) dias = 7;
+            const d = new Date(hoje);
+            d.setDate(hoje.getDate() + dias);
+            const p2 = n => String(n).padStart(2, '0');
+            return `Sábado (${p2(d.getDate())}/${p2(d.getMonth() + 1)}), ${CONFIG.entregaHorario}`;
+        }
+
+        function renderFreteBanner() {
+            const ok = temFreteGratis();
+            const est = document.getElementById('delivery-estimate');
+            const hint = document.getElementById('cart-ship-hint');
+            const el = document.getElementById('free-ship-banner');
+            if (est) est.innerText = textoEntrega();
+            if (hint) {
+                hint.innerText = ok ? 'Frete grátis garantido!' : 'Combo de 10 = frete grátis';
+                hint.className = 'text-[10px] font-semibold ' + (ok ? 'text-emerald-600' : 'text-amber-600');
+            }
+            if (el) {
+                const pct = ok ? 100 : (cartCombos.length ? 50 : 0);
+                el.innerHTML = ok
+                    ? `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-2"><p class="font-bold text-emerald-900"><i class="fa-solid fa-truck-fast"></i> Frete grátis garantido pelo Combo de 10!</p><div class="h-2 bg-stone-200 rounded-full overflow-hidden"><div class="h-full bg-emerald-500" style="width:${pct}%"></div></div></div>`
+                    : `<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs space-y-2"><p class="font-bold text-amber-900"><i class="fa-solid fa-truck-fast"></i> Peça um Combo de 10 marmitas (350g ou 500g) e ganhe frete grátis!</p><div class="h-2 bg-stone-200 rounded-full overflow-hidden"><div class="h-full bg-amber-500" style="width:${pct}%"></div></div><div class="flex gap-2"><button type="button" onclick="closeCheckoutModal();openFlavorsModal('combo-10-350g')" class="flex-1 bg-amber-500 text-stone-900 font-bold py-1.5 rounded-lg">+ Combo 10 (350g)</button><button type="button" onclick="closeCheckoutModal();openFlavorsModal('combo-10-500g')" class="flex-1 bg-amber-500 text-stone-900 font-bold py-1.5 rounded-lg">+ Combo 10 (500g)</button></div></div>`;
+            }
+            atualizarPixBox();
+        }
+
+        function duplicarCombo(i) {
+            const c = cartCombos[i];
+            if (!c) return;
+            cartCombos.splice(i + 1, 0, { ...c, cartId: Date.now().toString() });
+            updateCartUI();
+            animarCarrinho();
+        }
+
+        function montagemAutomatica() {
+            selectedFlavors = {};
+            const lista = availableFlavors.filter(f => f.tag === currentEditingCombo.type)
+                .sort(() => Math.random() - 0.5);
+            for (let i = 0; i < currentEditingCombo.qty; i++) {
+                const f = lista[i % lista.length];
+                selectedFlavors[f.id] = (selectedFlavors[f.id] || 0) + 1;
+            }
+            renderFlavorsSelectionList();
+            updateFlavorSelectionState();
+        }
+
+        function animarCarrinho() {
+            const el = document.getElementById('cart-icon-wrap');
+            if (!el) return;
+            el.classList.remove('cart-bump');
+            void el.offsetWidth;
+            el.classList.add('cart-bump');
+        }
+
+        function atualizarIconeTema() {
+            const b = document.getElementById('theme-btn');
+            if (b) b.innerHTML = document.documentElement.classList.contains('dark')
+                ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        }
+
+        function alternarTema() {
+            const dark = document.documentElement.classList.toggle('dark');
+            try { localStorage.setItem('tema', dark ? 'dark' : 'light'); } catch (e) {}
+            atualizarIconeTema();
+        }
+
+        function atualizarPixBox() {
+            const box = document.getElementById('pix-container');
+            if (!box) return;
+            const pix = document.getElementById('cust-payment').value === 'Pix';
+            box.classList.toggle('hidden', !pix);
+            if (pix) {
+                const sub = cartCombos.reduce((sum, i) => sum + i.price, 0);
+                const fe = freteEfetivo();
+                document.getElementById('pix-chave').innerText = CONFIG.pixChave;
+                document.getElementById('pix-valor').innerText = 'R$ ' + (sub + (fe || 0)).toFixed(2).replace('.', ',');
+            }
+        }
+
+        async function copiarPix() {
+            try { await navigator.clipboard.writeText(CONFIG.pixChave); alert('Chave Pix copiada!'); }
+            catch (e) { alert('Copie manualmente: ' + CONFIG.pixChave); }
+        }
 
         /* --- CONTADOR REGRESSIVO: sempre até a próxima sexta, 23:59:59 --- */
         function iniciarContadorRegressivo() {
@@ -591,9 +738,9 @@
 
         const combos = [
             { id: 'combo-5-350g', name: "Combo 5 Marmitas - 350g", qty: 5, price: 100.00, description: "Escolha 5 marmitas tradicionais de 350g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional", destaque: true },
-            { id: 'combo-10-350g', name: "Combo 10 Marmitas - 350g", qty: 10, price: 200.00, description: "Escolha 10 marmitas tradicionais de 350g variadas para a sua semana.", image: "Combo 10.1.png", type: "Tradicional", destaque: false },
+            { id: 'combo-10-350g', freteGratis: true, name: "Combo 10 Marmitas - 350g", qty: 10, price: 200.00, description: "Escolha 10 marmitas tradicionais de 350g variadas para a sua semana.", image: "Combo 10.1.png", type: "Tradicional", destaque: false },
             { id: 'combo-5-500g', name: "Combo 5 Marmitas - 500g", qty: 5, price: 125.00, description: "Escolha 5 marmitas tradicionais de 500g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional", destaque: false },
-            { id: 'combo-10-500g', name: "Combo 10 Marmitas - 500g", qty: 10, price: 250.00, description: "Escolha 10 marmitas tradicionais de 500g variadas para a sua semana.", image: "Combo 10.png", type: "Tradicional", destaque: false },
+            { id: 'combo-10-500g', freteGratis: true, name: "Combo 10 Marmitas - 500g", qty: 10, price: 250.00, description: "Escolha 10 marmitas tradicionais de 500g variadas para a sua semana.", image: "Combo 10.png", type: "Tradicional", destaque: false },
             { id: 'combo-5-300g-fit', name: "Combo 5 Marmitas FIT - 300g", qty: 5, price: 130.00, description: "Escolha 5 marmitas da nossa linha fit leve de 300g.", image: "Combo 5.1.png", type: "Linha Fit", destaque: true },
             { id: 'combo-10-300g-fit', name: "Combo 10 Marmitas FIT - 300g", qty: 10, price: 260.00, description: "Escolha 10 marmitas da nossa linha fit leve de 300g variadas.", image: "Combo 10.1.png", type: "Linha Fit", destaque: false }
         ];
@@ -635,7 +782,7 @@
                 const card = document.createElement('div');
                 card.className = "bg-white p-3 rounded-xl border border-stone-200 flex gap-3 items-center shadow-sm";
                 card.innerHTML = `
-                    <img src="${flavor.img}" alt="${flavor.name}" class="w-16 h-16 rounded-lg object-cover shrink-0">
+                    <img loading="lazy" decoding="async" src="${flavor.img}" alt="${flavor.name}" class="w-16 h-16 rounded-lg object-cover shrink-0">
                     <div class="flex-1">
                         <span class="text-[9px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-2 py-0.5 rounded">${flavor.tag}</span>
                         <h4 class="font-bold text-stone-800 text-xs mt-0.5">${flavor.name}</h4>
@@ -655,7 +802,7 @@
                 card.innerHTML = `
                     <div>
                         <div class="h-44 w-full overflow-hidden relative">
-                            <img src="${combo.image}" alt="${combo.name}" class="w-full h-full object-cover">
+                            <img loading="lazy" decoding="async" src="${combo.image}" alt="${combo.name}" class="w-full h-full object-cover">
                             <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-stone-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
                                 ${combo.qty} Marmitas (${combo.type})
                             </span>
@@ -763,10 +910,12 @@
                 name: currentEditingCombo.name,
                 price: currentEditingCombo.price,
                 qty: currentEditingCombo.qty,
+                freteGratis: !!currentEditingCombo.freteGratis,
                 flavorsSummary: summaryFlavors
             };
 
             cartCombos.push(cartItem);
+            animarCarrinho();
             closeFlavorsModal();
             updateCartUI();
         }
@@ -784,7 +933,8 @@
             countEl.innerText = totalCount;
 
             const subtotalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
-            const shippingFeeToDisplay = currentShippingFee !== null ? currentShippingFee : 0;
+            const feEf = freteEfetivo();
+            const shippingFeeToDisplay = feEf !== null ? feEf : 0;
             const totalPrice = subtotalPrice + shippingFeeToDisplay;
 
             totalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
@@ -792,7 +942,11 @@
 
             if (shippingEl) {
                 if (currentShippingFee !== null) {
-                    shippingEl.innerText = `R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`;
+                    if (temFreteGratis()) {
+                        shippingEl.innerHTML = `<s class="text-stone-400 font-normal">R$ ${currentShippingFee.toFixed(2).replace('.', ',')}</s> <span class="text-emerald-600">GRÁTIS</span>`;
+                    } else {
+                        shippingEl.innerText = `R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`;
+                    }
                     shippingEl.className = "font-bold text-stone-800";
                 } else {
                     shippingEl.innerText = "Clique em calcular frete";
@@ -800,6 +954,7 @@
                 }
             }
 
+            renderFreteBanner();
             if (summaryTotalEl) summaryTotalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
 
             if (totalCount > 0) {
@@ -818,7 +973,7 @@
                         <p class="text-[10px] text-stone-500 mt-0.5"><span class="font-semibold">Sabores:</span> ${item.flavorsSummary}</p>
                         <p class="text-xs font-bold text-brand-accent mt-1">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
                     </div>
-                    <button onclick="removeCartItem(${index})" class="text-stone-400 hover:text-red-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    <div class="flex flex-col items-center gap-1"><button onclick="duplicarCombo(${index})" title="Duplicar combo" class="text-stone-400 hover:text-emerald-600 p-1"><i class="fa-regular fa-copy text-xs"></i></button><button onclick="removeCartItem(${index})" title="Remover" class="text-stone-400 hover:text-red-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button></div>
                 `;
                 container.appendChild(div);
             });
@@ -844,6 +999,7 @@
         function toggleTrocoField() {
             const payment = document.getElementById('cust-payment').value;
             const trocoContainer = document.getElementById('troco-container');
+            atualizarPixBox();
             if (payment === 'Dinheiro') {
                 trocoContainer.classList.remove('hidden');
             } else {
@@ -893,7 +1049,7 @@
             }
 
             if (historico.itensCarrinho && historico.itensCarrinho.length > 0) {
-                cartCombos = [...historico.itensCarrinho];
+                cartCombos = historico.itensCarrinho.map(i => ({ ...i, freteGratis: !!(combos.find(c => c.id === i.comboId) || {}).freteGratis }));
                 updateCartUI();
             }
 
@@ -948,8 +1104,11 @@
             const eNote = String.fromCodePoint(0x1F4D1);
             const eSparkles = String.fromCodePoint(0x2728);
 
+            const agora = new Date();
+            const p2 = n => String(n).padStart(2, '0');
+            const numPedido = `${p2(agora.getDate())}${p2(agora.getMonth() + 1)}-${p2(agora.getHours())}${p2(agora.getMinutes())}${p2(agora.getSeconds())}`;
             let lines = [];
-            lines.push(`${ePlate} *NOVO PEDIDO - TEMPERO DA ILMA* ${ePlate}`);
+            lines.push(`${ePlate} *NOVO PEDIDO #${numPedido} - TEMPERO DA ILMA* ${ePlate}`);
             lines.push(``);
             lines.push(`${eUser} *Cliente:* ${name}`);
             lines.push(`${ePhone} *Telefone:* ${phone}`);
@@ -971,15 +1130,26 @@
             });
 
             const subtotalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
-            const totalPrice = subtotalPrice + currentShippingFee;
+            const feFinal = freteEfetivo();
+            const totalPrice = subtotalPrice + feFinal;
+
+            const tot = {};
+            cartCombos.forEach(it => it.flavorsSummary.split(', ').forEach(sv => {
+                const m = sv.match(/^(\d+)x (.+)$/);
+                if (m) tot[m[2]] = (tot[m[2]] || 0) + parseInt(m[1], 10);
+            }));
+            lines.push(``);
+            lines.push(`${eNote} *TOTAL POR SABOR*`);
+            Object.entries(tot).forEach(([n, q]) => lines.push(`- ${q}x ${n}`));
 
             lines.push(``);
             lines.push(`${eMoney} *RESUMO FINANCEIRO*`);
             lines.push(`Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
-            lines.push(`${eDelivery} Taxa de Entrega (${bairro}): R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`);
+            lines.push(`${eDelivery} Taxa de Entrega (${bairro}): ${feFinal === 0 ? 'GRÁTIS (Combo de 10)' : 'R$ ' + feFinal.toFixed(2).replace('.', ',')}`);
             lines.push(`*TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
             lines.push(``);
             lines.push(`${eCard} *Forma de Pagamento:* ${payment}`);
+            lines.push(`${eDelivery} *Entrega prevista:* ${textoEntrega()}`);
 
             if (payment === 'Dinheiro' && troco) {
                 lines.push(`*Troco para:* ${troco}`);
@@ -1002,6 +1172,10 @@
             renderFlavorsDisplay();
             renderCombos();
             verificarUltimoCliente();
+            aplicarModoFechado();
+            atualizarIconeTema();
+            renderFreteBanner();
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
         };
     </script>
 </body>
