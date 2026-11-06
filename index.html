@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tempero da Ilma - Cardápio de Combos</title>
     <!-- Tailwind CSS CDN -->
@@ -722,31 +723,48 @@
             fullAddress += ` - Bairro: ${bairro}, Salvador - BA`;
             if(cep) fullAddress += ` (CEP: ${cep})`;
 
-            // MONTAGEM DA MENSAGEM DO WHATSAPP COM EMOJIS SEGUROS (UTF-8 via encodeURIComponent)
+            // DEFINIÇÃO UNICODE SEGURA DOS EMOJIS (IMPOSSÍVEL CORROMPER OU VIRAR '?')
+            const ePlate = "\u{1F37D}\u{FE0F}";
+            const eUser = "\u{1F464}";
+            const ePhone = "\u{1F4DE}";
+            const ePin = "\u{1F40D}"; // ou \u{1F4A1} / \u{1F4CE}
+            const eMapPin = "\u{1F30F}";
+            const eMemo = "\u{1F4CB}";
+            const eBox = "\u{1F4E6}";
+            const eStew = "\u{1F372}";
+            const eBullet = "\u{25AA}\u{FE0F}";
+            const eMoney = "\u{1F4B0}";
+            const eSmallWhite = "\u{25AB}\u{FE0F}";
+            const eScooter = "\u{1F6F5}";
+            const eDollar = "\u{1F4B5}";
+            const eCard = "\u{1F4B3}";
+            const ePencil = "\u{1F4DD}";
+            const eSparkles = "\u{2728}";
+
             let lines = [];
-            lines.push(`📝 *NOVO PEDIDO - TEMPERO DA ILMA* 📝`);
+            lines.push(`${ePlate} *NOVO PEDIDO - TEMPERO DA ILMA* ${ePlate}`);
             lines.push(``);
-            lines.push(`👤 *Cliente:* ${name}`);
-            lines.push(`📱 *Telefone:* ${phone}`);
-            lines.push(`📌 *Endereço:* ${fullAddress}`);
+            lines.push(`${eUser} *Cliente:* ${name}`);
+            lines.push(`${ePhone} *Telefone:* ${phone}`);
+            lines.push(`📍 *Endereço:* ${fullAddress}`);
             
             if(lastCalculatedLat && lastCalculatedLng) {
-                lines.push(`🗺️ *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${lastCalculatedLat},${lastCalculatedLng}`);
+                lines.push(`${eMapPin} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${lastCalculatedLat},${lastCalculatedLng}`);
             } else {
-                lines.push(`🗺️ *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`)}`);
+                lines.push(`${eMapPin} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`)}`);
             }
 
             lines.push(``);
-            lines.push(`🗒️ *--- COMANDA DIGITAL ---* 🗒️`);
+            lines.push(`${eMemo} *--- COMANDA DIGITAL ---* ${eMemo}`);
 
             cartCombos.forEach((item, index) => {
                 lines.push(``);
-                lines.push(`📦 *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})`);
-                lines.push(`   🍱 *Sabores Escolhidos:*`);
+                lines.push(`${eBox} *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})`);
+                lines.push(`   ${eStew} *Sabores Escolhidos:*`);
                 
                 const saboresArray = item.flavorsSummary.split(', ');
                 saboresArray.forEach(sabor => {
-                    lines.push(`   ▪️ ${sabor}`);
+                    lines.push(`   ${eBullet} ${sabor}`);
                 });
             });
 
@@ -754,22 +772,22 @@
             const totalPrice = subtotalPrice + currentShippingFee;
 
             lines.push(``);
-            lines.push(`💰 *RESUMO FINANCEIRO*`);
-            lines.push(`💲 Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
-            lines.push(`🚘 Taxa de Entrega: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`);
-            lines.push(`💸 *TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
+            lines.push(`${eMoney} *RESUMO FINANCEIRO*`);
+            lines.push(`${eSmallWhite} Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
+            lines.push(`${eScooter} Taxa de Entrega: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`);
+            lines.push(`${eDollar} *TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
             lines.push(``);
-            lines.push(`💳 *Forma de Pagamento:* ${payment}`);
+            lines.push(`${eCard} *Forma de Pagamento:* ${payment}`);
             
             if(payment === 'Dinheiro' && troco) {
-                lines.push(`💵 *Troco para:* ${troco}`);
+                lines.push(`${eDollar} *Troco para:* ${troco}`);
             }
             if(obs) {
-                lines.push(`📝 *Observações:* ${obs}`);
+                lines.push(`${ePencil} *Observações:* ${obs}`);
             }
             
             lines.push(``);
-            lines.push(`_Pedido gerado automaticamente pelo cardápio digital_ ✨`);
+            lines.push(`_Pedido gerado automaticamente pelo cardápio digital_ ${eSparkles}`);
 
             const fullText = lines.join('\n');
             const whatsappUrl = `https://wa.me/5571994125510?text=${encodeURIComponent(fullText)}`;
