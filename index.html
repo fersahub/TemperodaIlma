@@ -390,7 +390,7 @@
                     currentShippingFee = obterTabelaFrete(distanciaRota);
                     updateCartUI();
                     
-                    statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculated: R$ ${currentShippingFee.toFixed(2).replace('.', ',')} (${distanciaRota.toFixed(1)} km)</span>`;
+                    statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado: R$ ${currentShippingFee.toFixed(2).replace('.', ',')} (${distanciaRota.toFixed(1)} km)</span>`;
                 } else {
                     const queryFallback = `${rua}, ${bairro}, Salvador, Bahia, Brasil`;
                     const resFb = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryFallback)}&limit=1`);
@@ -722,7 +722,7 @@
             fullAddress += ` - Bairro: ${bairro}, Salvador - BA`;
             if(cep) fullAddress += ` (CEP: ${cep})`;
 
-            // MONTAGEM DA MENSAGEM DO WHATSAPP
+            // MONTAGEM DA MENSAGEM DO WHATSAPP COM EMOJIS SEGUROS (UTF-8 via encodeURIComponent)
             let lines = [];
             lines.push(`🍽️ *NOVO PEDIDO - TEMPERO DA ILMA* 🍽️`);
             lines.push(``);
