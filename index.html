@@ -454,16 +454,11 @@
 
         /* --- CONFIGURAÇÕES (edite aqui) --- */
         const CONFIG = {
-            pixChave: 'SUA-CHAVE-PIX-AQUI',
-            freteGratisMinimo: 200 // valor mínimo em combos (sem frete) para ganhar frete grátis
+            pixChave: 'SUA-CHAVE-PIX-AQUI'
         };
 
-        function subtotalCarrinho() { return cartCombos.reduce((sum, i) => sum + i.price, 0); }
-
-        // Frete grátis: Combo de 10 (350g/500g) OU subtotal a partir do valor mínimo
-        function temFreteGratis() {
-            return cartCombos.some(c => c.freteGratis) || subtotalCarrinho() >= CONFIG.freteGratisMinimo;
-        }
+        // Frete grátis: somente com Combo de 10 (350g ou 500g)
+        function temFreteGratis() { return cartCombos.some(c => c.freteGratis); }
 
         function freteEfetivo() {
             if (currentShippingFee === null) return null;
@@ -489,19 +484,15 @@
             const ok = temFreteGratis();
             const hint = document.getElementById('cart-ship-hint');
             const el = document.getElementById('free-ship-banner');
-            const min = CONFIG.freteGratisMinimo;
-            const sub = subtotalCarrinho();
-            const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
-            const falta = Math.max(0, min - sub);
-            const pct = ok ? 100 : Math.min(99, Math.round(sub / min * 100));
+            const pct = ok ? 100 : (cartCombos.length ? 50 : 0);
             if (hint) {
-                hint.innerText = ok ? 'Frete grátis garantido!' : `Faltam ${fmt(falta)} para frete grátis`;
+                hint.innerText = ok ? 'Frete grátis garantido!' : 'Combo de 10 = frete grátis';
                 hint.className = 'text-[10px] font-semibold ' + (ok ? 'text-emerald-600' : 'text-amber-600');
             }
             if (el) {
                 el.innerHTML = ok
-                    ? `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-2"><p class="font-bold text-emerald-900"><i class="fa-solid fa-truck-fast"></i> Parabéns! Você ganhou frete grátis!</p><div class="h-2 bg-stone-200 rounded-full overflow-hidden"><div class="h-full bg-emerald-500" style="width:100%"></div></div></div>`
-                    : `<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs space-y-2"><p class="font-bold text-amber-900"><i class="fa-solid fa-truck-fast"></i> Faltam ${fmt(falta)} para ganhar frete grátis!</p><p class="text-stone-600">Frete grátis em pedidos a partir de ${fmt(min)} ou com um Combo de 10 (350g ou 500g).</p><div class="h-2 bg-stone-200 rounded-full overflow-hidden"><div class="h-full bg-amber-500" style="width:${pct}%"></div></div>${cartCombos.length ? `<button type="button" onclick="duplicarCombo(cartCombos.length - 1)" class="w-full bg-amber-500 text-stone-900 font-bold py-1.5 rounded-lg">Duplicar último combo (+${fmt(cartCombos[cartCombos.length - 1].price)})</button>` : ''}<div class="flex gap-2"><button type="button" onclick="closeCheckoutModal();openFlavorsModal('combo-10-350g')" class="flex-1 bg-amber-500 text-stone-900 font-bold py-1.5 rounded-lg">+ Combo 10 (350g)</button><button type="button" onclick="closeCheckoutModal();openFlavorsModal('combo-10-500g')" class="flex-1 bg-amber-500 text-stone-900 font-bold py-1.5 rounded-lg">+ Combo 10 (500g)</button></div></div>`;
+                    ? `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-2"><p class="font-bold text-emerald-900"><i class="fa-solid fa-truck-fast"></i> Frete grátis garantido pelo Combo de 10!</p><div class="h-2 bg-stone-200 rounded-full overflow-hidden"><div class="h-full bg-emerald-500" style="width:100%"></div></div></div>`
+                    : `<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs space-y-2"><p class="font-bold text-amber-900"><i class="fa-solid fa-truck-fast"></i> Peça um Combo de 10 marmitas (350g ou 500g) e ganhe frete grátis!</p><div class="h-2 bg-stone-200 rounded-full overflow-hidden"><div class="h-full bg-amber-500" style="width:${pct}%"></div></div><div class="flex gap-2"><button type="button" onclick="closeCheckoutModal();openFlavorsModal('combo-10-350g')" class="flex-1 bg-amber-500 text-stone-900 font-bold py-1.5 rounded-lg">+ Combo 10 (350g)</button><button type="button" onclick="closeCheckoutModal();openFlavorsModal('combo-10-500g')" class="flex-1 bg-amber-500 text-stone-900 font-bold py-1.5 rounded-lg">+ Combo 10 (500g)</button></div></div>`;
             }
             atualizarPixBox();
         }
