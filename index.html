@@ -62,6 +62,12 @@
         </div>
     </header>
 
+    <!-- OPÇÃO 3: CONTADOR REGRESSIVO DE PEDIDOS -->
+    <div id="countdown-bar" class="bg-amber-500 text-stone-900 px-4 py-2 text-center text-xs font-bold border-b border-amber-600 shadow-inner flex items-center justify-center gap-2">
+        <i class="fa-solid fa-clock animate-pulse"></i>
+        <span>Encomendas para entrega neste Sábado encerram em: <span id="timer-text" class="font-extrabold underline decoration-stone-900">Carregando...</span></span>
+    </div>
+
     <!-- HERO SECTION -->
     <section class="bg-gradient-to-r from-stone-900 to-stone-800 text-white py-8 px-4 relative">
         <div class="max-w-4xl mx-auto text-center space-y-2">
@@ -90,14 +96,29 @@
             </button>
         </div>
 
+        <!-- SEÇÃO DE PRATOS COM FILTRO RÁPIDO (OPÇÃO 4) -->
         <section class="space-y-4">
-            <div class="border-b border-stone-200 pb-2 flex items-center justify-between">
-                <h3 class="font-bold text-lg text-stone-800 flex items-center gap-2">
-                    <i class="fa-solid fa-fire text-amber-500"></i> Cardápio da Semana
-                </h3>
-                <span class="text-xs text-stone-500 bg-stone-200 px-2.5 py-1 rounded-full font-medium">Apenas consulta</span>
+            <div class="border-b border-stone-200 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="font-bold text-lg text-stone-800 flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-amber-500"></i> Cardápio da Semana
+                    </h3>
+                    <p class="text-xs text-stone-500">Consulte os pratos disponíveis nesta semana. Feitos sob demanda:</p>
+                </div>
+
+                <!-- BOTOES DE FILTRO RÁPIDO -->
+                <div class="flex items-center gap-1.5 bg-stone-200 p-1 rounded-xl self-start sm:self-auto">
+                    <button onclick="filtrarPratos('Todos')" id="filter-btn-Todos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-stone-800 shadow-sm">
+                        Todos
+                    </button>
+                    <button onclick="filtrarPratos('Tradicional')" id="filter-btn-Tradicional" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">
+                        Tradicional
+                    </button>
+                    <button onclick="filtrarPratos('Linha Fit')" id="filter-btn-Linha Fit" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">
+                        Linha Fit
+                    </button>
+                </div>
             </div>
-            <p class="text-xs text-stone-500">Consulte os pratos disponíveis nesta semana. Todos os pratos são feitos sob demanda:</p>
 
             <div id="flavors-display-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
         </section>
@@ -398,6 +419,69 @@
         let cartCombos = []; 
         let currentEditingCombo = null;
         let selectedFlavors = {}; 
+        let currentFlavorFilter = 'Todos';
+
+        /* --- OPÇÃO 3: LÓGICA DO CONTADOR REGRESSIVO --- */
+        function iniciarContadorRegressivo() {
+            function atualizarTimer() {
+                const now = new Date();
+                let deadline = new Date(now);
+                
+                // Define a meta para a próxima sexta-feira às 18:00
+                const dayOfWeek = now.getDay(); // 0: Dom, 1: Seg, ..., 5: Sex, 6: Sáb
+                let daysUntilFriday = (5 - dayOfWeek + 7) % 7;
+                
+                // Se já for sexta após as 18:00 ou sábado, aponta para a próxima sexta
+                if (dayOfWeek === 5 && now.getHours() >= 18) {
+                    daysUntilFriday = 7;
+                } else if (dayOfWeek === 6) {
+                    daysUntilFriday = 6;
+                }
+
+                deadline.setDate(now.getDate() + daysUntilFriday);
+                deadline.setHours(18, 0, 0, 0);
+
+                const diff = deadline - now;
+                const timerText = document.getElementById('timer-text');
+
+                if (diff <= 0) {
+                    timerText.innerText = "Encerrados para esta semana!";
+                    return;
+                }
+
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const m = Math.floor((diff / 1000 / 60) % 60);
+                const s = Math.floor((diff / 1000) % 60);
+
+                let text = "";
+                if (d > 0) text += `${d}d `;
+                text += `${h.toString().padStart(2, '0')}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+                
+                timerText.innerText = text;
+            }
+
+            atualizarTimer();
+            setInterval(atualizarTimer, 1000);
+        }
+
+        /* --- OPÇÃO 4: LÓGICA DO FILTRO RÁPIDO DE PRATOS --- */
+        function filtrarPratos(tag) {
+            currentFlavorFilter = tag;
+            
+            // Atualiza botões
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-stone-800', 'shadow-sm');
+                btn.classList.add('text-stone-600');
+            });
+            const activeBtn = document.getElementById(`filter-btn-${tag}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-white', 'text-stone-800', 'shadow-sm');
+                activeBtn.classList.remove('text-stone-600');
+            }
+
+            renderFlavorsDisplay();
+        }
 
         function mascaraCep(input) {
             let v = input.value.replace(/\D/g, '');
@@ -454,7 +538,7 @@
                 const option = selectBairro.options[selectBairro.selectedIndex];
                 currentShippingFee = parseFloat(option.getAttribute('data-taxa') || 0);
                 updateCartUI();
-                statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado para ${option.value}: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}</span>`;
+                statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculated para ${option.value}: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}</span>`;
                 return;
             }
 
@@ -553,7 +637,12 @@
         function renderFlavorsDisplay() {
             const grid = document.getElementById('flavors-display-grid');
             grid.innerHTML = '';
-            availableFlavors.forEach(flavor => {
+            
+            const filtered = currentFlavorFilter === 'Todos' 
+                ? availableFlavors 
+                : availableFlavors.filter(f => f.tag === currentFlavorFilter);
+
+            filtered.forEach(flavor => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-3 rounded-xl border border-stone-200 flex gap-3 items-center shadow-sm";
                 card.innerHTML = `
@@ -773,7 +862,6 @@
             }
         }
 
-        /* --- SALVAMENTO E RECUPERAÇÃO DO HISTÓRICO COMPLETO --- */
         function salvarUltimoCliente(dados) {
             const historicoCompleto = {
                 cliente: dados,
@@ -795,7 +883,6 @@
                 const historico = JSON.parse(salvo);
                 const dados = historico.cliente || {};
                 
-                // Preenche dados do cliente
                 document.getElementById('cust-name').value = dados.name || '';
                 document.getElementById('cust-phone').value = dados.phone || '';
                 document.getElementById('cust-cep').value = dados.cep || '';
@@ -806,7 +893,6 @@
                 document.getElementById('cust-numero').value = dados.numero || '';
                 document.getElementById('cust-comp').value = dados.comp || '';
 
-                // Restaura o carrinho com os combos anteriores
                 if (historico.itensCarrinho && historico.itensCarrinho.length > 0) {
                     cartCombos = [...historico.itensCarrinho];
                     updateCartUI();
@@ -844,7 +930,6 @@
                 return;
             }
 
-            // Salva o histórico completo (dados + itens) antes de direcionar ao WhatsApp
             salvarUltimoCliente({ name, phone, cep, bairro, rua, numero, comp });
 
             let fullAddress = `${rua}, nº ${numero}`;
@@ -915,6 +1000,7 @@
 
         window.onload = function() {
             checkBusinessStatus();
+            iniciarContadorRegressivo();
             renderFlavorsDisplay();
             renderCombos();
             verificarUltimoCliente();
