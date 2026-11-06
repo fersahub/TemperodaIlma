@@ -271,6 +271,8 @@
         const ORIGEM_LNG = -38.4775149;
         
         let currentShippingFee = null;
+        let lastCalculatedLat = null;
+        let lastCalculatedLng = null;
 
         function mascaraCep(input) {
             let v = input.value.replace(/\D/g, '');
@@ -280,7 +282,6 @@
             input.value = v;
         }
 
-        // ViaCEP padrão (Entrada: CEP -> Saída: Rua e Bairro)
         async function consultarCepPorNumero() {
             let cep = document.getElementById('cust-cep').value.replace(/\D/g, '');
             if (cep.length !== 8) return;
@@ -304,7 +305,6 @@
             }
         }
 
-        // Botão opcional para buscar o CEP se o cliente só souber a rua e bairro
         async function buscarCepPorEndereco() {
             const rua = document.getElementById('cust-rua').value.trim();
             const bairro = document.getElementById('cust-bairro').value.trim();
@@ -381,10 +381,10 @@
                 const data = await response.json();
 
                 if (data && data.length > 0) {
-                    const destLat = parseFloat(data[0].lat);
-                    const destLng = parseFloat(data[0].lon);
+                    lastCalculatedLat = parseFloat(data[0].lat);
+                    lastCalculatedLng = parseFloat(data[0].lon);
                     
-                    const distanciaDireta = calcularHaversineKM(ORIGEM_LAT, ORIGEM_LNG, destLat, destLng);
+                    const distanciaDireta = calcularHaversineKM(ORIGEM_LAT, ORIGEM_LNG, lastCalculatedLat, lastCalculatedLng);
                     const distanciaRota = distanciaDireta * 1.25;
                     
                     currentShippingFee = obterTabelaFrete(distanciaRota);
@@ -397,9 +397,9 @@
                     const dataFb = await resFb.json();
 
                     if (dataFb && dataFb.length > 0) {
-                        const destLat = parseFloat(dataFb[0].lat);
-                        const destLng = parseFloat(dataFb[0].lon);
-                        const distanciaRota = calcularHaversineKM(ORIGEM_LAT, ORIGEM_LNG, destLat, destLng) * 1.25;
+                        lastCalculatedLat = parseFloat(dataFb[0].lat);
+                        lastCalculatedLng = parseFloat(dataFb[0].lon);
+                        const distanciaRota = calcularHaversineKM(ORIGEM_LAT, ORIGEM_LNG, lastCalculatedLat, lastCalculatedLng) * 1.25;
                         currentShippingFee = obterTabelaFrete(distanciaRota);
                         updateCartUI();
                         statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado: R$ ${currentShippingFee.toFixed(2).replace('.', ',')} (~${distanciaRota.toFixed(1)} km)</span>`;
@@ -717,6 +717,16 @@
             message += `*Cliente:* ${name}%0A`;
             message += `*Telefone:* ${phone}%0A`;
             message += `*Endereço:* ${fullAddress}%0A`;
+            
+            // Adiciona o link do Google Maps na mensagem se a coordenada foi calculada
+            if(lastCalculatedLat && lastCalculatedLng) {
+                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lastCalculatedLat},${lastCalculatedLng}`;
+                message += `*Localização no Maps:* ${mapsUrl}%0A`;
+            } else {
+                const mapsQuery = encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`);
+                message += `*Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${mapsQuery}%0A`;
+            }
+
             message += `%0A*ITENS DO PEDIDO:*%0A`;
 
             cartCombos.forEach((item, index) => {
