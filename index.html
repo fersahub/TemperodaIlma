@@ -189,7 +189,7 @@
                     </div>
                     <div class="flex justify-between text-stone-600">
                         <span>Taxa de Entrega:</span>
-                        <span id="summary-shipping-price" class="font-bold text-amber-600">A calcular</span>
+                        <span id="summary-shipping-price" class="font-bold text-amber-600">Clique em calcular frete</span>
                     </div>
                     <div class="pt-2 border-t border-stone-200 flex justify-between items-center font-bold text-stone-800 text-base">
                         <span>Total do Pedido:</span>
@@ -216,17 +216,119 @@
                         </div>
                     </div>
 
-                    <!-- ENDEREÇO FLEXÍVEL -->
+                    <!-- ENDEREÇO E SELEÇÃO DE BAIRRO LIMPA -->
                     <div class="space-y-3 bg-stone-50 p-3 rounded-xl border border-stone-200">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs font-semibold text-stone-700 mb-1">CEP (Opcional)</label>
-                                <input type="text" id="cust-cep" maxlength="9" placeholder="00000-000" onkeyup="mascaraCep(this)" onblur="consultarCepPorNumero()" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-stone-700 mb-1">Bairro *</label>
-                                <input type="text" id="cust-bairro" required placeholder="Digite o bairro" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-700 mb-1">Bairro para Entrega (Salvador) *</label>
+                            <select id="cust-bairro" required class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-xs font-medium focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                                <option value="" data-taxa="0">-- Selecione o seu Bairro --</option>
+                                
+                                <optgroup label="São Caetano / Liberdade">
+                                    <option value="São Caetano" data-taxa="7.00">São Caetano</option>
+                                    <option value="Boa Vista de São Caetano" data-taxa="7.00">Boa Vista de São Caetano</option>
+                                    <option value="Capelinha" data-taxa="7.00">Capelinha</option>
+                                    <option value="Calafate" data-taxa="7.00">Calafate</option>
+                                    <option value="Fazenda Grande do Retiro" data-taxa="7.00">Fazenda Grande do Retiro</option>
+                                    <option value="Largo do Tanque" data-taxa="7.00">Largo do Tanque</option>
+                                    <option value="Liberdade" data-taxa="7.00">Liberdade</option>
+                                    <option value="Retiro" data-taxa="7.00">Retiro</option>
+                                    <option value="IAPI" data-taxa="7.00">IAPI</option>
+                                    <option value="Curuzu" data-taxa="7.00">Curuzu</option>
+                                </optgroup>
+
+                                <optgroup label="Pirajá / Campinas / Marechal">
+                                    <option value="Pirajá" data-taxa="8.50">Pirajá</option>
+                                    <option value="Campinas de Pirajá" data-taxa="8.50">Campinas de Pirajá</option>
+                                    <option value="Marechal Rondon" data-taxa="8.50">Marechal Rondon</option>
+                                </optgroup>
+
+                                <optgroup label="Centro / Brotas">
+                                    <option value="Brotas" data-taxa="9.00">Brotas</option>
+                                    <option value="Campinas de Brotas" data-taxa="9.00">Campinas de Brotas</option>
+                                    <option value="Matatu" data-taxa="9.00">Matatu</option>
+                                    <option value="Vila Laura" data-taxa="9.00">Vila Laura</option>
+                                    <option value="Bonocô" data-taxa="9.00">Bonocô</option>
+                                    <option value="Nazaré" data-taxa="9.00">Nazaré</option>
+                                    <option value="Centro" data-taxa="9.00">Centro</option>
+                                    <option value="Campo Grande" data-taxa="9.00">Campo Grande</option>
+                                    <option value="Garcia" data-taxa="9.00">Garcia</option>
+                                    <option value="Barris" data-taxa="9.00">Barris</option>
+                                    <option value="Tororó" data-taxa="9.00">Tororó</option>
+                                    <option value="Graça" data-taxa="9.00">Graça</option>
+                                </optgroup>
+
+                                <optgroup label="Cidade Baixa & Itapagipe">
+                                    <option value="Calçada" data-taxa="10.00">Calçada</option>
+                                    <option value="Mares" data-taxa="10.00">Mares</option>
+                                    <option value="Roma" data-taxa="10.00">Roma</option>
+                                    <option value="Uruguai" data-taxa="10.00">Uruguai</option>
+                                    <option value="Massaranduba" data-taxa="10.00">Massaranduba</option>
+                                    <option value="Boa Viagem" data-taxa="10.00">Boa Viagem</option>
+                                    <option value="Ribeira" data-taxa="10.00">Ribeira</option>
+                                    <option value="Bonfim" data-taxa="10.00">Bonfim</option>
+                                    <option value="Monte Serrat" data-taxa="10.00">Monte Serrat</option>
+                                </optgroup>
+
+                                <optgroup label="Cabula / Imbuí / Pernambués">
+                                    <option value="Cabula" data-taxa="10.00">Cabula</option>
+                                    <option value="Saboeiro" data-taxa="10.00">Saboeiro</option>
+                                    <option value="Narandiba" data-taxa="10.00">Narandiba</option>
+                                    <option value="Pernambués" data-taxa="10.00">Pernambués</option>
+                                    <option value="Beiru / Tancredo Neves" data-taxa="10.00">Beiru / Tancredo Neves</option>
+                                    <option value="Doron" data-taxa="10.00">Doron</option>
+                                    <option value="Engomadeira" data-taxa="10.00">Engomadeira</option>
+                                    <option value="Mata Escura" data-taxa="10.00">Mata Escura</option>
+                                    <option value="Imbuí" data-taxa="10.00">Imbuí</option>
+                                    <option value="Stiep" data-taxa="10.00">Stiep</option>
+                                </optgroup>
+
+                                <optgroup label="Orla Central / Barra / Pituba">
+                                    <option value="Barra" data-taxa="12.00">Barra</option>
+                                    <option value="Ondina" data-taxa="12.00">Ondina</option>
+                                    <option value="Rio Vermelho" data-taxa="12.00">Rio Vermelho</option>
+                                    <option value="Federação" data-taxa="12.00">Federação</option>
+                                    <option value="Engenho Velho da Federação" data-taxa="12.00">Engenho Velho da Federação</option>
+                                    <option value="Amaralina" data-taxa="12.00">Amaralina</option>
+                                    <option value="Pituba" data-taxa="12.00">Pituba</option>
+                                    <option value="Itaigara" data-taxa="12.00">Itaigara</option>
+                                    <option value="Horto Florestal" data-taxa="12.00">Horto Florestal</option>
+                                    <option value="Costa Azul" data-taxa="12.00">Costa Azul</option>
+                                </optgroup>
+
+                                <optgroup label="Miolo / Pau da Lima / Cajazeiras">
+                                    <option value="Pau da Lima" data-taxa="13.00">Pau da Lima</option>
+                                    <option value="São Marcos" data-taxa="13.00">São Marcos</option>
+                                    <option value="Sete de Abril" data-taxa="13.00">Sete de Abril</option>
+                                    <option value="Castelo Branco" data-taxa="13.00">Castelo Branco</option>
+                                    <option value="Canabrava" data-taxa="13.00">Canabrava</option>
+                                    <option value="Dom Avelar" data-taxa="13.00">Dom Avelar</option>
+                                    <option value="Cajazeiras (I a XI)" data-taxa="13.00">Cajazeiras (I a XI)</option>
+                                    <option value="Fazenda Grande (1 a 4)" data-taxa="13.00">Fazenda Grande (1 a 4)</option>
+                                    <option value="Boca da Mata" data-taxa="13.00">Boca da Mata</option>
+                                </optgroup>
+
+                                <optgroup label="Orla Norte / Itapuã / Paralela">
+                                    <option value="Boca do Rio" data-taxa="15.00">Boca do Rio</option>
+                                    <option value="Patamares" data-taxa="15.00">Patamares</option>
+                                    <option value="Piatã" data-taxa="15.00">Piatã</option>
+                                    <option value="Itapuã" data-taxa="15.00">Itapuã</option>
+                                    <option value="Stella Maris" data-taxa="15.00">Stella Maris</option>
+                                    <option value="Bairro da Paz" data-taxa="15.00">Bairro da Paz</option>
+                                    <option value="Mussurunga" data-taxa="15.00">Mussurunga</option>
+                                    <option value="São Cristóvão" data-taxa="15.00">São Cristóvão</option>
+                                    <option value="Jardim das Margaridas" data-taxa="15.00">Jardim das Margaridas</option>
+                                </optgroup>
+
+                                <optgroup label="Subúrbio Profundo & Valéria">
+                                    <option value="Lobato" data-taxa="15.00">Lobato</option>
+                                    <option value="Plataforma" data-taxa="15.00">Plataforma</option>
+                                    <option value="Periperi" data-taxa="15.00">Periperi</option>
+                                    <option value="Coutos" data-taxa="15.00">Coutos</option>
+                                    <option value="Fazenda Coutos" data-taxa="15.00">Fazenda Coutos</option>
+                                    <option value="Paripe" data-taxa="15.00">Paripe</option>
+                                    <option value="Valéria" data-taxa="15.00">Valéria</option>
+                                </optgroup>
+                            </select>
                         </div>
 
                         <div>
@@ -245,13 +347,10 @@
                             </div>
                         </div>
 
-                        <!-- BOTÕES DE BUSCAR CEP E CALCULAR FRETE -->
-                        <div class="grid grid-cols-2 gap-2 pt-1">
-                            <button type="button" onclick="buscarCepPorEndereco()" class="bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm text-xs">
-                                <i class="fa-solid fa-magnifying-glass text-xs"></i> Preencher CEP
-                            </button>
-                            <button type="button" onclick="calcularFretePorKm()" class="bg-amber-500 hover:bg-amber-600 text-stone-900 font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm text-xs">
-                                <i class="fa-solid fa-calculator text-xs"></i> Calcular Frete por KM
+                        <!-- BOTÃO DE CALCULAR FRETE -->
+                        <div class="pt-1">
+                            <button type="button" onclick="calcularFretePorBairroSelecionado()" class="w-full bg-amber-500 hover:bg-amber-600 text-stone-900 font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm text-xs">
+                                <i class="fa-solid fa-calculator text-xs"></i> Calcular Frete para o Bairro
                             </button>
                         </div>
                         <p id="shipping-calc-status" class="text-[11px] text-stone-500 text-center font-medium min-h-[16px]"></p>
@@ -288,152 +387,7 @@
     </div>
 
     <script>
-        const ORIGEM_LAT = -12.936212;
-        const ORIGEM_LNG = -38.4775149;
-        
         let currentShippingFee = null;
-        let lastCalculatedLat = null;
-        let lastCalculatedLng = null;
-
-        function mascaraCep(input) {
-            let v = input.value.replace(/\D/g, '');
-            if (v.length > 5) {
-                v = v.substring(0, 5) + '-' + v.substring(5, 8);
-            }
-            input.value = v;
-        }
-
-        async function consultarCepPorNumero() {
-            let cep = document.getElementById('cust-cep').value.replace(/\D/g, '');
-            if (cep.length !== 8) return;
-
-            const statusEl = document.getElementById('shipping-calc-status');
-            statusEl.innerHTML = `<span class="text-amber-600"><i class="fa-solid fa-spinner animate-spin"></i> Buscando endereço pelo ViaCEP...</span>`;
-
-            try {
-                let response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-                let data = await response.json();
-                
-                if (!data.erro) {
-                    if (data.bairro) document.getElementById('cust-bairro').value = data.bairro;
-                    if (data.logradouro) document.getElementById('cust-rua').value = data.logradouro;
-                    statusEl.innerHTML = `<span class="text-emerald-600 font-medium"><i class="fa-solid fa-check"></i> Endereço preenchido pelo ViaCEP! Clique em "Calcular Frete por KM".</span>`;
-                } else {
-                    statusEl.innerHTML = `<span class="text-red-500">CEP não encontrado no ViaCEP.</span>`;
-                }
-            } catch (err) {
-                statusEl.innerHTML = `<span class="text-red-500">Erro ao consultar ViaCEP.</span>`;
-            }
-        }
-
-        async function buscarCepPorEndereco() {
-            const rua = document.getElementById('cust-rua').value.trim();
-            const bairro = document.getElementById('cust-bairro').value.trim();
-            const statusEl = document.getElementById('shipping-calc-status');
-
-            if (!rua || !bairro) {
-                alert('Preencha ao menos a Rua e o Bairro para buscar o CEP.');
-                return;
-            }
-
-            statusEl.innerHTML = `<span class="text-amber-600"><i class="fa-solid fa-spinner animate-spin"></i> Buscando CEP correspondente...</span>`;
-
-            try {
-                const queryText = `${rua}, ${bairro}, Salvador, Bahia, Brasil`;
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryText)}&addressdetails=1&limit=1`;
-                
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data && data.length > 0 && data[0].address && data[0].address.postcode) {
-                    let postcode = data[0].address.postcode.replace(/\D/g, '');
-                    if (postcode.length === 8) {
-                        postcode = postcode.substring(0, 5) + '-' + postcode.substring(5, 8);
-                        document.getElementById('cust-cep').value = postcode;
-                        statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i> CEP preenchido com sucesso!</span>`;
-                    } else {
-                        statusEl.innerHTML = `<span class="text-amber-600">Endereço localizado, mas CEP não retornado.</span>`;
-                    }
-                } else {
-                    statusEl.innerHTML = `<span class="text-amber-600">CEP não localizado automaticamente, mas você pode prosseguir assim mesmo.</span>`;
-                }
-            } catch (err) {
-                statusEl.innerHTML = `<span class="text-red-500">Erro ao buscar CEP.</span>`;
-            }
-        }
-
-        function calcularHaversineKM(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-        }
-
-        function obterTabelaFrete(distanciaKm) {
-            if (distanciaKm <= 2.0) return 5.00;
-            if (distanciaKm <= 3.5) return 7.00;
-            if (distanciaKm <= 5.0) return 9.00;
-            if (distanciaKm <= 8.0) return 12.00;
-            if (distanciaKm <= 12.0) return 15.00;
-            return 20.00;
-        }
-
-        async function calcularFretePorKm() {
-            const rua = document.getElementById('cust-rua').value.trim();
-            const bairro = document.getElementById('cust-bairro').value.trim();
-            const numero = document.getElementById('cust-numero').value.trim();
-            const statusEl = document.getElementById('shipping-calc-status');
-
-            if (!rua || !bairro) {
-                alert('Preencha ao menos a Rua e o Bairro para calcular o frete.');
-                return;
-            }
-
-            statusEl.innerHTML = `<span class="text-amber-600"><i class="fa-solid fa-spinner animate-spin"></i> Calculando distância exata...</span>`;
-
-            try {
-                const queryText = `${rua}, ${numero ? numero + ',' : ''} ${bairro}, Salvador, Bahia, Brasil`;
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryText)}&limit=1`;
-                
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data && data.length > 0) {
-                    lastCalculatedLat = parseFloat(data[0].lat);
-                    lastCalculatedLng = parseFloat(data[0].lon);
-                    
-                    const distanciaDireta = calcularHaversineKM(ORIGEM_LAT, ORIGEM_LNG, lastCalculatedLat, lastCalculatedLng);
-                    const distanciaRota = distanciaDireta * 1.25;
-                    
-                    currentShippingFee = obterTabelaFrete(distanciaRota);
-                    updateCartUI();
-                    
-                    statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculated: R$ ${currentShippingFee.toFixed(2).replace('.', ',')} (${distanciaRota.toFixed(1)} km)</span>`;
-                } else {
-                    const queryFallback = `${rua}, ${bairro}, Salvador, Bahia, Brasil`;
-                    const resFb = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryFallback)}&limit=1`);
-                    const dataFb = await resFb.json();
-
-                    if (dataFb && dataFb.length > 0) {
-                        lastCalculatedLat = parseFloat(dataFb[0].lat);
-                        lastCalculatedLng = parseFloat(dataFb[0].lon);
-                        const distanciaRota = calcularHaversineKM(ORIGEM_LAT, ORIGEM_LNG, lastCalculatedLat, lastCalculatedLng) * 1.25;
-                        currentShippingFee = obterTabelaFrete(distanciaRota);
-                        updateCartUI();
-                        statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado: R$ ${currentShippingFee.toFixed(2).replace('.', ',')} (~${distanciaRota.toFixed(1)} km)</span>`;
-                    } else {
-                        statusEl.innerHTML = `<span class="text-red-500">Não foi possível calcular automaticamente por KM. O frete padrão de R$ 7,00 foi aplicado.</span>`;
-                        currentShippingFee = 7.00;
-                        updateCartUI();
-                    }
-                }
-            } catch (e) {
-                statusEl.innerHTML = `<span class="text-red-500">Erro de conexão ao calcular frete.</span>`;
-            }
-        }
 
         function checkBusinessStatus() {
             const now = new Date();
@@ -633,6 +587,27 @@
             updateCartUI();
         }
 
+        function calcularFretePorBairroSelecionado() {
+            const select = document.getElementById('cust-bairro');
+            const option = select.options[select.selectedIndex];
+            const taxa = parseFloat(option.getAttribute('data-taxa') || 0);
+            const statusEl = document.getElementById('shipping-calc-status');
+
+            if (!select.value) {
+                alert('Por favor, selecione o seu bairro na lista.');
+                return;
+            }
+
+            if (taxa > 0) {
+                currentShippingFee = taxa;
+                statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado: R$ ${taxa.toFixed(2).replace('.', ',')}</span>`;
+            } else {
+                currentShippingFee = null;
+                statusEl.innerHTML = `<span class="text-red-500">Selecione um bairro válido.</span>`;
+            }
+            updateCartUI();
+        }
+
         function updateCartUI() {
             const countEl = document.getElementById('cart-count');
             const totalEl = document.getElementById('cart-total');
@@ -657,7 +632,7 @@
                     shippingEl.innerText = `R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`;
                     shippingEl.className = "font-bold text-stone-800";
                 } else {
-                    shippingEl.innerText = "A calcular";
+                    shippingEl.innerText = "Clique em calcular frete";
                     shippingEl.className = "font-bold text-amber-600";
                 }
             }
@@ -730,12 +705,13 @@
                 const dados = JSON.parse(salvo);
                 document.getElementById('cust-name').value = dados.name || '';
                 document.getElementById('cust-phone').value = dados.phone || '';
-                document.getElementById('cust-cep').value = dados.cep || '';
-                document.getElementById('cust-bairro').value = dados.bairro || '';
+                if(dados.bairro) {
+                    document.getElementById('cust-bairro').value = dados.bairro;
+                }
                 document.getElementById('cust-rua').value = dados.rua || '';
                 document.getElementById('cust-numero').value = dados.numero || '';
                 document.getElementById('cust-comp').value = dados.comp || '';
-                alert('Dados carregados com sucesso! Agora basta calcular o frete e finalizar o pedido.');
+                alert('Dados carregados com sucesso! Selecione o bairro e clique em calcular frete.');
             }
         }
 
@@ -747,8 +723,7 @@
 
             const name = document.getElementById('cust-name').value.trim();
             const phone = document.getElementById('cust-phone').value.trim();
-            const cep = document.getElementById('cust-cep').value.trim();
-            const bairro = document.getElementById('cust-bairro').value.trim();
+            const bairro = document.getElementById('cust-bairro').value;
             const rua = document.getElementById('cust-rua').value.trim();
             const numero = document.getElementById('cust-numero').value.trim();
             const comp = document.getElementById('cust-comp').value.trim();
@@ -762,16 +737,15 @@
             }
 
             if(currentShippingFee === null) {
-                alert('Por favor, clique no botão "Calcular Frete por KM" antes de enviar o pedido.');
+                alert('Por favor, clique no botão "Calcular Frete para o Bairro" antes de enviar o pedido.');
                 return;
             }
 
-            salvarUltimoCliente({ name, phone, cep, bairro, rua, numero, comp });
+            salvarUltimoCliente({ name, phone, bairro, rua, numero, comp });
 
             let fullAddress = `${rua}, nº ${numero}`;
             if(comp) fullAddress += ` (${comp})`;
             fullAddress += ` - Bairro: ${bairro}, Salvador - BA`;
-            if(cep) fullAddress += ` (CEP: ${cep})`;
 
             const ePlate = String.fromCodePoint(0x1F37D);
             const eUser = String.fromCodePoint(0x1F464);
@@ -792,12 +766,7 @@
             lines.push(`${eUser} *Cliente:* ${name}`);
             lines.push(`${ePhone} *Telefone:* ${phone}`);
             lines.push(`${ePin} *Endereço:* ${fullAddress}`);
-            
-            if(lastCalculatedLat && lastCalculatedLng) {
-                lines.push(`${eMap} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${lastCalculatedLat},${lastCalculatedLng}`);
-            } else {
-                lines.push(`${eMap} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`)}`);
-            }
+            lines.push(`${eMap} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`)}`);
 
             lines.push(``);
             lines.push(`${eMemo} *--- COMANDA DIGITAL ---*`);
@@ -819,7 +788,7 @@
             lines.push(``);
             lines.push(`${eMoney} *RESUMO FINANCEIRO*`);
             lines.push(`Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
-            lines.push(`${eDelivery} Taxa de Entrega: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`);
+            lines.push(`${eDelivery} Taxa de Entrega (${bairro}): R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`);
             lines.push(`*TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
             lines.push(``);
             lines.push(`${eCard} *Forma de Pagamento:* ${payment}`);
