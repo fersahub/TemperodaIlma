@@ -713,13 +713,12 @@
             fullAddress += ` - Bairro: ${bairro}, Salvador - BA`;
             if(cep) fullAddress += ` (CEP: ${cep})`;
 
-            // Montagem da mensagem estruturada com emojis e comanda digital
+            // MONTAGEM COMPLETA DA MENSAGEM DO WHATSAPP COM COMANDA DIGITAL E MAPS
             let message = `🍽️ *NOVO PEDIDO - TEMPERO DA ILMA* 🍽️%0A%0A`;
             message += `👤 *Cliente:* ${name}%0A`;
             message += `📞 *Telefone:* ${phone}%0A`;
             message += `📍 *Endereço:* ${fullAddress}%0A`;
             
-            // Link do Google Maps
             if(lastCalculatedLat && lastCalculatedLng) {
                 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lastCalculatedLat},${lastCalculatedLng}`;
                 message += `🗺️ *Localização no Maps:* ${mapsUrl}%0A`;
@@ -728,7 +727,7 @@
                 message += `🗺️ *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${mapsQuery}%0A`;
             }
 
-            message += `%0A📋 *--- COMANDA DIGITAL ---*📋%0A`;
+            message += `%0A📋 *--- COMANDA DIGITAL ---* 📋%0A`;
 
             cartCombos.forEach((item, index) => {
                 message += `%0A📦 *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})%0A`;
