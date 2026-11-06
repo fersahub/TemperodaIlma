@@ -74,6 +74,22 @@
     <!-- CONTAINER PRINCIPAL -->
     <main class="max-w-4xl mx-auto px-4 pt-8 space-y-10">
 
+        <!-- BOTÃO DE REPETIR ÚLTIMO PEDIDO (SE HOUVER) -->
+        <div id="quick-reorder-banner" class="hidden bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-emerald-900 text-xs">Fazer novo pedido rápido?</h4>
+                    <p class="text-[11px] text-emerald-700">Encontramos os seus dados salvos do último atendimento.</p>
+                </div>
+            </div>
+            <button onclick="carregarUltimoCliente()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm">
+                Preencher Dados
+            </button>
+        </div>
+
         <section class="space-y-4">
             <div class="border-b border-stone-200 pb-2 flex items-center justify-between">
                 <h3 class="font-bold text-lg text-stone-800 flex items-center gap-2">
@@ -81,7 +97,7 @@
                 </h3>
                 <span class="text-xs text-stone-500 bg-stone-200 px-2.5 py-1 rounded-full font-medium">Apenas consulta</span>
             </div>
-            <p class="text-xs text-stone-500">Consulte os pratos disponíveis nesta semana. A seleção dos sabores é feita ao montar o seu combo abaixo:</p>
+            <p class="text-xs text-stone-500">Consulte os pratos disponíveis nesta semana. Pratos marcados como indisponíveis não podem ser selecionados nos combos:</p>
 
             <div id="flavors-display-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
         </section>
@@ -96,9 +112,13 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-stone-900 text-stone-300 mt-16 pt-8 pb-20 border-t border-stone-800 text-center text-xs space-y-3">
+    <footer class="bg-stone-900 text-stone-300 mt-16 pt-8 pb-24 border-t border-stone-800 text-center text-xs space-y-4">
+        <div class="flex justify-center gap-4 text-base">
+            <a href="https://instagram.com" target="_blank" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center hover:bg-brand-secondary transition text-white"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://wa.me/5571994125510" target="_blank" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center hover:bg-brand-secondary transition text-white"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
         <p class="font-bold text-white text-sm">Tempero da Ilma - Marmitaria</p>
-        <p class="text-stone-400">Atendimento e Pedidos via WhatsApp: (71) 99412-5510</p>
+        <p class="text-stone-400">Atendimento e Pedidos via WhatsApp: (71) 99412-5510 | Salvador - BA</p>
         <p class="text-stone-500">&copy; Todos os direitos reservados.</p>
     </footer>
 
@@ -235,6 +255,30 @@
                             </button>
                         </div>
                         <p id="shipping-calc-status" class="text-[11px] text-stone-500 text-center font-medium min-h-[16px]"></p>
+                    </div>
+
+                    <!-- AGENDAMENTO DE ENTREGA -->
+                    <div class="grid grid-cols-2 gap-2 bg-stone-50 p-3 rounded-xl border border-stone-200">
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-700 mb-1">Dia da Entrega</label>
+                            <select id="schedule-day" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-xs focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                                <option value="Hoje">Hoje</option>
+                                <option value="Amanhã">Amanhã</option>
+                                <option value="Segunda-feira">Segunda-feira</option>
+                                <option value="Terça-feira">Terça-feira</option>
+                                <option value="Quarta-feira">Quarta-feira</option>
+                                <option value="Quinta-feira">Quinta-feira</option>
+                                <option value="Sexta-feira">Sexta-feira</option>
+                                <option value="Sábado">Sábado</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-700 mb-1">Turno / Horário</label>
+                            <select id="schedule-turn" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-xs focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                                <option value="Almoço (11:30 - 14:00)">Almoço (11:30 - 14:00)</option>
+                                <option value="Jantar / Noite">Jantar / Noite</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div>
@@ -433,37 +477,37 @@
         }
 
         const combos = [
-            { id: 'combo-5-350g', name: "Combo 5 Marmitas - 350g", qty: 5, price: 100.00, description: "Escolha 5 marmitas tradicionais de 350g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional" },
-            { id: 'combo-10-350g', name: "Combo 10 Marmitas - 350g", qty: 10, price: 200.00, description: "Escolha 10 marmitas tradicionais de 350g variadas para a sua semana.", image: "Combo 10.1.png", type: "Tradicional" },
-            { id: 'combo-5-500g', name: "Combo 5 Marmitas - 500g", qty: 5, price: 125.00, description: "Escolha 5 marmitas tradicionais de 500g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional" },
-            { id: 'combo-10-500g', name: "Combo 10 Marmitas - 500g", qty: 10, price: 250.00, description: "Escolha 10 marmitas tradicionais de 500g variadas para a sua semana.", image: "Combo 10.png", type: "Tradicional" },
-            { id: 'combo-5-300g-fit', name: "Combo 5 Marmitas FIT - 300g", qty: 5, price: 130.00, description: "Escolha 5 marmitas da nossa linha fit leve de 300g.", image: "Combo 5.1.png", type: "Linha Fit" },
-            { id: 'combo-10-300g-fit', name: "Combo 10 Marmitas FIT - 300g", qty: 10, price: 260.00, description: "Escolha 10 marmitas da nossa linha fit leve de 300g variadas.", image: "Combo 10.1.png", type: "Linha Fit" }
+            { id: 'combo-5-350g', name: "Combo 5 Marmitas - 350g", qty: 5, price: 100.00, description: "Escolha 5 marmitas tradicionais de 350g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional", destaque: true },
+            { id: 'combo-10-350g', name: "Combo 10 Marmitas - 350g", qty: 10, price: 200.00, description: "Escolha 10 marmitas tradicionais de 350g variadas para a sua semana.", image: "Combo 10.1.png", type: "Tradicional", destaque: false },
+            { id: 'combo-5-500g', name: "Combo 5 Marmitas - 500g", qty: 5, price: 125.00, description: "Escolha 5 marmitas tradicionais de 500g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional", destaque: false },
+            { id: 'combo-10-500g', name: "Combo 10 Marmitas - 500g", qty: 10, price: 250.00, description: "Escolha 10 marmitas tradicionais de 500g variadas para a sua semana.", image: "Combo 10.png", type: "Tradicional", destaque: false },
+            { id: 'combo-5-300g-fit', name: "Combo 5 Marmitas FIT - 300g", qty: 5, price: 130.00, description: "Escolha 5 marmitas da nossa linha fit leve de 300g.", image: "Combo 5.1.png", type: "Linha Fit", destaque: true },
+            { id: 'combo-10-300g-fit', name: "Combo 10 Marmitas FIT - 300g", qty: 10, price: 260.00, description: "Escolha 10 marmitas da nossa linha fit leve de 300g variadas.", image: "Combo 10.1.png", type: "Linha Fit", destaque: false }
         ];
 
         const availableFlavors = [
-            { id: 'f1', name: 'Panqueca de Frango', desc: 'Frango desfiado, molho de tomate e queijo parmesão', tag: 'Tradicional', img: 'Panqueca frango.png' },
-            { id: 'f2', name: 'Bife de Carne Temperada', desc: 'Feijão preto, Arroz branco e Camponata', tag: 'Tradicional', img: 'Bife carne temparada.png' },
-            { id: 'f3', name: 'Carne Moida com Camponata', desc: 'Carne moída, Arroz branco e Camponata', tag: 'Tradicional', img: 'Carne camponata.png' },
-            { id: 'f4', name: 'Feijoada de Feijão Preto', desc: 'Arroz branco e couve folha', tag: 'Tradicional', img: 'Feijão preto.png' },
-            { id: 'f5', name: 'Carne de Panela com Batatas', desc: 'Arroz branco e Feijão carioca', tag: 'Tradicional', img: 'Bife panela.jpg' },
-            { id: 'f7', name: 'Strogonoff de Frango', desc: 'Frango, Batata doce assada com páprica defumada', tag: 'Tradicional', img: 'Strogonoff.jpg' },
-            { id: 'f8', name: 'Quiabada de Frango', desc: 'Feijão e Arroz branco', tag: 'Tradicional', img: 'Quiabada.jpg' },
-            { id: 'f9', name: 'Panqueca de Carne Moída', desc: 'Carne moída, Molho de tomate e Queijo parmesão', tag: 'Tradicional', img: 'Panqueca carne.jpg' },
-            { id: 'f10', name: 'Bife de Carne Acebolado', desc: 'Feijão carioca, Arroz branco e Brócolis', tag: 'Tradicional', img: 'Bife acebolado.jpg' },
-            { id: 'f11', name: 'Carne Moída com Mix de Verduras', desc: 'Carne moída, Arroz branco e Mix de Verduras', tag: 'Tradicional', img: 'Carne moida mix.jpg' },
-            { id: 'f12', name: 'Penne a Bolonhesa', desc: 'Massa Penne, Molho de tomate e Carne moída', tag: 'Linha Fit', img: 'Penne.jpg' },
-            { id: 'f13', name: 'Espaguete com Almondegas', desc: 'Massa Espaguete, Molho de tomate, e Almondegas de Carne', tag: 'Tradicional', img: 'Almondegas.jpg' },
-            { id: 'f14', name: 'Frango ao Creme de Milho', desc: 'Com milho e Arroz com Brócolis', tag: 'Tradicional', img: 'Frango milho.jpg' },
-            { id: 'f15', name: 'Carne de Panela Desfiada', desc: 'Carne desfiada, Arroz branco, Purê de abóbora e Mix de verduras', tag: 'Tradicional', img: 'Carne desfiada.jpg' },
-            { id: 'f16', name: 'Lombo de Boi recheado', desc: 'Lombo de boi, Arroz branco, Feijão e Brócolis', tag: 'Tradicional', img: 'Lombo de boi.jpg' },
-            { id: 'f17', name: 'Omelete de Frango', desc: 'Omelete de Frango, Arroz branco, Purê de batata e Mix de Verduras', tag: 'Tradicional', img: 'Omelete frango.jpg' },
-            { id: 'f18', name: 'Bife de Frango Acebolado', desc: 'Bife de frango, Feijão, Arroz branco e Cenoura', tag: 'Tradicional', img: 'Frango acebolado.jpg' },
-            { id: 'f19', name: 'Panqueca de Frango (Farinha Integral)', desc: 'Frango desfiado, Molho de tomate e Queijo parmesão', tag: 'Linha Fit', img: 'Panqueca frango integral.jpg' },
-            { id: 'f20', name: 'Frango com Purê de Mandiquinha', desc: 'Frango desfiado, Purê de mandiquinha e Legumes assados', tag: 'Linha Fit', img: 'Frango mandioquinha.jpg' },
-            { id: 'f21', name: 'Escondidinho Fit', desc: 'Purê de batata doce e Frango desfiado', tag: 'Linha Fit', img: 'Escondidinho.jpg' },
-            { id: 'f22', name: 'Macarrão Integral com Almondegas', desc: 'Massa integral, Molho de tomate e Almondegas', tag: 'Linha Fit', img: 'Integral almondegas.jpg' },
-            { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'Arroz funcional.jpg' }
+            { id: 'f1', name: 'Panqueca de Frango', desc: 'Frango desfiado, molho de tomate e queijo parmesão', tag: 'Tradicional', img: 'Panqueca frango.png', disponivel: true },
+            { id: 'f2', name: 'Bife de Carne Temperada', desc: 'Feijão preto, Arroz branco e Camponata', tag: 'Tradicional', img: 'Bife carne temparada.png', disponivel: true },
+            { id: 'f3', name: 'Carne Moida com Camponata', desc: 'Carne moída, Arroz branco e Camponata', tag: 'Tradicional', img: 'Carne camponata.png', disponivel: true },
+            { id: 'f4', name: 'Feijoada de Feijão Preto', desc: 'Arroz branco e couve folha', tag: 'Tradicional', img: 'Feijão preto.png', disponivel: false },
+            { id: 'f5', name: 'Carne de Panela com Batatas', desc: 'Arroz branco e Feijão carioca', tag: 'Tradicional', img: 'Bife panela.jpg', disponivel: true },
+            { id: 'f7', name: 'Strogonoff de Frango', desc: 'Frango, Batata doce assada com páprica defumada', tag: 'Tradicional', img: 'Strogonoff.jpg', disponivel: true },
+            { id: 'f8', name: 'Quiabada de Frango', desc: 'Feijão e Arroz branco', tag: 'Tradicional', img: 'Quiabada.jpg', disponivel: true },
+            { id: 'f9', name: 'Panqueca de Carne Moída', desc: 'Carne moída, Molho de tomate e Queijo parmesão', tag: 'Tradicional', img: 'Panqueca carne.jpg', disponivel: true },
+            { id: 'f10', name: 'Bife de Carne Acebolado', desc: 'Feijão carioca, Arroz branco e Brócolis', tag: 'Tradicional', img: 'Bife acebolado.jpg', disponivel: true },
+            { id: 'f11', name: 'Carne Moída com Mix de Verduras', desc: 'Carne moída, Arroz branco e Mix de Verduras', tag: 'Tradicional', img: 'Carne moida mix.jpg', disponivel: true },
+            { id: 'f12', name: 'Penne a Bolonhesa', desc: 'Massa Penne, Molho de tomate e Carne moída', tag: 'Linha Fit', img: 'Penne.jpg', disponivel: true },
+            { id: 'f13', name: 'Espaguete com Almondegas', desc: 'Massa Espaguete, Molho de tomate, e Almondegas de Carne', tag: 'Tradicional', img: 'Almondegas.jpg', disponivel: true },
+            { id: 'f14', name: 'Frango ao Creme de Milho', desc: 'Com milho e Arroz com Brócolis', tag: 'Tradicional', img: 'Frango milho.jpg', disponivel: true },
+            { id: 'f15', name: 'Carne de Panela Desfiada', desc: 'Carne desfiada, Arroz branco, Purê de abóbora e Mix de verduras', tag: 'Tradicional', img: 'Carne desfiada.jpg', disponivel: true },
+            { id: 'f16', name: 'Lombo de Boi recheado', desc: 'Lombo de boi, Arroz branco, Feijão e Brócolis', tag: 'Tradicional', img: 'Lombo de boi.jpg', disponivel: true },
+            { id: 'f17', name: 'Omelete de Frango', desc: 'Omelete de Frango, Arroz branco, Purê de batata e Mix de Verduras', tag: 'Tradicional', img: 'Omelete frango.jpg', disponivel: true },
+            { id: 'f18', name: 'Bife de Frango Acebolado', desc: 'Bife de frango, Feijão, Arroz branco e Cenoura', tag: 'Tradicional', img: 'Frango acebolado.jpg', disponivel: true },
+            { id: 'f19', name: 'Panqueca de Frango (Farinha Integral)', desc: 'Frango desfiado, Molho de tomate e Queijo parmesão', tag: 'Linha Fit', img: 'Panqueca frango integral.jpg', disponivel: true },
+            { id: 'f20', name: 'Frango com Purê de Mandiquinha', desc: 'Frango desfiado, Purê de mandiquinha e Legumes assados', tag: 'Linha Fit', img: 'Frango mandioquinha.jpg', disponivel: true },
+            { id: 'f21', name: 'Escondidinho Fit', desc: 'Purê de batata doce e Frango desfiado', tag: 'Linha Fit', img: 'Escondidinho.jpg', disponivel: true },
+            { id: 'f22', name: 'Macarrão Integral com Almondegas', desc: 'Massa integral, Molho de tomate e Almondegas', tag: 'Linha Fit', img: 'Integral almondegas.jpg', disponivel: true },
+            { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'Arroz funcional.jpg', disponivel: true }
         ];
 
         let cartCombos = []; 
@@ -475,11 +519,14 @@
             grid.innerHTML = '';
             availableFlavors.forEach(flavor => {
                 const card = document.createElement('div');
-                card.className = "bg-white p-3 rounded-xl border border-stone-200 flex gap-3 items-center shadow-sm";
+                card.className = `bg-white p-3 rounded-xl border flex gap-3 items-center shadow-sm ${flavor.disponivel ? 'border-stone-200' : 'border-stone-200 opacity-60 bg-stone-50'}`;
                 card.innerHTML = `
                     <img src="${flavor.img}" alt="${flavor.name}" class="w-16 h-16 rounded-lg object-cover shrink-0">
-                    <div>
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-2 py-0.5 rounded">${flavor.tag}</span>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-2 py-0.5 rounded">${flavor.tag}</span>
+                            ${!flavor.disponivel ? '<span class="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">Esgotado</span>' : ''}
+                        </div>
                         <h4 class="font-bold text-stone-800 text-xs mt-0.5">${flavor.name}</h4>
                         <p class="text-[10px] text-stone-500 leading-tight mt-0.5 line-clamp-2">${flavor.desc}</p>
                     </div>
@@ -493,7 +540,7 @@
             grid.innerHTML = '';
             combos.forEach(combo => {
                 const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between";
+                card.className = "bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between relative";
                 card.innerHTML = `
                     <div>
                         <div class="h-44 w-full overflow-hidden relative">
@@ -501,6 +548,7 @@
                             <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-stone-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
                                 ${combo.qty} Marmitas (${combo.type})
                             </span>
+                            ${combo.destaque ? '<span class="absolute top-3 right-3 bg-amber-500 text-stone-900 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">Mais Vendido</span>' : ''}
                         </div>
                         <div class="p-4 space-y-2">
                             <h3 class="font-bold text-stone-800 text-lg">${combo.name}</h3>
@@ -540,26 +588,42 @@
             const container = document.getElementById('flavors-selection-list');
             container.innerHTML = '';
             const filteredFlavors = availableFlavors.filter(flavor => flavor.tag === currentEditingCombo.type);
+            
             filteredFlavors.forEach(flavor => {
                 const count = selectedFlavors[flavor.id] || 0;
                 const item = document.createElement('div');
-                item.className = "flex items-center justify-between bg-stone-50 p-3 rounded-xl border border-stone-200";
-                item.innerHTML = `
-                    <div class="max-w-[60%]">
-                        <p class="font-bold text-stone-800 text-xs">${flavor.name}</p>
-                        <p class="text-[10px] text-stone-500">${flavor.desc}</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="changeFlavorCount('${flavor.id}', -1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">-</button>
-                        <span class="font-bold text-stone-800 w-5 text-center text-sm">${count}</span>
-                        <button onclick="changeFlavorCount('${flavor.id}', 1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">+</button>
-                    </div>
-                `;
+                
+                if (!flavor.disponivel) {
+                    item.className = "flex items-center justify-between bg-stone-100 p-3 rounded-xl border border-stone-200 opacity-60";
+                    item.innerHTML = `
+                        <div class="max-w-[70%]">
+                            <p class="font-bold text-stone-500 text-xs">${flavor.name} <span class="text-red-500 text-[10px]">(Esgotado)</span></p>
+                            <p class="text-[10px] text-stone-400">${flavor.desc}</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-stone-400">Indisponível</span>
+                    `;
+                } else {
+                    item.className = "flex items-center justify-between bg-stone-50 p-3 rounded-xl border border-stone-200";
+                    item.innerHTML = `
+                        <div class="max-w-[60%]">
+                            <p class="font-bold text-stone-800 text-xs">${flavor.name}</p>
+                            <p class="text-[10px] text-stone-500">${flavor.desc}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="changeFlavorCount('${flavor.id}', -1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">-</button>
+                            <span class="font-bold text-stone-800 w-5 text-center text-sm">${count}</span>
+                            <button onclick="changeFlavorCount('${flavor.id}', 1)" class="w-8 h-8 bg-white border border-stone-300 rounded-lg flex items-center justify-center text-stone-700 font-bold hover:bg-stone-100">+</button>
+                        </div>
+                    `;
+                }
                 container.appendChild(item);
             });
         }
 
         function changeFlavorCount(flavorId, delta) {
+            const flavor = availableFlavors.find(f => f.id === flavorId);
+            if (!flavor || !flavor.disponivel) return;
+
             const currentTotal = Object.values(selectedFlavors).reduce((a, b) => a + b, 0);
             const flavorCount = selectedFlavors[flavorId] || 0;
             if(delta > 0 && currentTotal >= currentEditingCombo.qty) {
@@ -691,6 +755,32 @@
             }
         }
 
+        function salvarUltimoCliente(dados) {
+            localStorage.setItem('tempero_ilma_ultimo_cliente', JSON.stringify(dados));
+        }
+
+        function verificarUltimoCliente() {
+            const salvo = localStorage.getItem('tempero_ilma_ultimo_cliente');
+            if (salvo) {
+                document.getElementById('quick-reorder-banner').classList.remove('hidden');
+            }
+        }
+
+        function carregarUltimoCliente() {
+            const salvo = localStorage.getItem('tempero_ilma_ultimo_cliente');
+            if (salvo) {
+                const dados = JSON.parse(salvo);
+                document.getElementById('cust-name').value = dados.name || '';
+                document.getElementById('cust-phone').value = dados.phone || '';
+                document.getElementById('cust-cep').value = dados.cep || '';
+                document.getElementById('cust-bairro').value = dados.bairro || '';
+                document.getElementById('cust-rua').value = dados.rua || '';
+                document.getElementById('cust-numero').value = dados.numero || '';
+                document.getElementById('cust-comp').value = dados.comp || '';
+                alert('Dados carregados com sucesso! Agora basta calcular o frete e finalizar o pedido.');
+            }
+        }
+
         function sendToWhatsApp() {
             if(cartCombos.length === 0) {
                 alert('Adicione pelo menos um combo ao carrinho.');
@@ -704,6 +794,8 @@
             const rua = document.getElementById('cust-rua').value.trim();
             const numero = document.getElementById('cust-numero').value.trim();
             const comp = document.getElementById('cust-comp').value.trim();
+            const scheduleDay = document.getElementById('schedule-day').value;
+            const scheduleTurn = document.getElementById('schedule-turn').value;
             const payment = document.getElementById('cust-payment').value;
             const troco = document.getElementById('cust-troco').value.trim();
             const obs = document.getElementById('cust-obs').value.trim();
@@ -718,27 +810,26 @@
                 return;
             }
 
+            salvarUltimoCliente({ name, phone, cep, bairro, rua, numero, comp });
+
             let fullAddress = `${rua}, nº ${numero}`;
             if(comp) fullAddress += ` (${comp})`;
             fullAddress += ` - Bairro: ${bairro}, Salvador - BA`;
             if(cep) fullAddress += ` (CEP: ${cep})`;
 
-            // 100% BLINDADO: EMOJIS GERADOS POR CÓDIGO (IGNORA PROBLEMAS DE CODIFICAÇÃO DO EDITOR)
+            // EMOJIS SEGUROS VIA UNICODE PURO (COMPATÍVEIS COM WHATSAPP WEB E MOBILE)
             const ePlate = String.fromCodePoint(0x1F37D);
             const eUser = String.fromCodePoint(0x1F464);
             const ePhone = String.fromCodePoint(0x1F4DE);
             const ePin = String.fromCodePoint(0x1F4CD);
-            const eMapPin = String.fromCodePoint(0x1F5FA);
-            const eMemo = String.fromCodePoint(0x1F4CB);
+            const eMap = String.fromCodePoint(0x1F4CC);
+            const eMemo = String.fromCodePoint(0x1F4DD);
             const eBox = String.fromCodePoint(0x1F4E6);
-            const eStew = String.fromCodePoint(0x1F372);
-            const eBullet = String.fromCodePoint(0x25AA);
             const eMoney = String.fromCodePoint(0x1F4B0);
-            const eSmallWhite = String.fromCodePoint(0x25AB);
-            const eScooter = String.fromCodePoint(0x1F6F5);
-            const eDollar = String.fromCodePoint(0x1F4B5);
+            const eDelivery = String.fromCodePoint(0x1F69A);
             const eCard = String.fromCodePoint(0x1F4B3);
-            const ePencil = String.fromCodePoint(0x1F4DD);
+            const eNote = String.fromCodePoint(0x1F4D1);
+            const eClock = String.fromCodePoint(0x1F553);
             const eSparkles = String.fromCodePoint(0x2728);
 
             let lines = [];
@@ -747,24 +838,25 @@
             lines.push(`${eUser} *Cliente:* ${name}`);
             lines.push(`${ePhone} *Telefone:* ${phone}`);
             lines.push(`${ePin} *Endereço:* ${fullAddress}`);
+            lines.push(`${eClock} *Agendamento:* ${scheduleDay} (${scheduleTurn})`);
             
             if(lastCalculatedLat && lastCalculatedLng) {
-                lines.push(`${eMapPin} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${lastCalculatedLat},${lastCalculatedLng}`);
+                lines.push(`${eMap} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${lastCalculatedLat},${lastCalculatedLng}`);
             } else {
-                lines.push(`${eMapPin} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`)}`);
+                lines.push(`${eMap} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`)}`);
             }
 
             lines.push(``);
-            lines.push(`${eMemo} *--- COMANDA DIGITAL ---* ${eMemo}`);
+            lines.push(`${eMemo} *--- COMANDA DIGITAL ---*`);
 
             cartCombos.forEach((item, index) => {
                 lines.push(``);
                 lines.push(`${eBox} *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})`);
-                lines.push(`   ${eStew} *Sabores Escolhidos:*`);
+                lines.push(`   *Sabores Escolhidos:*`);
                 
                 const saboresArray = item.flavorsSummary.split(', ');
                 saboresArray.forEach(sabor => {
-                    lines.push(`   ${eBullet} ${sabor}`);
+                    lines.push(`   - ${sabor}`);
                 });
             });
 
@@ -773,17 +865,17 @@
 
             lines.push(``);
             lines.push(`${eMoney} *RESUMO FINANCEIRO*`);
-            lines.push(`${eSmallWhite} Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
-            lines.push(`${eScooter} Taxa de Entrega: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`);
-            lines.push(`${eDollar} *TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
+            lines.push(`Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
+            lines.push(`${eDelivery} Taxa de Entrega: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}`);
+            lines.push(`*TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
             lines.push(``);
             lines.push(`${eCard} *Forma de Pagamento:* ${payment}`);
             
             if(payment === 'Dinheiro' && troco) {
-                lines.push(`${eDollar} *Troco para:* ${troco}`);
+                lines.push(`*Troco para:* ${troco}`);
             }
             if(obs) {
-                lines.push(`${ePencil} *Observações:* ${obs}`);
+                lines.push(`${eNote} *Observações:* ${obs}`);
             }
             
             lines.push(``);
@@ -798,6 +890,7 @@
             checkBusinessStatus();
             renderFlavorsDisplay();
             renderCombos();
+            verificarUltimoCliente();
         };
     </script>
 </body>
