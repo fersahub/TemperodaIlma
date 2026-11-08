@@ -44,6 +44,9 @@
         }
         @keyframes bump{0%{transform:scale(1)}30%{transform:scale(1.35) rotate(-8deg)}100%{transform:scale(1)}}
         .cart-bump{animation:bump .5s ease}
+        .campo-erro{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.25);background-color:#fef2f2!important;animation:tremer .3s}
+        @keyframes tremer{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+        html.dark .campo-erro{background-color:#3b1d1d!important}
         /* MODO ESCURO */
         html.dark body{background:#141414;color:#eee}
         html.dark .bg-white,html.dark .bg-white\/95{background:#1e1e1e!important}
@@ -137,6 +140,11 @@
                         Linha Fit
                     </button>
                 </div>
+            </div>
+
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="search" id="flavor-search" autocomplete="off" placeholder="Buscar prato (ex: frango, panqueca, arroz...)" oninput="buscarPratos(this.value)" class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
             </div>
 
             <div id="flavors-display-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
@@ -283,7 +291,7 @@
                 <div id="free-ship-banner"></div>
                 <p class="text-xs font-bold text-stone-800 text-center"><i class="fa-solid fa-truck text-brand-secondary"></i> Entrega aos sábados - Verifique disponibilidade de horário!</p>
                 
-                <form id="checkout-form" class="space-y-4 pt-3 border-t border-stone-200" onsubmit="event.preventDefault(); sendToWhatsApp();">
+                <form id="checkout-form" novalidate class="space-y-4 pt-3 border-t border-stone-200" onsubmit="event.preventDefault(); sendToWhatsApp();">
                     <h4 class="font-bold text-stone-800 text-sm">Seus dados para contato e entrega</h4>
 
                     <div>
@@ -492,8 +500,37 @@
         let currentEditingCombo = null;
         let selectedFlavors = {};
         let currentFlavorFilter = 'Todos';
+        let currentFlavorSearch = '';
         let editandoIndex = null;
         let pendingWhatsUrl = '';
+
+        function marcarErro(id, msg) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('campo-erro');
+            el.setAttribute('aria-invalid', 'true');
+            const p = document.createElement('p');
+            p.className = 'erro-msg text-[11px] font-semibold text-red-500 mt-1';
+            p.dataset.for = id;
+            p.textContent = msg;
+            (el.closest('.relative') || el).insertAdjacentElement('afterend', p);
+        }
+
+        function limparErro(id) {
+            const el = document.getElementById(id);
+            if (el) { el.classList.remove('campo-erro'); el.removeAttribute('aria-invalid'); }
+            document.querySelectorAll('.erro-msg').forEach(p => { if (p.dataset.for === id) p.remove(); });
+        }
+
+        function limparTodosErros() {
+            document.querySelectorAll('.erro-msg').forEach(p => p.remove());
+            document.querySelectorAll('.campo-erro').forEach(el => el.classList.remove('campo-erro'));
+        }
+
+        function iniciarValidacao() {
+            const form = document.getElementById('checkout-form');
+            ['input', 'change'].forEach(ev => form.addEventListener(ev, e => { if (e.target.id) limparErro(e.target.id); }));
+        }
 
         function escapeHtml(t) {
             return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -701,6 +738,15 @@
             setInterval(atualizarTimer, 1000);
         }
 
+        function normalizarTexto(t) {
+            return String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function buscarPratos(valor) {
+            currentFlavorSearch = valor.trim();
+            renderFlavorsDisplay();
+        }
+
         function filtrarPratos(tag) {
             currentFlavorFilter = tag;
 
@@ -882,9 +928,18 @@
             const grid = document.getElementById('flavors-display-grid');
             grid.innerHTML = '';
 
-            const filtered = currentFlavorFilter === 'Todos'
-                ? availableFlavors
-                : availableFlavors.filter(f => f.tag === currentFlavorFilter);
+            const palavras = normalizarTexto(currentFlavorSearch).split(/\s+/).filter(Boolean);
+            const filtered = availableFlavors
+                .filter(f => currentFlavorFilter === 'Todos' || f.tag === currentFlavorFilter)
+                .filter(f => {
+                    const alvo = normalizarTexto(`${f.name} ${f.desc}`);
+                    return palavras.every(w => alvo.includes(w));
+                });
+
+            if (!filtered.length) {
+                grid.innerHTML = `<p class="col-span-full text-center text-xs text-stone-500 py-6">Nenhum prato encontrado${currentFlavorSearch ? ` para "${escapeHtml(currentFlavorSearch)}"` : ''}.</p>`;
+                return;
+            }
 
             filtered.forEach(flavor => {
                 const card = document.createElement('div');
@@ -1199,13 +1254,26 @@
             const troco = document.getElementById('cust-troco').value.trim();
             const obs = document.getElementById('cust-obs').value.trim();
 
-            if (!name || !phone || !bairro || !rua || !numero) {
-                alert('Por favor, preencha os campos obrigatórios (*): Nome, Telefone, Bairro, Rua e Número.');
+            limparTodosErros();
+            const erros = [];
+            if (!name) erros.push(['cust-name', 'Informe seu nome completo.']);
+            const telDigitos = phone.replace(/\D/g, '');
+            if (telDigitos.length < 10 || telDigitos.length > 13) erros.push(['cust-phone', 'Digite um telefone válido com DDD. Ex: (71) 99999-9999']);
+            if (!rua) erros.push(['cust-rua', 'Informe a rua ou avenida.']);
+            if (!numero) erros.push(['cust-numero', 'Informe o número (ou S/N).']);
+            if (!bairro) erros.push(['cust-bairro', 'Selecione o seu bairro.']);
+            if (erros.length) {
+                erros.forEach(([id, msg]) => marcarErro(id, msg));
+                const primeiro = document.getElementById(erros[0][0]);
+                primeiro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                primeiro.focus({ preventScroll: true });
                 return;
             }
 
             if (currentShippingFee === null) {
-                alert('Por favor, clique no botão "Calcular Frete" antes de enviar o pedido.');
+                const st = document.getElementById('shipping-calc-status');
+                st.innerHTML = '<span class="text-red-500 font-bold">Clique em "Calcular Frete" antes de enviar o pedido.</span>';
+                st.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
 
@@ -1299,6 +1367,7 @@
             renderCombos();
             verificarUltimoCliente();
             mostrarAvisoFimDeSemana();
+            iniciarValidacao();
             restaurarCarrinho();
             atualizarIconeTema();
             renderFreteBanner();
