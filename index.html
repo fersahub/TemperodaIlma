@@ -5,14 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tempero da Ilma - Cardápio de Combos</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#5F935D">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#3E6B45">
     <script>try{if(localStorage.getItem('tema')==='dark')document.documentElement.classList.add('dark')}catch(e){}</script>
     <!-- Tailwind CSS CDN -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -21,16 +25,18 @@
             theme: {
                 extend: {
                     colors: {
+                        amber: { 50: '#FBF5E1', 100: '#F6EBC3', 200: '#EBD58A', 500: '#C9A227', 600: '#8A6A0F', 700: '#6F5410', 900: '#4A3708' },
                         brand: {
-                            primary: '#FFD482',
-                            secondary: '#5F935D',
-                            accent: '#4C7A4A',
+                            primary: '#E6C36A',
+                            secondary: '#3E6B45',
+                            accent: '#2F5233',
                             dark: '#222222',
-                            light: '#FAF8F5'
+                            light: '#FAF6EC'
                         }
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Playfair Display', 'Georgia', 'serif'],
                     }
                 }
             }
@@ -39,7 +45,7 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #FAF8F5;
+            background-color: #FAF6EC;
             color: #222222;
         }
         @keyframes bump{0%{transform:scale(1)}30%{transform:scale(1.35) rotate(-8deg)}100%{transform:scale(1)}}
@@ -47,6 +53,41 @@
         .campo-erro{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.25);background-color:#fef2f2!important;animation:tremer .3s}
         @keyframes tremer{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
         html.dark .campo-erro{background-color:#3b1d1d!important}
+        /* TÍTULOS EM SERIFADA */
+        h1,h2,h3{font-family:'Playfair Display',Georgia,serif}
+        /* BRILHO DOURADO NA LOGO */
+        .logo-brilho{position:relative;overflow:hidden}
+        .logo-brilho::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,236,170,.65) 50%,transparent 65%);transform:translateX(-120%);animation:brilho 5s ease-in-out 1.5s infinite;pointer-events:none}
+        @keyframes brilho{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+        /* TELA DE ABERTURA */
+        #splash{position:fixed;inset:0;z-index:100;background:#FAF6EC;display:flex;align-items:center;justify-content:center;animation:splashOut .5s ease 1.2s forwards}
+        html.dark #splash{background:#141414}
+        .splash-logo{width:150px;height:150px;border-radius:50%;margin:0 auto;animation:logoIn .9s cubic-bezier(.2,.8,.2,1) both}
+        .splash-logo img{width:100%;height:100%;object-fit:contain}
+        .splash-barra{width:120px;height:3px;background:#E8DDB8;border-radius:9px;margin:22px auto 0;overflow:hidden}
+        .splash-barra span{display:block;height:100%;background:#C9A227;transform-origin:left;animation:barra 1.1s ease forwards}
+        @keyframes logoIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+        @keyframes barra{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+        @keyframes splashOut{to{opacity:0;visibility:hidden}}
+        @media (prefers-reduced-motion:reduce){#splash{display:none}.logo-brilho::after{animation:none}}
+        /* BARRA DE ETAPAS */
+        .etapa{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;padding:6px 4px;border-radius:999px;background:#F1EEE6;color:#6b6358}
+        .etapa .etapa-num{width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.08);display:inline-flex;align-items:center;justify-content:center;font-size:11px}
+        .etapa.ativa{background:#3E6B45;color:#fff}
+        .etapa.ativa .etapa-num{background:rgba(255,255,255,.25)}
+        .etapa.feita{background:#DCE8DC;color:#2F5233}
+        html.dark .etapa{background:#2a2a2a;color:#aaa}
+        html.dark .etapa.ativa{background:#3E6B45;color:#fff}
+        html.dark .etapa.feita{background:#1f3a25;color:#a7f3d0}
+        #cart-combos-container,#checkout-form,#step-pagamento{scroll-margin-top:70px}
+        /* FOCO VISÍVEL, TEXTOS MAIORES E CONTRASTE */
+        a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #8A6A0F!important;outline-offset:2px!important}
+        html.dark a:focus-visible,html.dark button:focus-visible,html.dark summary:focus-visible,html.dark input:focus-visible,html.dark select:focus-visible,html.dark textarea:focus-visible{outline-color:#E8C25A!important}
+        .text-\[9px\]{font-size:11px!important}
+        .text-\[10px\]{font-size:12px!important}
+        .text-\[11px\]{font-size:12px!important}
+        #cart-count{font-size:11px!important}
+        html.dark .text-amber-600,html.dark .text-amber-700{color:#E8C25A!important}
         /* MODO ESCURO */
         html.dark body{background:#141414;color:#eee}
         html.dark .bg-white,html.dark .bg-white\/95{background:#1e1e1e!important}
@@ -64,12 +105,21 @@
 </head>
 <body class="pb-28">
 
+    <!-- TELA DE ABERTURA -->
+    <div id="splash" aria-hidden="true">
+        <div>
+            <div class="splash-logo logo-brilho"><img src="LOGO.PNG" alt=""></div>
+            <div class="splash-barra"><span></span></div>
+        </div>
+    </div>
+    <script>try{var _s=document.getElementById('splash');if(sessionStorage.getItem('splash_visto')){_s.remove()}else{sessionStorage.setItem('splash_visto','1');setTimeout(function(){if(_s.parentNode)_s.remove()},2000)}}catch(e){}</script>
+
     <!-- HEADER / LOGO -->
     <header class="bg-white border-b border-stone-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-brand-secondary shadow-sm bg-white shrink-0 flex items-center justify-center">
-                    <img src="LOGO.PNG" alt="Tempero da Ilma" class="w-full h-full object-contain bg-white">
+                <div class="logo-brilho w-12 h-12 rounded-full overflow-hidden border-2 border-brand-secondary shadow-sm bg-white shrink-0 flex items-center justify-center">
+                    <img src="LOGO.PNG" alt="Tempero da Ilma" width="48" height="48" fetchpriority="high" class="w-full h-full object-contain bg-white">
                 </div>
                 <div>
                     <h1 class="font-bold text-lg text-stone-800 leading-tight">Tempero da Ilma - Sabor Caseiro</h1>
@@ -91,7 +141,7 @@
     <div id="weekend-banner" class="hidden bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 text-center text-xs font-semibold"></div>
 
     <!-- HERO SECTION -->
-    <section class="bg-gradient-to-r from-stone-900 to-stone-800 text-white py-8 px-4 relative">
+    <section class="bg-gradient-to-r from-[#1F3A25] to-[#2F5233] text-white py-8 px-4 relative">
         <div class="max-w-4xl mx-auto text-center space-y-2">
             <span class="bg-brand-primary text-stone-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Combos Semanais</span>
             <h2 class="text-2xl md:text-3xl font-extrabold">Monte o seu Pacote de Marmitas</h2>
@@ -169,7 +219,7 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-stone-900 text-stone-300 mt-16 pt-8 pb-24 border-t border-stone-800 text-center text-xs space-y-4">
+    <footer class="bg-[#1B2E20] text-stone-300 mt-16 pt-8 pb-24 border-t border-stone-800 text-center text-xs space-y-4">
         <div class="flex justify-center gap-4 text-base">
             <a href="https://instagram.com" target="_blank" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center hover:bg-brand-secondary transition text-white"><i class="fa-brands fa-instagram"></i></a>
             <a href="https://wa.me/5571994125510" target="_blank" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center hover:bg-brand-secondary transition text-white"><i class="fa-brands fa-whatsapp"></i></a>
@@ -267,7 +317,12 @@
                 </button>
             </div>
 
-            <div class="p-4 overflow-y-auto space-y-4 flex-1">
+            <div id="checkout-scroll" class="p-4 overflow-y-auto space-y-4 flex-1">
+                <div id="steps-bar" class="sticky top-0 z-10 bg-white -mx-4 -mt-4 px-4 pt-3 pb-2 border-b border-stone-100 flex items-center gap-2">
+                    <button type="button" data-step="1" onclick="irParaEtapa(1)" class="etapa"><span class="etapa-num">1</span> Combos</button>
+                    <button type="button" data-step="2" onclick="irParaEtapa(2)" class="etapa"><span class="etapa-num">2</span> Dados</button>
+                    <button type="button" data-step="3" onclick="irParaEtapa(3)" class="etapa"><span class="etapa-num">3</span> Pagamento</button>
+                </div>
                 <div class="space-y-3">
                     <p class="text-xs font-bold text-stone-500 uppercase tracking-wider">Combos no Carrinho</p>
                     <div id="cart-combos-container" class="space-y-3"></div>
@@ -298,7 +353,7 @@
                         <label class="block text-xs font-semibold text-stone-700 mb-1">Nome completo *</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none"><i class="fa-regular fa-user"></i></span>
-                            <input type="text" id="cust-name" required placeholder="Digite seu nome completo" class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                            <input type="text" id="cust-name" name="name" autocomplete="name" autocapitalize="words" required placeholder="Digite seu nome completo" class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                         </div>
                     </div>
 
@@ -306,7 +361,7 @@
                         <label class="block text-xs font-semibold text-stone-700 mb-1">Telefone de contato *</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-stone-400 pointer-events-none"><i class="fa-solid fa-phone"></i></span>
-                            <input type="tel" id="cust-phone" required placeholder="(71) 99999-9999" class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                            <input type="tel" id="cust-phone" name="tel" autocomplete="tel" inputmode="tel" required placeholder="(71) 99999-9999" class="w-full bg-white border border-stone-200 rounded-lg py-2.5 pl-10 pr-3 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                         </div>
                     </div>
 
@@ -314,12 +369,12 @@
                     <div class="space-y-3 bg-stone-50 p-3 rounded-xl border border-stone-200">
                         <div>
                             <label class="block text-xs font-semibold text-stone-700 mb-1">CEP (Opcional)</label>
-                            <input type="text" id="cust-cep" maxlength="9" placeholder="00000-000" oninput="mascaraCep(this)" onblur="consultarViaCep()" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                            <input type="text" id="cust-cep" name="postal-code" autocomplete="postal-code" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="mascaraCep(this)" onblur="consultarViaCep()" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-stone-700 mb-1">Rua / Avenida *</label>
-                            <input type="text" id="cust-rua" required placeholder="Digite sua rua..." class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                            <input type="text" id="cust-rua" name="street-address" autocomplete="address-line1" autocapitalize="words" required placeholder="Digite sua rua..." class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
@@ -329,7 +384,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-stone-700 mb-1">Complemento</label>
-                                <input type="text" id="cust-comp" placeholder="Ex: Ap 201, Bloco B" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                                <input type="text" id="cust-comp" name="address-line2" autocomplete="address-line2" placeholder="Ex: Ap 201, Bloco B" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                             </div>
                         </div>
 
@@ -458,7 +513,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-stone-700 mb-1">Forma de Pagamento *</label>
+                        <label id="step-pagamento" class="block text-xs font-semibold text-stone-700 mb-1">Forma de Pagamento *</label>
                         <select id="cust-payment" onchange="toggleTrocoField()" required class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                             <option value="Pix">Pix</option>
                             <option value="Cartão de Débito">Cartão de Débito</option>
@@ -476,7 +531,7 @@
 
                     <div id="troco-container" class="hidden">
                         <label class="block text-xs font-semibold text-stone-700 mb-1">Troco para quanto?</label>
-                        <input type="text" id="cust-troco" placeholder="Ex: R$ 100,00" class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                        <input type="text" id="cust-troco" inputmode="decimal" placeholder="Ex: R$ 100,00" class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                     </div>
 
                     <div>
@@ -530,6 +585,34 @@
         function iniciarValidacao() {
             const form = document.getElementById('checkout-form');
             ['input', 'change'].forEach(ev => form.addEventListener(ev, e => { if (e.target.id) limparErro(e.target.id); }));
+        }
+
+        function irParaEtapa(n) {
+            const alvo = { 1: 'cart-combos-container', 2: 'checkout-form', 3: 'step-pagamento' }[n];
+            const el = document.getElementById(alvo);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function atualizarEtapas() {
+            const box = document.getElementById('checkout-scroll');
+            if (!box) return;
+            const topo = box.getBoundingClientRect().top + 90;
+            const y = id => { const el = document.getElementById(id); return el ? el.getBoundingClientRect().top : Infinity; };
+            let etapa = 1;
+            if (y('checkout-form') <= topo) etapa = 2;
+            if (y('step-pagamento') <= topo) etapa = 3;
+            if (box.scrollHeight > box.clientHeight + 8 && box.scrollTop + box.clientHeight >= box.scrollHeight - 4) etapa = 3;
+            document.querySelectorAll('#steps-bar .etapa').forEach(b => {
+                const n = Number(b.dataset.step);
+                b.classList.toggle('ativa', n === etapa);
+                b.classList.toggle('feita', n < etapa);
+            });
+        }
+
+        function iniciarEtapas() {
+            const box = document.getElementById('checkout-scroll');
+            if (box) box.addEventListener('scroll', atualizarEtapas, { passive: true });
+            atualizarEtapas();
         }
 
         function escapeHtml(t) {
@@ -1170,6 +1253,8 @@
                 return;
             }
             document.getElementById('checkout-modal').classList.remove('hidden');
+            document.getElementById('checkout-scroll').scrollTop = 0;
+            atualizarEtapas();
         }
 
         function closeCheckoutModal() {
@@ -1368,6 +1453,7 @@
             verificarUltimoCliente();
             mostrarAvisoFimDeSemana();
             iniciarValidacao();
+            iniciarEtapas();
             restaurarCarrinho();
             atualizarIconeTema();
             renderFreteBanner();
