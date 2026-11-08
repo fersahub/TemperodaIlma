@@ -144,6 +144,15 @@
             <h3 class="font-bold text-lg text-stone-800 border-b border-stone-200 pb-2 flex items-center gap-2">
                 <i class="fa-solid fa-box-open text-brand-secondary"></i> Escolha seus Combos
             </h3>
+            <details class="bg-white border border-stone-200 rounded-2xl p-4 shadow-sm">
+                <summary class="font-bold text-sm text-stone-800 cursor-pointer"><i class="fa-solid fa-ruler text-brand-secondary"></i> Qual tamanho escolher? 300g, 350g ou 500g</summary>
+                <div class="mt-3 space-y-2 text-xs text-stone-600">
+                    <p><span class="font-bold text-stone-800">300g (Linha Fit):</span> porção leve, boa para uma refeição mais enxuta ou para quem tem apetite menor.</p>
+                    <p><span class="font-bold text-stone-800">350g (Tradicional):</span> porção padrão, um almoço completo para a maioria das pessoas.</p>
+                    <p><span class="font-bold text-stone-800">500g (Tradicional):</span> porção reforçada, para quem tem mais fome ou precisa de mais energia no dia.</p>
+                    <p class="text-stone-500">Em dúvida? Comece pelo 350g e ajuste nos próximos pedidos.</p>
+                </div>
+            </details>
             <div id="combos-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
@@ -159,6 +168,32 @@
         <p class="text-stone-400">Atendimento e Pedidos via WhatsApp: (71) 99412-5510 | Salvador - BA</p>
         <p class="text-stone-500">&copy; Todos os direitos reservados.</p>
     </footer>
+
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-end sm:items-center hidden">
+        <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-stone-200 bg-stone-50">
+                <h3 class="font-bold text-stone-800 text-base">Confira seu pedido</h3>
+                <p class="text-xs text-stone-500">Revise os dados antes de enviar.</p>
+            </div>
+            <div id="confirm-content" class="p-4 overflow-y-auto space-y-3 flex-1 text-xs text-stone-700"></div>
+            <div class="p-4 border-t border-stone-200 bg-stone-50 flex gap-2">
+                <button type="button" onclick="document.getElementById('confirm-modal').classList.add('hidden')" class="w-1/3 bg-stone-200 text-stone-700 font-bold py-3 rounded-xl text-xs">Voltar e corrigir</button>
+                <button type="button" onclick="confirmarEnvio()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-base"></i> Confirmar e enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PEDIDO ENVIADO -->
+    <div id="sent-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-center hidden p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center space-y-3">
+            <div class="w-14 h-14 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl"><i class="fa-solid fa-check"></i></div>
+            <h3 class="font-bold text-stone-800 text-lg">Pedido enviado!</h3>
+            <p class="text-xs text-stone-600">Aguarde a confirmação pelo WhatsApp. Seu carrinho foi limpo.</p>
+            <a id="sent-link" href="#" target="_blank" rel="noopener" class="block text-xs text-emerald-700 underline">O WhatsApp não abriu? Toque aqui</a>
+            <button type="button" onclick="document.getElementById('sent-modal').classList.add('hidden')" class="w-full bg-brand-secondary text-white font-bold py-3 rounded-xl text-sm">Fechar</button>
+        </div>
+    </div>
 
     <!-- BOTÃO FLUTUANTE WHATSAPP -->
     <a href="https://wa.me/5571994125510?text=Ol%C3%A1!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20card%C3%A1pio." target="_blank" rel="noopener" aria-label="Tirar dúvidas no WhatsApp" class="fixed right-4 bottom-24 z-30 w-14 h-14 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-xl text-3xl"><i class="fa-brands fa-whatsapp"></i></a>
@@ -201,6 +236,10 @@
                 </p>
             </div>
             <div class="p-4 overflow-y-auto space-y-3 flex-1" id="flavors-selection-list"></div>
+            <div class="px-4 pb-3 pt-2 border-t border-stone-100">
+                <label class="block text-xs font-semibold text-stone-700 mb-1">Observação deste combo (opcional)</label>
+                <input type="text" id="combo-obs" maxlength="120" placeholder="Ex: sem cebola, pouco sal..." class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+            </div>
             <div class="p-4 border-t border-stone-200 bg-stone-50 flex gap-2">
                 <button onclick="closeFlavorsModal()" class="w-1/3 bg-stone-200 text-stone-700 font-bold py-3 rounded-xl text-xs">Cancelar</button>
                 <button id="btn-confirm-combo" onclick="confirmComboSelection()" disabled class="w-2/3 bg-stone-300 text-stone-500 font-bold py-3 rounded-xl text-xs transition">Adicionar Combo ao Pedido</button>
@@ -451,6 +490,79 @@
         let currentEditingCombo = null;
         let selectedFlavors = {};
         let currentFlavorFilter = 'Todos';
+        let editandoIndex = null;
+        let pendingWhatsUrl = '';
+
+        function escapeHtml(t) {
+            return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        /* --- CARRINHO SALVO NO CELULAR --- */
+        function salvarCarrinho() {
+            try { localStorage.setItem('tempero_ilma_carrinho', JSON.stringify(cartCombos)); } catch (e) {}
+        }
+
+        function restaurarCarrinho() {
+            if (!pedidosAbertos()) return;
+            try {
+                const salvo = JSON.parse(localStorage.getItem('tempero_ilma_carrinho') || '[]');
+                cartCombos = salvo
+                    .filter(i => combos.some(c => c.id === i.comboId))
+                    .map(i => {
+                        const c = combos.find(x => x.id === i.comboId);
+                        return { ...i, name: c.name, price: c.price, freteGratis: !!c.freteGratis };
+                    });
+                if (cartCombos.length) updateCartUI();
+            } catch (e) {}
+        }
+
+        /* --- EDITAR COMBO --- */
+        function flavorsDoResumo(resumo) {
+            const o = {};
+            resumo.split(', ').forEach(x => {
+                const m = x.match(/^(\d+)x (.+)$/);
+                const f = m && availableFlavors.find(v => v.name === m[2]);
+                if (f) o[f.id] = parseInt(m[1], 10);
+            });
+            return o;
+        }
+
+        function editarCombo(i) {
+            const it = cartCombos[i];
+            if (!it) return;
+            if (!it.flavors) it.flavors = flavorsDoResumo(it.flavorsSummary);
+            closeCheckoutModal();
+            openFlavorsModal(it.comboId, i);
+        }
+
+        /* --- CONFIRMAÇÃO E ENVIO --- */
+        function abrirConfirmacao(url, d) {
+            pendingWhatsUrl = url;
+            const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
+            const e = escapeHtml;
+            const itens = cartCombos.map(it => `<div class="bg-stone-50 border border-stone-200 rounded-xl p-3"><p class="font-bold text-stone-800">${e(it.name)} <span class="text-brand-accent">${fmt(it.price)}</span></p><p class="text-[11px] text-stone-500">${e(it.flavorsSummary)}</p>${it.obs ? `<p class="text-[11px] text-amber-700">Obs: ${e(it.obs)}</p>` : ''}</div>`).join('');
+            document.getElementById('confirm-content').innerHTML = `
+                <div><p><b>Cliente:</b> ${e(d.name)}</p><p><b>Telefone:</b> ${e(d.phone)}</p><p><b>Endereço:</b> ${e(d.fullAddress)}</p></div>
+                <div class="space-y-2">${itens}</div>
+                <div class="border-t border-stone-200 pt-2 space-y-1">
+                    <p class="flex justify-between"><span>Subtotal</span><b>${fmt(d.subtotalPrice)}</b></p>
+                    <p class="flex justify-between"><span>Entrega</span><b>${d.feFinal === 0 ? 'GRÁTIS' : fmt(d.feFinal)}</b></p>
+                    <p class="flex justify-between text-base text-stone-800"><b>Total</b><b class="text-brand-accent">${fmt(d.totalPrice)}</b></p>
+                    <p><b>Pagamento:</b> ${e(d.payment)}${d.payment === 'Dinheiro' && d.troco ? ' (troco para ' + e(d.troco) + ')' : ''}</p>
+                    ${d.obs ? `<p><b>Observações:</b> ${e(d.obs)}</p>` : ''}
+                </div>`;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function confirmarEnvio() {
+            window.open(pendingWhatsUrl, '_blank');
+            document.getElementById('confirm-modal').classList.add('hidden');
+            closeCheckoutModal();
+            cartCombos = [];
+            updateCartUI();
+            document.getElementById('sent-link').href = pendingWhatsUrl;
+            document.getElementById('sent-modal').classList.remove('hidden');
+        }
 
         /* --- CONFIGURAÇÕES (edite aqui) --- */
         const CONFIG = {
@@ -815,12 +927,16 @@
             });
         }
 
-        function openFlavorsModal(comboId) {
+        function openFlavorsModal(comboId, editIdx) {
+            editandoIndex = (typeof editIdx === 'number') ? editIdx : null;
             currentEditingCombo = combos.find(c => c.id === comboId);
-            selectedFlavors = {};
+            const item = editandoIndex !== null ? cartCombos[editandoIndex] : null;
+            selectedFlavors = item ? { ...(item.flavors || {}) } : {};
+            document.getElementById('combo-obs').value = item ? (item.obs || '') : '';
             document.getElementById('modal-combo-title').innerText = currentEditingCombo.name;
             document.getElementById('modal-combo-subtitle').innerText = `Escolha ${currentEditingCombo.qty} marmitas para este combo (${currentEditingCombo.type})`;
             document.getElementById('max-count').innerText = currentEditingCombo.qty;
+            document.getElementById('btn-confirm-combo').innerText = item ? 'Salvar alterações' : 'Adicionar Combo ao Pedido';
             renderFlavorsSelectionList();
             updateFlavorSelectionState();
             document.getElementById('flavors-modal').classList.remove('hidden');
@@ -828,6 +944,7 @@
 
         function closeFlavorsModal() {
             document.getElementById('flavors-modal').classList.add('hidden');
+            if (editandoIndex !== null) { editandoIndex = null; openCheckoutModal(); }
         }
 
         function renderFlavorsSelectionList() {
@@ -899,13 +1016,23 @@
                 price: currentEditingCombo.price,
                 qty: currentEditingCombo.qty,
                 freteGratis: !!currentEditingCombo.freteGratis,
-                flavorsSummary: summaryFlavors
+                flavors: { ...selectedFlavors },
+                flavorsSummary: summaryFlavors,
+                obs: document.getElementById('combo-obs').value.trim()
             };
 
-            cartCombos.push(cartItem);
-            animarCarrinho();
+            const estavaEditando = editandoIndex !== null;
+            if (estavaEditando) {
+                cartItem.cartId = cartCombos[editandoIndex].cartId;
+                cartCombos[editandoIndex] = cartItem;
+            } else {
+                cartCombos.push(cartItem);
+            }
+            editandoIndex = null;
             closeFlavorsModal();
             updateCartUI();
+            animarCarrinho();
+            if (estavaEditando) openCheckoutModal();
         }
 
         function updateCartUI() {
@@ -943,6 +1070,7 @@
             }
 
             renderFreteBanner();
+            salvarCarrinho();
             if (summaryTotalEl) summaryTotalEl.innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
 
             if (totalCount > 0) {
@@ -959,9 +1087,10 @@
                     <div>
                         <h5 class="font-bold text-stone-800 text-xs">${item.name}</h5>
                         <p class="text-[10px] text-stone-500 mt-0.5"><span class="font-semibold">Sabores:</span> ${item.flavorsSummary}</p>
+                        ${item.obs ? `<p class="text-[10px] text-amber-700 mt-0.5">Obs: ${escapeHtml(item.obs)}</p>` : ''}
                         <p class="text-xs font-bold text-brand-accent mt-1">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
                     </div>
-                    <div class="flex flex-col items-center gap-1"><button onclick="duplicarCombo(${index})" title="Duplicar combo" class="text-stone-400 hover:text-emerald-600 p-1"><i class="fa-regular fa-copy text-xs"></i></button><button onclick="removeCartItem(${index})" title="Remover" class="text-stone-400 hover:text-red-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button></div>
+                    <div class="flex flex-col items-center gap-1"><button onclick="editarCombo(${index})" title="Editar combo" class="text-stone-400 hover:text-amber-600 p-1"><i class="fa-solid fa-pen text-xs"></i></button><button onclick="duplicarCombo(${index})" title="Duplicar combo" class="text-stone-400 hover:text-emerald-600 p-1"><i class="fa-regular fa-copy text-xs"></i></button><button onclick="removeCartItem(${index})" title="Remover" class="text-stone-400 hover:text-red-500 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button></div>
                 `;
                 container.appendChild(div);
             });
@@ -1109,6 +1238,7 @@
             cartCombos.forEach((item, index) => {
                 lines.push(``);
                 lines.push(`${eBox} *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})`);
+                if (item.obs) lines.push(`   *Obs do combo:* ${item.obs}`);
                 lines.push(`   *Sabores Escolhidos:*`);
 
                 const saboresArray = item.flavorsSummary.split(', ');
@@ -1150,7 +1280,7 @@
 
             const fullText = lines.join('\n');
             const whatsappUrl = `https://wa.me/5571994125510?text=${encodeURIComponent(fullText)}`;
-            window.open(whatsappUrl, '_blank');
+            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice });
         }
 
         window.onload = function() {
@@ -1160,6 +1290,7 @@
             renderCombos();
             verificarUltimoCliente();
             aplicarModoFechado();
+            restaurarCarrinho();
             atualizarIconeTema();
             renderFreteBanner();
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
