@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Página não encontrada - Tempero da Ilma</title>
+    <meta name="theme-color" content="#3E6B45">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root { color-scheme: light dark; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center;
+               font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #FAF6EC; color: #222; }
+        .card { max-width: 420px; width: 100%; }
+        .logo { width: 140px; height: 140px; border-radius: 50%; object-fit: contain; background: #fff; }
+        h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.9rem; margin: 20px 0 8px; color: #2F5233; }
+        p { margin: 0 0 22px; color: #5c5548; line-height: 1.5; }
+        .btn { display: block; padding: 14px 18px; border-radius: 14px; font-weight: 700; text-decoration: none; margin-bottom: 10px; }
+        .btn-principal { background: #3E6B45; color: #fff; }
+        .btn-zap { background: #fff; color: #2F5233; border: 2px solid #3E6B45; }
+        .btn:focus-visible { outline: 3px solid #8A6A0F; outline-offset: 2px; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #141414; color: #eee; }
+            h1 { color: #E6C36A; }
+            p { color: #b5b0a5; }
+            .btn-zap { background: #1e1e1e; color: #E6C36A; border-color: #E6C36A; }
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <img id="logo" class="logo" alt="Tempero da Ilma" width="140" height="140">
+        <h1>Ops, essa página não existe</h1>
+        <p>O endereço pode ter sido digitado errado ou a página mudou de lugar. O cardápio da semana está a um toque de distância.</p>
+        <a id="voltar" class="btn btn-principal" href="/">Voltar ao cardápio</a>
+        <a class="btn btn-zap" href="https://wa.me/5571994125510" target="_blank" rel="noopener">Falar no WhatsApp</a>
+    </main>
+    <script>
+        // Descobre a pasta do site (no GitHub Pages de projeto, o site fica em /nome-do-repositorio/).
+        // Se o link "Voltar" não levar ao cardápio, escreva a pasta aqui, por exemplo: '/meu-repositorio/'.
+        var PASTA_MANUAL = '';
+        var base = '/';
+        if (PASTA_MANUAL) {
+            base = PASTA_MANUAL;
+        } else if (location.hostname.slice(-10) === '.github.io') {
+            var partes = location.pathname.split('/').filter(Boolean);
+            if (partes.length) base = '/' + partes[0] + '/';
+        }
+        document.getElementById('voltar').href = base;
+        document.getElementById('logo').src = base + 'LOGO.PNG';
+    </script>
+</body>
+</html>
