@@ -88,6 +88,8 @@
         .text-\[11px\]{font-size:12px!important}
         #cart-count{font-size:11px!important}
         html.dark .text-amber-600,html.dark .text-amber-700{color:#E8C25A!important}
+        /* SELO SOBRE A IMAGEM DO COMBO (legível nos dois temas) */
+        .selo-img{background:rgba(255,255,255,.92);color:#222}
         /* MODO ESCURO */
         html.dark body{background:#141414;color:#eee}
         html.dark .bg-white,html.dark .bg-white\/95{background:#1e1e1e!important}
@@ -688,7 +690,7 @@
 
         /* --- CONFIGURAÇÕES (edite aqui) --- */
         const CONFIG = {
-            pixChave: '71994125510'
+            pixChave: 'SUA-CHAVE-PIX-AQUI'
         };
 
         // Frete grátis: somente com Combo de 10 (350g ou 500g)
@@ -1049,7 +1051,7 @@
                     <div>
                         <div class="h-44 w-full overflow-hidden relative">
                             <img loading="lazy" decoding="async" src="${combo.image}" alt="${combo.name}" class="w-full h-full object-cover">
-                            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-stone-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                            <span class="absolute top-3 left-3 selo-img backdrop-blur-md text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
                                 ${combo.qty} Marmitas (${combo.type})
                             </span>
                             ${combo.destaque ? '<span class="absolute top-3 right-3 bg-amber-500 text-stone-900 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">Mais Vendido</span>' : ''}
