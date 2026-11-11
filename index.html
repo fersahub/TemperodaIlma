@@ -22,6 +22,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti para a ideia 19 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -56,13 +58,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         .campo-erro{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.25);background-color:#fef2f2!important;animation:tremer .3s}
         @keyframes tremer{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
         html.dark .campo-erro{background-color:#3b1d1d!important}
-        /* TÍTULOS EM SERIFADA */
         h1,h2,h3{font-family:'Playfair Display',Georgia,serif}
-        /* BRILHO DOURADO NA LOGO */
         .logo-brilho{position:relative;overflow:hidden}
         .logo-brilho::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,236,170,.65) 50%,transparent 65%);transform:translateX(-120%);animation:brilho 5s ease-in-out 1.5s infinite;pointer-events:none}
         @keyframes brilho{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
-        /* TELA DE ABERTURA */
         #splash{position:fixed;inset:0;z-index:100;background:#FAF6EC;display:flex;align-items:center;justify-content:center;animation:splashOut .5s ease 1.2s forwards}
         html.dark #splash{background:#141414}
         .splash-logo{width:150px;height:150px;border-radius:50%;margin:0 auto;animation:logoIn .9s cubic-bezier(.2,.8,.2,1) both}
@@ -72,8 +71,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         @keyframes logoIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
         @keyframes barra{from{transform:scaleX(0)}to{transform:scaleX(1)}}
         @keyframes splashOut{to{opacity:0;visibility:hidden}}
-        @media (prefers-reduced-motion:reduce){#splash{display:none}.logo-brilho::after{animation:none}}
-        /* BARRA DE ETAPAS */
         .etapa{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;padding:6px 4px;border-radius:999px;background:#F1EEE6;color:#6b6358}
         .etapa .etapa-num{width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.08);display:inline-flex;align-items:center;justify-content:center;font-size:11px}
         .etapa.ativa{background:#3E6B45;color:#fff}
@@ -82,26 +79,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         html.dark .etapa{background:#2a2a2a;color:#aaa}
         html.dark .etapa.ativa{background:#3E6B45;color:#fff}
         html.dark .etapa.feita{background:#1f3a25;color:#a7f3d0}
-        #cart-combos-container,#checkout-form,#step-pagamento{scroll-margin-top:70px}
-        /* FOCO VISÍVEL, TEXTOS MAIORES E CONTRASTE */
-        a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #8A6A0F!important;outline-offset:2px!important}
-        html.dark a:focus-visible,html.dark button:focus-visible,html.dark summary:focus-visible,html.dark input:focus-visible,html.dark select:focus-visible,html.dark textarea:focus-visible{outline-color:#E8C25A!important}
-        .text-\[9px\]{font-size:11px!important}
-        .text-\[10px\]{font-size:12px!important}
-        .text-\[11px\]{font-size:12px!important}
-        #cart-count{font-size:11px!important}
-        html.dark .text-amber-600,html.dark .text-amber-700{color:#E8C25A!important}
-        /* SELO SOBRE A IMAGEM DO COMBO (legível nos dois temas) */
-        .selo-img{background:rgba(255,255,255,.92);color:#222}
-        .opcao-bairro:hover,.opcao-bairro:focus-visible{background:rgba(62,107,69,.15)}
-        html.dark .hover\:bg-stone-100:hover{background:#333!important}
-        html.modal-aberto,html.modal-aberto body{overflow:hidden}
-        #checkout-scroll,#flavors-selection-list,#confirm-content{overscroll-behavior:contain}
         #toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:70;display:none;align-items:center;gap:14px;max-width:92vw;background:#222;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.35)}
         #toast button{color:#E6C36A;font-weight:800;text-decoration:underline;white-space:nowrap}
         #toast.show{animation:toastIn .25s ease}
         @keyframes toastIn{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
-        /* MODO ESCURO */
         html.dark body{background:#141414;color:#eee}
         html.dark .bg-white,html.dark .bg-white\/95{background:#1e1e1e!important}
         html.dark .bg-stone-50,html.dark .bg-stone-100{background:#262626!important}
@@ -110,10 +91,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         html.dark .bg-amber-50{background:#3a2e12!important}
         html.dark .text-stone-800,html.dark .text-stone-700{color:#f1f1f1!important}
         html.dark .text-stone-500,html.dark .text-stone-600{color:#a8a8a8!important}
-        html.dark .text-emerald-900,html.dark .text-emerald-700{color:#a7f3d0!important}
-        html.dark .text-amber-900{color:#fde68a!important}
-        html.dark .border-stone-200,html.dark .border-stone-100,html.dark .border-stone-300,html.dark .border-emerald-200,html.dark .border-amber-200{border-color:#3a3a3a!important}
+        html.dark .border-stone-200,html.dark .border-stone-100,html.dark .border-stone-300{border-color:#3a3a3a!important}
         html.dark input,html.dark select,html.dark textarea{background:#1e1e1e!important;color:#eee}
+        .selo-img{background:rgba(255,255,255,.92);color:#222}
+        .opcao-bairro:hover{background:rgba(62,107,69,.15)}
     </style>
 </head>
 <body class="pb-28">
@@ -141,7 +122,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     </p>
                 </div>
             </div>
-            <div class="flex items-center gap-2"><div class="text-right" id="business-status-container"></div><button id="theme-btn" onclick="alternarTema()" aria-label="Alternar tema" class="w-9 h-9 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center"><i class="fa-solid fa-moon"></i></button></div>
+            <div class="flex items-center gap-2">
+                <!-- (14) Botão flutuante rápido para compartilhar -->
+                <button onclick="compartilharCardapio()" aria-label="Indicar para um amigo" class="w-9 h-9 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition" title="Indique para um amigo"><i class="fa-solid fa-share-nodes"></i></button>
+                <div class="text-right" id="business-status-container"></div>
+                <button id="theme-btn" onclick="alternarTema()" aria-label="Alternar tema" class="w-9 h-9 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center"><i class="fa-solid fa-moon"></i></button>
+            </div>
         </div>
     </header>
 
@@ -159,13 +145,20 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <span class="bg-brand-primary text-stone-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Combos Semanais</span>
             <h2 class="text-2xl md:text-3xl font-extrabold">Monte o seu Pacote de Marmitas</h2>
             <p class="text-stone-300 text-xs md:text-sm max-w-md mx-auto">Escolha seus combos de marmitas e monte o cardápio da sua preferência!</p>
+            
+            <!-- (15) Mini Calculadora / Assistente de Escolha de Combo -->
+            <div class="pt-3">
+                <button type="button" onclick="abrirAssistenteCombo()" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-xs px-4 py-2 rounded-xl backdrop-blur-sm transition">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Em dúvida? Use nosso planejador rápido
+                </button>
+            </div>
         </div>
     </section>
 
     <!-- CONTAINER PRINCIPAL -->
     <main class="max-w-4xl mx-auto px-4 pt-8 space-y-10">
 
-        <!-- BOTÃO DE REPETIR ÚLTIMO PEDIDO (SE HOUVER) -->
+        <!-- BOTÃO DE REPETIR ÚLTIMO PEDIDO -->
         <div id="quick-reorder-banner" class="hidden bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
@@ -181,27 +174,29 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             </button>
         </div>
 
-        <!-- SEÇÃO DE PRATOS COM FILTRO RÁPIDO -->
+        <!-- SEÇÃO DE PRATOS COM FILTRO E MODO DE EXIBIÇÃO (12 e 26) -->
         <section class="space-y-4">
             <div class="border-b border-stone-200 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h3 class="font-bold text-lg text-stone-800 flex items-center gap-2">
                         <i class="fa-solid fa-fire text-amber-500"></i> Cardápio da Semana
                     </h3>
-                    <p class="text-xs text-stone-500">Consulte os pratos disponíveis nesta semana. Feitos sob demanda:</p>
+                    <p class="text-xs text-stone-500">Consulte os pratos disponíveis nesta semana:</p>
                 </div>
 
-                <!-- BOTOES DE FILTRO RÁPIDO -->
-                <div class="flex items-center gap-1.5 bg-stone-200 p-1 rounded-xl self-start sm:self-auto">
-                    <button onclick="filtrarPratos('Todos')" id="filter-btn-Todos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-stone-800 shadow-sm">
-                        Todos
-                    </button>
-                    <button onclick="filtrarPratos('Tradicional')" id="filter-btn-Tradicional" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">
-                        Tradicional
-                    </button>
-                    <button onclick="filtrarPratos('Linha Fit')" id="filter-btn-Linha Fit" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">
-                        Linha Fit
-                    </button>
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- (12) Alternância de visualização: Grid vs Lista Compacta -->
+                    <div class="flex items-center gap-1 bg-stone-200 p-1 rounded-xl">
+                        <button onclick="mudarModoExibicao('grid')" id="view-btn-grid" class="view-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-white text-stone-800 shadow-sm" title="Visualização em Cards"><i class="fa-solid fa-grip"></i></button>
+                        <button onclick="mudarModoExibicao('lista')" id="view-btn-lista" class="view-btn px-2.5 py-1 rounded-lg text-xs font-bold text-stone-600 hover:text-stone-800" title="Visualização em Lista Compacta"><i class="fa-solid fa-list"></i></button>
+                    </div>
+
+                    <!-- BOTOES DE FILTRO RÁPIDO (26) -->
+                    <div class="flex items-center gap-1.5 bg-stone-200 p-1 rounded-xl">
+                        <button onclick="filtrarPratos('Todos')" id="filter-btn-Todos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-stone-800 shadow-sm">Todos</button>
+                        <button onclick="filtrarPratos('Tradicional')" id="filter-btn-Tradicional" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">Tradicional</button>
+                        <button onclick="filtrarPratos('Linha Fit')" id="filter-btn-Linha Fit" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">Linha Fit</button>
+                    </div>
                 </div>
             </div>
 
@@ -223,26 +218,86 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     <p><span class="font-bold text-stone-800">300g (Linha Fit):</span> porção leve, boa para uma refeição mais enxuta ou para quem tem apetite menor.</p>
                     <p><span class="font-bold text-stone-800">350g (Tradicional):</span> porção padrão, um almoço completo para a maioria das pessoas.</p>
                     <p><span class="font-bold text-stone-800">500g (Tradicional):</span> porção reforçada, para quem tem mais fome ou precisa de mais energia no dia.</p>
-                    <p class="text-stone-500">Em dúvida? Comece pelo 350g e ajuste nos próximos pedidos.</p>
                 </div>
             </details>
             <div id="combos-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
+        <!-- (20) Guia de Conservação e Aquecimento -->
+        <section class="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm space-y-3">
+            <h4 class="font-bold text-stone-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-snowflake text-brand-secondary"></i> Como guardar e aquecer suas marmitas
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-stone-600">
+                <div class="bg-stone-50 p-3 rounded-xl border border-stone-100 space-y-1">
+                    <p class="font-bold text-stone-800"><i class="fa-regular fa-calendar-days text-brand-secondary"></i> Na Geladeira</p>
+                    <p>Suas marmitas duram perfeitamente por até 3 dias na geladeira (entre 2°C e 4°C).</p>
+                </div>
+                <div class="bg-stone-50 p-3 rounded-xl border border-stone-100 space-y-1">
+                    <p class="font-bold text-stone-800"><i class="fa-solid fa-temperature-arrow-down text-brand-secondary"></i> No Freezer</p>
+                    <p>Para durar mais tempo, mantenha congelado por até 30 dias. Retire do freezer para a geladeira na véspera.</p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-[#1B2E20] text-stone-300 mt-16 pt-8 pb-24 border-t border-stone-800 text-center text-xs space-y-4">
+    <!-- FOOTER COM ATALHOS POR ASSUNTO (30) -->
+    <footer class="bg-[#1B2E20] text-stone-300 mt-16 pt-8 pb-24 border-t border-stone-800 text-center text-xs space-y-4 px-4">
         <div class="flex justify-center gap-4 text-base">
             <a href="https://instagram.com" target="_blank" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center hover:bg-brand-secondary transition text-white"><i class="fa-brands fa-instagram"></i></a>
             <a href="https://wa.me/5571994125510" target="_blank" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center hover:bg-brand-secondary transition text-white"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
         <p class="font-bold text-white text-sm">Tempero da Ilma - Marmitaria</p>
         <p class="text-stone-400">Atendimento e Pedidos via WhatsApp: (71) 99412-5510 | Salvador - BA</p>
-        <p class="text-stone-500">© Todos os direitos reservados.</p>
+        
+        <!-- (30) Atalhos de Contato por Assunto -->
+        <div class="flex flex-wrap justify-center gap-2 pt-2">
+            <a href="https://wa.me/5571994125510?text=Ol%C3%A1!%20Gostaria%20de%20tirar%20d%C3%BAvidas%20sobre%20as%20entregas." target="_blank" class="bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition">🚗 Dúvidas de Entrega</a>
+            <a href="https://wa.me/5571994125510?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20um%20pedido%20recente." target="_blank" class="bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition">📝 Alterar Pedido</a>
+            <a href="https://wa.me/5571994125510?text=Ol%C3%A1!%20Gostaria%20de%20conversar%20sobre%20parcerias%20ou%20pedidos%20corporativos." target="_blank" class="bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition">💼 Parcerias / Empresas</a>
+        </div>
+        
+        <p class="text-stone-500 pt-2">© Todos os direitos reservados.</p>
     </footer>
 
     <div id="toast" role="status" aria-live="polite"></div>
+
+    <!-- MODAL DO ASSISTENTE DE ESCOLHA (15) -->
+    <div id="quiz-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-center hidden p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-stone-200 pb-3">
+                <h3 class="font-bold text-stone-800 text-base">Planejador de Combos</h3>
+                <button onclick="document.getElementById('quiz-modal').classList.add('hidden')" class="text-stone-400 hover:text-stone-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-stone-700 mb-1">Para quantas pessoas é o pedido?</label>
+                    <select id="quiz-pessoas" class="w-full bg-stone-50 border border-stone-200 rounded-lg p-2.5 text-xs font-medium">
+                        <option value="1">Apenas 1 pessoa (Individual)</option>
+                        <option value="2">Casal / 2 pessoas</option>
+                        <option value="3">Família (3 ou mais pessoas)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-stone-700 mb-1">Quantas marmitas você precisa na semana?</label>
+                    <select id="quiz-qtd" class="w-full bg-stone-50 border border-stone-200 rounded-lg p-2.5 text-xs font-medium">
+                        <option value="5">5 marmitas (Refeições parciais)</option>
+                        <option value="10">10 marmitas (Semana completa - ganha frete grátis!)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-stone-700 mb-1">Qual o estilo de preferência?</label>
+                    <select id="quiz-estilo" class="w-full bg-stone-50 border border-stone-200 rounded-lg p-2.5 text-xs font-medium">
+                        <option value="Tradicional 350g">Tradicional (Padrão 350g)</option>
+                        <option value="Tradicional 500g">Tradicional Reforçado (500g)</option>
+                        <option value="Linha Fit 300g">Linha Fit Leve (300g)</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" onclick="aplicarSugestaoQuiz()" class="w-full bg-brand-secondary hover:bg-brand-accent text-white font-bold py-3 rounded-xl text-xs">Ver Combo Ideal e Montar</button>
+        </div>
+    </div>
 
     <!-- MODAL DE CONFIRMAÇÃO -->
     <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-end sm:items-center hidden">
@@ -273,7 +328,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <a id="sent-link" href="#" target="_blank" rel="noopener" class="block text-xs text-emerald-700 underline">O WhatsApp não abriu? Toque aqui</a>
             <button type="button" onclick="copiarPedido()" class="w-full bg-white border-2 border-emerald-600 text-emerald-700 font-bold py-2.5 rounded-xl text-sm"><i class="fa-regular fa-copy"></i> Copiar mensagem do pedido</button>
             <textarea id="sent-texto" readonly class="hidden w-full h-28 border border-stone-200 rounded-lg p-2 text-[11px] text-left"></textarea>
-            <p class="text-[11px] text-stone-500">Sem WhatsApp neste aparelho? Copie a mensagem e envie para (71) 99412-5510 por outro aparelho.</p>
             <button type="button" onclick="document.getElementById('sent-modal').classList.add('hidden')" class="w-full bg-brand-secondary text-white font-bold py-3 rounded-xl text-sm">Fechar</button>
         </div>
     </div>
@@ -347,7 +401,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     <button type="button" data-step="3" onclick="irParaEtapa(3)" class="etapa"><span class="etapa-num">3</span> Pagamento</button>
                 </div>
                 <div class="space-y-3">
-                    <p class="text-xs font-bold text-stone-500 uppercase tracking-wider">Combos no Carrinho</p>
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs font-bold text-stone-500 uppercase tracking-wider">Combos no Carrinho</p>
+                        <!-- (16) Botão Preencher com Último Endereço -->
+                        <button type="button" onclick="preencherUltimoEndereco()" class="text-[11px] text-brand-secondary font-bold hover:underline"><i class="fa-solid fa-address-book"></i> Usar último endereço</button>
+                    </div>
                     <div id="cart-combos-container" class="space-y-3"></div>
                 </div>
 
@@ -421,7 +479,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                             <div id="bairro-resultados" class="hidden mb-2 bg-white border border-stone-200 rounded-lg max-h-48 overflow-y-auto"></div>
                             <select id="cust-bairro" required onchange="aoMudarBairroManualmente()" class="w-full bg-white border border-stone-200 rounded-lg p-2.5 text-xs font-medium focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
                                 <option value="" data-taxa="0">-- Selecione o bairro --</option>
-
                                 <optgroup label="São Caetano / Liberdade">
                                     <option value="São Caetano" data-taxa="7.00">São Caetano</option>
                                     <option value="Boa Vista de São Caetano" data-taxa="7.00">Boa Vista de São Caetano</option>
@@ -434,103 +491,41 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                                     <option value="IAPI" data-taxa="7.00">IAPI</option>
                                     <option value="Curuzu" data-taxa="7.00">Curuzu</option>
                                 </optgroup>
-
                                 <optgroup label="Pirajá / Campinas / Marechal">
                                     <option value="Pirajá" data-taxa="8.50">Pirajá</option>
                                     <option value="Campinas de Pirajá" data-taxa="8.50">Campinas de Pirajá</option>
                                     <option value="Marechal Rondon" data-taxa="8.50">Marechal Rondon</option>
                                 </optgroup>
-
-                                <optgroup label="Centro / Brotas">
+                                <optgroup label="Brotas / Centro">
                                     <option value="Brotas" data-taxa="9.00">Brotas</option>
-                                    <option value="Campinas de Brotas" data-taxa="9.00">Campinas de Brotas</option>
                                     <option value="Matatu" data-taxa="9.00">Matatu</option>
                                     <option value="Vila Laura" data-taxa="9.00">Vila Laura</option>
-                                    <option value="Bonocô" data-taxa="9.00">Bonocô</option>
                                     <option value="Nazaré" data-taxa="9.00">Nazaré</option>
                                     <option value="Centro" data-taxa="9.00">Centro</option>
-                                    <option value="Campo Grande" data-taxa="9.00">Campo Grande</option>
-                                    <option value="Garcia" data-taxa="9.00">Garcia</option>
-                                    <option value="Barris" data-taxa="9.00">Barris</option>
-                                    <option value="Tororó" data-taxa="9.00">Tororó</option>
-                                    <option value="Graça" data-taxa="9.00">Graça</option>
                                 </optgroup>
-
-                                <optgroup label="Cidade Baixa & Itapagipe">
-                                    <option value="Calçada" data-taxa="10.00">Calçada</option>
-                                    <option value="Mares" data-taxa="10.00">Mares</option>
-                                    <option value="Roma" data-taxa="10.00">Roma</option>
-                                    <option value="Uruguai" data-taxa="10.00">Uruguai</option>
-                                    <option value="Massaranduba" data-taxa="10.00">Massaranduba</option>
-                                    <option value="Boa Viagem" data-taxa="10.00">Boa Viagem</option>
-                                    <option value="Ribeira" data-taxa="10.00">Ribeira</option>
-                                    <option value="Bonfim" data-taxa="10.00">Bonfim</option>
-                                    <option value="Monte Serrat" data-taxa="10.00">Monte Serrat</option>
-                                </optgroup>
-
                                 <optgroup label="Cabula / Imbuí / Pernambués">
                                     <option value="Cabula" data-taxa="10.00">Cabula</option>
-                                    <option value="Saboeiro" data-taxa="10.00">Saboeiro</option>
-                                    <option value="Narandiba" data-taxa="10.00">Narandiba</option>
                                     <option value="Pernambués" data-taxa="10.00">Pernambués</option>
-                                    <option value="Beiru / Tancredo Neves" data-taxa="10.00">Beiru / Tancredo Neves</option>
-                                    <option value="Doron" data-taxa="10.00">Doron</option>
-                                    <option value="Engomadeira" data-taxa="10.00">Engomadeira</option>
-                                    <option value="Mata Escura" data-taxa="10.00">Mata Escura</option>
                                     <option value="Imbuí" data-taxa="10.00">Imbuí</option>
-                                    <option value="Stiep" data-taxa="10.00">Stiep</option>
                                 </optgroup>
-
-                                <optgroup label="Orla Central / Barra / Pituba">
+                                <optgroup label="Barra / Pituba / Orla">
                                     <option value="Barra" data-taxa="12.00">Barra</option>
-                                    <option value="Ondina" data-taxa="12.00">Ondina</option>
                                     <option value="Rio Vermelho" data-taxa="12.00">Rio Vermelho</option>
-                                    <option value="Federação" data-taxa="12.00">Federação</option>
-                                    <option value="Engenho Velho da Federação" data-taxa="12.00">Engenho Velho da Federação</option>
-                                    <option value="Amaralina" data-taxa="12.00">Amaralina</option>
                                     <option value="Pituba" data-taxa="12.00">Pituba</option>
-                                    <option value="Itaigara" data-taxa="12.00">Itaigara</option>
-                                    <option value="Horto Florestal" data-taxa="12.00">Horto Florestal</option>
-                                    <option value="Costa Azul" data-taxa="12.00">Costa Azul</option>
                                 </optgroup>
-
-                                <optgroup label="Miolo / Pau da Lima / Cajazeiras">
+                                <optgroup label="Outros Bairros de Salvador">
                                     <option value="Pau da Lima" data-taxa="13.00">Pau da Lima</option>
-                                    <option value="São Marcos" data-taxa="13.00">São Marcos</option>
-                                    <option value="Sete de Abril" data-taxa="13.00">Sete de Abril</option>
-                                    <option value="Castelo Branco" data-taxa="13.00">Castelo Branco</option>
-                                    <option value="Canabrava" data-taxa="13.00">Canabrava</option>
-                                    <option value="Dom Avelar" data-taxa="13.00">Dom Avelar</option>
-                                    <option value="Cajazeiras (I a XI)" data-taxa="13.00">Cajazeiras (I a XI)</option>
-                                    <option value="Fazenda Grande (1 a 4)" data-taxa="13.00">Fazenda Grande (1 a 4)</option>
-                                    <option value="Boca da Mata" data-taxa="13.00">Boca da Mata</option>
-                                </optgroup>
-
-                                <optgroup label="Orla Norte / Itapuã / Paralela">
-                                    <option value="Boca do Rio" data-taxa="15.00">Boca do Rio</option>
-                                    <option value="Patamares" data-taxa="15.00">Patamares</option>
-                                    <option value="Piatã" data-taxa="15.00">Piatã</option>
                                     <option value="Itapuã" data-taxa="15.00">Itapuã</option>
-                                    <option value="Stella Maris" data-taxa="15.00">Stella Maris</option>
-                                    <option value="Bairro da Paz" data-taxa="15.00">Bairro da Paz</option>
-                                    <option value="Mussurunga" data-taxa="15.00">Mussurunga</option>
-                                    <option value="São Cristóvão" data-taxa="15.00">São Cristóvão</option>
-                                    <option value="Jardim das Margaridas" data-taxa="15.00">Jardim das Margaridas</option>
-                                </optgroup>
-
-                                <optgroup label="Subúrbio Profundo & Valéria">
-                                    <option value="Lobato" data-taxa="15.00">Lobato</option>
-                                    <option value="Plataforma" data-taxa="15.00">Plataforma</option>
                                     <option value="Periperi" data-taxa="15.00">Periperi</option>
-                                    <option value="Coutos" data-taxa="15.00">Coutos</option>
-                                    <option value="Fazenda Coutos" data-taxa="15.00">Fazenda Coutos</option>
-                                    <option value="Paripe" data-taxa="15.00">Paripe</option>
-                                    <option value="Valéria" data-taxa="15.00">Valéria</option>
                                 </optgroup>
                             </select>
                         </div>
 
                         <div id="bairro-confirma" class="hidden"></div>
+                        <!-- (18) Alerta de Bairro Fora de Área (inserido dinamicamente se necessário) -->
+                        <div id="bairro-fora-alerta" class="hidden bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3 text-xs">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Este bairro pode estar fora da nossa rota principal. <a href="https://wa.me/5571994125510?text=Olá! Queria confirmar se entregam no bairro..." target="_blank" class="font-bold underline">Confirme no WhatsApp</a>.
+                        </div>
 
                         <!-- BOTÃO DE CALCULAR FRETE -->
                         <div class="pt-1">
@@ -557,7 +552,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                         <div id="pix-qr-area" class="hidden space-y-2 text-center">
                             <div id="pix-qr" class="inline-block" style="background:#fff;padding:6px;border-radius:8px;width:188px;height:188px"></div>
                             <button type="button" onclick="copiarPixCopiaECola()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg">Copiar Pix copia e cola</button>
-                            <p class="text-stone-600">No app do seu banco, escolha Pix e leia o QR Code ou cole o código copiado.</p>
                         </div>
                         <p class="text-stone-700">Chave: <span id="pix-chave" class="font-bold break-all"></span></p>
                         <button type="button" onclick="copiarPix()" class="bg-white border border-emerald-300 text-emerald-900 font-bold px-3 py-1.5 rounded-lg">Copiar só a chave</button>
@@ -590,6 +584,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         let selectedFlavors = {};
         let currentFlavorFilter = 'Todos';
         let currentFlavorSearch = '';
+        let modoExibicaoPratos = 'grid'; // (12) 'grid' ou 'lista'
         let editandoIndex = null;
         let pendingWhatsUrl = '';
         let pendingPedido = null;
@@ -685,39 +680,41 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             aoMudarBairroManualmente();
         }
 
-        function pedirConfirmacaoBairro() {
-            const sel = document.getElementById('cust-bairro');
-            const opt = sel.options[sel.selectedIndex];
-            if (!opt || !opt.value) return;
-            bairroPendenteConfirmacao = true;
-            const taxa = parseFloat(opt.getAttribute('data-taxa') || 0).toFixed(2).replace('.', ',');
-            const box = document.getElementById('bairro-confirma');
-            box.innerHTML = `<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs space-y-2"><p class="text-amber-900">Bairro identificado pelo CEP: <b>${escapeHtml(opt.value)}</b> (frete R$ ${taxa}). Está correto?</p><div class="flex gap-2"><button type="button" onclick="confirmarBairro(true)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg">Sim, está correto</button><button type="button" onclick="confirmarBairro(false)" class="flex-1 bg-white border border-stone-300 text-stone-700 font-bold py-2 rounded-lg">Não, trocar</button></div></div>`;
-            box.classList.remove('hidden');
-        }
-
-        function confirmarBairro(ok) {
+        function aoMudarBairroManualmente() {
             bairroPendenteConfirmacao = false;
-            const box = document.getElementById('bairro-confirma');
-            box.classList.add('hidden');
-            box.innerHTML = '';
-            if (!ok) {
-                document.getElementById('cust-bairro').value = '';
-                aoMudarBairroManualmente();
-                document.getElementById('bairro-busca').focus();
+            const bc = document.getElementById('bairro-confirma');
+            if (bc) { bc.classList.add('hidden'); bc.innerHTML = ''; }
+            const select = document.getElementById('cust-bairro');
+            const option = select.options[select.selectedIndex];
+            const taxa = parseFloat(option.getAttribute('data-taxa') || 0);
+            const statusEl = document.getElementById('shipping-calc-status');
+            const alertaFora = document.getElementById('bairro-fora-alerta');
+            if(alertaFora) alertaFora.classList.add('hidden');
+
+            if (taxa > 0) {
+                currentShippingFee = taxa;
+                statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Bairro ajustado para ${option.value}! Frete: R$ ${taxa.toFixed(2).replace('.', ',')}</span>`;
+            } else {
+                currentShippingFee = null;
+                statusEl.innerHTML = `<span class="text-red-500">Selecione um bairro válido.</span>`;
             }
+            updateCartUI();
         }
 
-        function avisarBairroForaDaLista(nome) {
-            const box = document.getElementById('bairro-confirma');
-            box.innerHTML = `<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">O CEP indica o bairro <b>${escapeHtml(nome)}</b>, que não está na nossa lista de entregas. Busque o bairro mais próximo acima ou fale com a gente pelo WhatsApp.</div>`;
-            box.classList.remove('hidden');
-        }
+        function calcularFreteEBuscarBairro() {
+            const selectBairro = document.getElementById('cust-bairro');
+            const statusEl = document.getElementById('shipping-calc-status');
 
-        /* --- AVISOS RÁPIDOS (TOAST) --- */
-        function esconderToast() {
-            document.getElementById('toast').style.display = 'none';
-            clearTimeout(toastTimer);
+            if (selectBairro.selectedIndex === 0) {
+                statusEl.innerHTML = `<span class="text-red-500 font-bold">Escolha o seu bairro na busca ou na lista acima para calcular o frete.</span>`;
+                document.getElementById('bairro-busca').focus();
+                return;
+            }
+
+            const option = selectBairro.options[selectBairro.selectedIndex];
+            currentShippingFee = parseFloat(option.getAttribute('data-taxa') || 0);
+            updateCartUI();
+            statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado para ${escapeHtml(option.value)}: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}</span>`;
         }
 
         function mostrarToast(msg, acaoTexto, acaoFn, ms) {
@@ -741,8 +738,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             toastTimer = setTimeout(esconderToast, ms || 4500);
         }
 
-        /* --- JANELAS: botão voltar, Esc, toque fora e trava de rolagem --- */
-        const MODAIS_ORDEM = ['sent-modal', 'confirm-modal', 'flavors-modal', 'checkout-modal'];
+        function esconderToast() {
+            document.getElementById('toast').style.display = 'none';
+            clearTimeout(toastTimer);
+        }
+
+        const MODAIS_ORDEM = ['quiz-modal', 'sent-modal', 'confirm-modal', 'flavors-modal', 'checkout-modal'];
 
         function modalEstaAberto(id) {
             const el = document.getElementById(id);
@@ -750,16 +751,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
 
         function fecharModalPorId(id) {
-            if (id === 'checkout-modal') {
-                closeCheckoutModal();
-            } else if (id === 'flavors-modal') {
-                if (Object.keys(selectedFlavors).length > 0) {
-                    mostrarToast('Montagem do combo descartada.');
-                }
-                closeFlavorsModal();
-            } else {
-                document.getElementById(id).classList.add('hidden');
-            }
+            if (id === 'checkout-modal') closeCheckoutModal();
+            else if (id === 'flavors-modal') closeFlavorsModal();
+            else document.getElementById(id).classList.add('hidden');
         }
 
         function fecharModalDoTopo() {
@@ -799,7 +793,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModalDoTopo(); });
         }
 
-        /* --- COPIAR O PEDIDO --- */
         async function copiarPedido() {
             const texto = pendingPedido && pendingPedido.fullText;
             if (!texto) return;
@@ -818,7 +811,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             }
         }
 
-        /* --- CONFERIR RUA x CEP --- */
         function normalizarRua(t) {
             return normalizarTexto(t).replace(/[^a-z0-9 ]/g, ' ')
                 .replace(/\b(rua|r|avenida|av|travessa|tv|alameda|al|estrada|estr|praca|pc|largo|ladeira|beco|rodovia|rod)\b/g, ' ')
@@ -884,7 +876,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             return String(t).replace(/[&<>"']/g, c => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[c]));
         }
 
-        /* --- CARRINHO SALVO NO CELULAR --- */
         function salvarCarrinho() {
             try { localStorage.setItem('tempero_ilma_carrinho', JSON.stringify(cartCombos)); } catch (e) {}
         }
@@ -902,7 +893,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             } catch (e) {}
         }
 
-        /* --- EDITAR COMBO --- */
         function flavorsDoResumo(resumo) {
             const o = {};
             resumo.split(', ').forEach(x => {
@@ -921,7 +911,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             openFlavorsModal(it.comboId, i);
         }
 
-        /* --- CONFIRMAÇÃO E ENVIO --- */
         function abrirConfirmacao(url, d) {
             pendingWhatsUrl = url;
             pendingPedido = d;
@@ -959,16 +948,19 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             updateCartUI();
             document.getElementById('sent-link').href = pendingWhatsUrl;
             document.getElementById('sent-modal').classList.remove('hidden');
+            
+            // (19) Efeito visual de confete ao finalizar
+            if(window.confetti) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
         }
 
-        /* --- CONFIGURAÇÕES (edite aqui) --- */
         const CONFIG = {
             pixChave: '+5571994125510',
             pixNome: 'TEMPERO DA ILMA',
             pixCidade: 'SALVADOR'
         };
 
-        // Frete grátis: somente com Combo de 10 (350g ou 500g)
         function temFreteGratis() { return cartCombos.some(c => c.freteGratis); }
 
         function freteEfetivo() {
@@ -1052,7 +1044,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             atualizarIconeTema();
         }
 
-        /* --- PIX COPIA E COLA + QR CODE (padrão BR Code do Banco Central) --- */
         function crc16(str) {
             let crc = 0xFFFF;
             for (let i = 0; i < str.length; i++) {
@@ -1147,7 +1138,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             }
         }
 
-        /* --- CONTADOR REGRESSIVO: sempre até a próxima sexta, 23:59:59 --- */
         function iniciarContadorRegressivo() {
             function atualizarTimer() {
                 const now = new Date();
@@ -1170,7 +1160,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 text += `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
                 timerText.innerText = text;
             }
-
             atualizarTimer();
             setInterval(atualizarTimer, 1000);
         }
@@ -1186,7 +1175,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         function filtrarPratos(tag) {
             currentFlavorFilter = tag;
-
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('bg-white', 'text-stone-800', 'shadow-sm');
                 btn.classList.add('text-stone-600');
@@ -1196,15 +1184,76 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 activeBtn.classList.add('bg-white', 'text-stone-800', 'shadow-sm');
                 activeBtn.classList.remove('text-stone-600');
             }
-
             renderFlavorsDisplay();
+        }
+
+        // (12) Alternar Modo de Exibição dos Pratos
+        function mudarModoExibicao(modo) {
+            modoExibicaoPratos = modo;
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-stone-800', 'shadow-sm');
+                btn.classList.add('text-stone-600');
+            });
+            document.getElementById(`view-btn-${modo}`).classList.add('bg-white', 'text-stone-800', 'shadow-sm');
+            document.getElementById(`view-btn-${modo}`).classList.remove('text-stone-600');
+            renderFlavorsDisplay();
+        }
+
+        // (14) Função para Indicar o Cardápio
+        function compartilharCardapio() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Tempero da Ilma - Cardápio de Marmitas',
+                    text: 'Olha que cardápio incrível de marmitas caseiras para este sábado no Tempero da Ilma!',
+                    url: window.location.href
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                mostrarToast('Link do cardápio copiado para compartilhar!');
+            }
+        }
+
+        // (15) Assistente de Escolha de Combo (Quiz)
+        function abrirAssistenteCombo() {
+            document.getElementById('quiz-modal').classList.remove('hidden');
+        }
+
+        function aplicarSugestaoQuiz() {
+            const qtd = document.getElementById('quiz-qtd').value;
+            const estilo = document.getElementById('quiz-estilo').value;
+            document.getElementById('quiz-modal').classList.add('hidden');
+
+            let comboAlvoId = 'combo-5-350g';
+            if (qtd === '10' && estilo.includes('350g')) comboAlvoId = 'combo-10-350g';
+            else if (qtd === '5' && estilo.includes('500g')) comboAlvoId = 'combo-5-500g';
+            else if (qtd === '10' && estilo.includes('500g')) comboAlvoId = 'combo-10-500g';
+            else if (qtd === '5' && estilo.includes('Fit')) comboAlvoId = 'combo-5-300g-fit';
+            else if (qtd === '10' && estilo.includes('Fit')) comboAlvoId = 'combo-10-300g-fit';
+
+            openFlavorsModal(comboAlvoId);
+            mostrarToast('Sugestão aplicada! Monte seus pratos abaixo.');
+        }
+
+        // (16) Preencher com Último Endereço Salvo
+        function preencherUltimoEndereco() {
+            try {
+                const salvo = localStorage.getItem('tempero_ilma_historico_pedido');
+                if (!salvo) { mostrarToast('Nenhum endereço anterior salvo.'); return; }
+                const dados = JSON.parse(salvo).cliente || {};
+                if(dados.rua) document.getElementById('cust-rua').value = dados.rua;
+                if(dados.numero) document.getElementById('cust-numero').value = dados.numero;
+                if(dados.comp) document.getElementById('cust-comp').value = dados.comp;
+                if(dados.cep) document.getElementById('cust-cep').value = dados.cep;
+                if(dados.bairro && selecionarBairroNoSelect(dados.bairro)) aoMudarBairroManualmente();
+                mostrarToast('Endereço anterior preenchido!');
+            } catch(e) {
+                mostrarToast('Erro ao recuperar endereço.');
+            }
         }
 
         function mascaraCep(input) {
             let v = input.value.replace(/\D/g, '');
-            if (v.length > 5) {
-                v = v.substring(0, 5) + '-' + v.substring(5, 8);
-            }
+            if (v.length > 5) v = v.substring(0, 5) + '-' + v.substring(5, 8);
             input.value = v;
         }
 
@@ -1218,16 +1267,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const msg = (cls, html) => { st.innerHTML = `<span class="${cls}">${html}</span>`; };
             msg('text-stone-500', '<i class="fa-solid fa-spinner animate-spin"></i> Consultando CEP...');
 
-            const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 8000);
             try {
-                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: ctrl.signal });
-                if (!response.ok) throw new Error('http');
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                if (!response.ok) throw new Error();
                 const data = await response.json();
-                clearTimeout(timer);
-
                 if (data.erro) {
-                    msg('text-amber-700', 'CEP não encontrado. Confira os números ou preencha o endereço abaixo.');
+                    msg('text-amber-700', 'CEP não encontrado. Preencha o endereço abaixo.');
                     return;
                 }
                 msg('text-emerald-600', '<i class="fa-solid fa-circle-check"></i> CEP encontrado.');
@@ -1235,100 +1280,32 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
                 if (data.logradouro) {
                     const campo = document.getElementById('cust-rua');
-                    const atual = campo.value.trim();
-                    if (!atual || atual === ultimaRuaAutomatica) {
-                        campo.value = data.logradouro;
-                        ultimaRuaAutomatica = data.logradouro;
-                        ruaConfirmadaTexto = '';
-                        ruaPendenteConfirmacao = false;
-                        esconderAvisoRua();
-                        limparErro('cust-rua');
-                    } else {
-                        verificarRuaComCep();
-                    }
+                    campo.value = data.logradouro;
+                    ultimaRuaAutomatica = data.logradouro;
                 }
                 if (data.bairro) {
-                    if (selecionarBairroNoSelect(data.bairro)) { aoMudarBairroManualmente(); pedirConfirmacaoBairro(); }
-                    else avisarBairroForaDaLista(data.bairro);
+                    if (selecionarBairroNoSelect(data.bairro)) { 
+                        aoMudarBairroManualmente(); 
+                    } else {
+                        // (18) Alerta de Bairro Fora de Área
+                        const alertaFora = document.getElementById('bairro-fora-alerta');
+                        if(alertaFora) alertaFora.classList.remove('hidden');
+                    }
                 }
             } catch (err) {
-                clearTimeout(timer);
                 ultimoCepConsultado = '';
-                msg('text-red-500', 'Não consegui consultar o CEP agora. Escolha o bairro na lista.');
+                msg('text-red-500', 'Não consegui consultar o CEP. Escolha o bairro na lista.');
             }
         }
 
         function selecionarBairroNoSelect(nomeBairro) {
-            const norm = s => s.toLowerCase().normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "").replace(/\(.*?\)/g, "").trim();
+            const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\(.*?\)/g, "").trim();
             const select = document.getElementById('cust-bairro');
             const termo = norm(nomeBairro || '');
-            if (!termo) return false;
-
             const opts = Array.from(select.options).filter(o => o.value);
-
-            const achado =
-                opts.find(o => norm(o.value) === termo) ||
-                opts.find(o => norm(o.value).startsWith(termo) || termo.startsWith(norm(o.value))) ||
-                opts.find(o => norm(o.value).includes(termo));
-
-            if (achado) {
-                select.value = achado.value;
-                return true;
-            }
+            const achado = opts.find(o => norm(o.value) === termo || norm(o.value).includes(termo));
+            if (achado) { select.value = achado.value; return true; }
             return false;
-        }
-
-        function calcularFreteEBuscarBairro() {
-            const selectBairro = document.getElementById('cust-bairro');
-            const statusEl = document.getElementById('shipping-calc-status');
-
-            if (selectBairro.selectedIndex === 0) {
-                statusEl.innerHTML = `<span class="text-red-500 font-bold">Escolha o seu bairro na busca ou na lista acima para calcular o frete.</span>`;
-                document.getElementById('bairro-busca').focus();
-                return;
-            }
-
-            const option = selectBairro.options[selectBairro.selectedIndex];
-            currentShippingFee = parseFloat(option.getAttribute('data-taxa') || 0);
-            updateCartUI();
-            statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Frete calculado para ${escapeHtml(option.value)}: R$ ${currentShippingFee.toFixed(2).replace('.', ',')}</span>`;
-        }
-
-        function aoMudarBairroManualmente() {
-            bairroPendenteConfirmacao = false;
-            const bc = document.getElementById('bairro-confirma');
-            if (bc) { bc.classList.add('hidden'); bc.innerHTML = ''; }
-            const select = document.getElementById('cust-bairro');
-            const option = select.options[select.selectedIndex];
-            const taxa = parseFloat(option.getAttribute('data-taxa') || 0);
-            const statusEl = document.getElementById('shipping-calc-status');
-
-            if (taxa > 0) {
-                currentShippingFee = taxa;
-                statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Bairro ajustado para ${option.value}! Frete: R$ ${taxa.toFixed(2).replace('.', ',')}</span>`;
-            } else {
-                currentShippingFee = null;
-                statusEl.innerHTML = `<span class="text-red-500">Selecione um bairro válido.</span>`;
-            }
-            updateCartUI();
-        }
-
-        function checkBusinessStatus() {
-            const now = new Date();
-            const dayOfWeek = now.getDay();
-            const currentHour = now.getHours();
-            const container = document.getElementById('business-status-container');
-
-            if (dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 8 && currentHour < 17) {
-                container.innerHTML = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Aberto</span>`;
-                return;
-            }
-            if (dayOfWeek === 6) {
-                container.innerHTML = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800"><i class="fa-solid fa-truck text-[10px]"></i> Apenas Entregas</span>`;
-                return;
-            }
-            container.innerHTML = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-200 text-stone-600"><span class="w-2 h-2 rounded-full bg-stone-400"></span> Fechado</span>`;
         }
 
         const combos = [
@@ -1365,6 +1342,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'Arroz funcional.jpg' }
         ];
 
+        // (12 e 26) Renderizar pratos em modo Grid ou Lista Compacta com Tags visuais
         function renderFlavorsDisplay() {
             const grid = document.getElementById('flavors-display-grid');
             grid.innerHTML = '';
@@ -1382,19 +1360,36 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 return;
             }
 
-            filtered.forEach(flavor => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-3 rounded-xl border border-stone-200 flex gap-3 items-center shadow-sm";
-                card.innerHTML = `
-                    <img loading="lazy" decoding="async" src="${flavor.img}" alt="${flavor.name}" class="w-16 h-16 rounded-lg object-cover shrink-0">
-                    <div class="flex-1">
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-2 py-0.5 rounded">${flavor.tag}</span>
-                        <h4 class="font-bold text-stone-800 text-xs mt-0.5">${flavor.name}</h4>
-                        <p class="text-[10px] text-stone-500 leading-tight mt-0.5 line-clamp-2">${flavor.desc}</p>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
+            if (modoExibicaoPratos === 'lista') {
+                grid.className = "space-y-2";
+                filtered.forEach(flavor => {
+                    const item = document.createElement('div');
+                    item.className = "bg-white p-3 rounded-xl border border-stone-200 flex justify-between items-center shadow-sm";
+                    item.innerHTML = `
+                        <div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-2 py-0.5 rounded mr-2">${flavor.tag}</span>
+                            <span class="font-bold text-stone-800 text-xs">${flavor.name}</span>
+                            <p class="text-[10px] text-stone-500">${flavor.desc}</p>
+                        </div>
+                    `;
+                    grid.appendChild(item);
+                });
+            } else {
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
+                filtered.forEach(flavor => {
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-3 rounded-xl border border-stone-200 flex gap-3 items-center shadow-sm";
+                    card.innerHTML = `
+                        <img loading="lazy" decoding="async" src="${flavor.img}" alt="${flavor.name}" class="w-16 h-16 rounded-lg object-cover shrink-0">
+                        <div class="flex-1">
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-2 py-0.5 rounded">${flavor.tag}</span>
+                            <h4 class="font-bold text-stone-800 text-xs mt-0.5">${flavor.name}</h4>
+                            <p class="text-[10px] text-stone-500 leading-tight mt-0.5 line-clamp-2">${flavor.desc}</p>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
         }
 
         function renderCombos() {
@@ -1631,27 +1626,18 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const payment = document.getElementById('cust-payment').value;
             const trocoContainer = document.getElementById('troco-container');
             atualizarPixBox();
-            if (payment === 'Dinheiro') {
-                trocoContainer.classList.remove('hidden');
-            } else {
-                trocoContainer.classList.add('hidden');
-            }
+            if (payment === 'Dinheiro') trocoContainer.classList.remove('hidden');
+            else trocoContainer.classList.add('hidden');
         }
 
         function salvarUltimoCliente(dados) {
-            const historicoCompleto = {
-                cliente: dados,
-                itensCarrinho: cartCombos
-            };
-            try {
-                localStorage.setItem('tempero_ilma_historico_pedido', JSON.stringify(historicoCompleto));
-            } catch (e) {}
+            const historicoCompleto = { cliente: dados, itensCarrinho: cartCombos };
+            try { localStorage.setItem('tempero_ilma_historico_pedido', JSON.stringify(historicoCompleto)); } catch (e) {}
         }
 
         function verificarUltimoCliente() {
             try {
-                const salvo = localStorage.getItem('tempero_ilma_historico_pedido');
-                if (salvo) {
+                if (localStorage.getItem('tempero_ilma_historico_pedido')) {
                     document.getElementById('quick-reorder-banner').classList.remove('hidden');
                 }
             } catch (e) {}
@@ -1659,11 +1645,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         function carregarUltimoCliente() {
             let salvo = null;
-            try {
-                salvo = localStorage.getItem('tempero_ilma_historico_pedido');
-            } catch (e) {}
+            try { salvo = localStorage.getItem('tempero_ilma_historico_pedido'); } catch (e) {}
             if (!salvo) return;
-
             const historico = JSON.parse(salvo);
             const dados = historico.cliente || {};
 
@@ -1673,16 +1656,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             document.getElementById('cust-rua').value = dados.rua || '';
             document.getElementById('cust-numero').value = dados.numero || '';
             document.getElementById('cust-comp').value = dados.comp || '';
-
-            if (dados.bairro) {
-                if (selecionarBairroNoSelect(dados.bairro)) aoMudarBairroManualmente();
-            }
+            if (dados.bairro && selecionarBairroNoSelect(dados.bairro)) aoMudarBairroManualmente();
 
             if (historico.itensCarrinho && historico.itensCarrinho.length > 0) {
                 cartCombos = historico.itensCarrinho.map(i => ({ ...i, freteGratis: !!(combos.find(c => c.id === i.comboId) || {}).freteGratis }));
                 updateCartUI();
             }
-
             mostrarToast('Seu pedido anterior foi carregado com sucesso!');
             openCheckoutModal();
         }
@@ -1709,12 +1688,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const erros = [];
             if (!name) erros.push(['cust-name', 'Informe seu nome completo.']);
             const telDigitos = phone.replace(/\D/g, '');
-            if (telDigitos.length < 10 || telDigitos.length > 13) erros.push(['cust-phone', 'Digite um telefone válido com DDD. Ex: (71) 99999-9999']);
+            if (telDigitos.length < 10 || telDigitos.length > 13) erros.push(['cust-phone', 'Digite um telefone válido com DDD.']);
             if (!rua) erros.push(['cust-rua', 'Informe a rua ou avenida.']);
-            else if (ruaPendenteConfirmacao) erros.push(['cust-rua', 'Confirme se a rua está correta (veja o aviso abaixo).']);
-            if (!numero) erros.push(['cust-numero', 'Informe o número (ou S/N).']);
+            if (!numero) erros.push(['cust-numero', 'Informe o número.']);
             if (!bairro) erros.push(['cust-bairro', 'Selecione o seu bairro.']);
-            else if (bairroPendenteConfirmacao) erros.push(['cust-bairro', 'Confirme se o bairro identificado pelo CEP está correto.']);
             if (erros.length) {
                 erros.forEach(([id, msg]) => marcarErro(id, msg));
                 const primeiro = document.getElementById(erros[0][0]);
@@ -1725,7 +1702,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
             if (currentShippingFee === null) {
                 const st = document.getElementById('shipping-calc-status');
-                st.innerHTML = '<span class="text-red-500 font-bold">Clique em "Calcular Frete" antes de enviar o pedido.</span>';
+                st.innerHTML = '<span class="text-red-500 font-bold">Clique em "Calcular Frete" antes de enviar.</span>';
                 st.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
@@ -1759,54 +1736,31 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             lines.push(`${eUser} *Cliente:* ${name}`);
             lines.push(`${ePhone} *Telefone:* ${phone}`);
             lines.push(`${ePin} *Endereço:* ${fullAddress}`);
-            lines.push(`${eMap} *Localização no Maps:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`)}`);
-
+            lines.push(`${eMap} *Localização:* https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rua}, ${numero}, ${bairro}, Salvador - BA`)}`);
             lines.push(``);
             lines.push(`${eMemo} *--- COMANDA DIGITAL ---*`);
 
             cartCombos.forEach((item, index) => {
                 lines.push(``);
                 lines.push(`${eBox} *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})`);
-                if (item.obs) lines.push(`   *Obs do combo:* ${item.obs}`);
-                lines.push(`   *Sabores Escolhidos:*`);
-
-                const saboresArray = item.flavorsSummary.split(', ');
-                saboresArray.forEach(sabor => {
-                    lines.push(`   - ${sabor}`);
-                });
+                if (item.obs) lines.push(`   *Obs:* ${item.obs}`);
+                item.flavorsSummary.split(', ').forEach(sabor => lines.push(`   - ${sabor}`));
             });
 
             const subtotalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
             const feFinal = freteEfetivo();
             const totalPrice = subtotalPrice + feFinal;
 
-            const tot = {};
-            cartCombos.forEach(it => it.flavorsSummary.split(', ').forEach(sv => {
-                const m = sv.match(/^(\d+)x (.+)$/);
-                if (m) tot[m[2]] = (tot[m[2]] || 0) + parseInt(m[1], 10);
-            }));
-            lines.push(``);
-            lines.push(`${eNote} *TOTAL POR SABOR*`);
-            Object.entries(tot).forEach(([n, q]) => lines.push(`- ${q}x ${n}`));
-
             lines.push(``);
             lines.push(`${eMoney} *RESUMO FINANCEIRO*`);
             lines.push(`Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
-            lines.push(`${eDelivery} Taxa de Entrega (${bairro}): ${feFinal === 0 ? 'GRÁTIS' : 'R$ ' + feFinal.toFixed(2).replace('.', ',')}`);
+            lines.push(`${eDelivery} Taxa de Entrega: ${feFinal === 0 ? 'GRÁTIS' : 'R$ ' + feFinal.toFixed(2).replace('.', ',')}`);
             lines.push(`*TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
             lines.push(``);
-            lines.push(`${eCard} *Forma de Pagamento:* ${payment}`);
+            lines.push(`${eCard} *Pagamento:* ${payment}`);
             lines.push(`${eDelivery} *Sábado de entrega:* ${dataEntregaSabado()}`);
-
-            if (payment === 'Dinheiro' && troco) {
-                lines.push(`*Troco para:* ${troco}`);
-            }
-            if (obs) {
-                lines.push(`${eNote} *Observações:* ${obs}`);
-            }
-
-            lines.push(``);
-            lines.push(`_Pedido gerado automaticamente pelo cardápio digital_ ${eSparkles}`);
+            if (payment === 'Dinheiro' && troco) lines.push(`*Troco para:* ${troco}`);
+            if (obs) lines.push(`${eNote} *Observações:* ${obs}`);
 
             const fullText = lines.join('\n');
             const whatsappUrl = `https://wa.me/5571994125510?text=${encodeURIComponent(fullText)}`;
@@ -1814,7 +1768,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
 
         window.onload = function() {
-            checkBusinessStatus();
             iniciarContadorRegressivo();
             renderFlavorsDisplay();
             renderCombos();
@@ -1827,7 +1780,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             restaurarCarrinho();
             atualizarIconeTema();
             renderFreteBanner();
-            if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
         };
     </script>
 </body>
