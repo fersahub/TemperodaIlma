@@ -95,6 +95,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         .selo-img{background:rgba(255,255,255,.92);color:#222}
         .opcao-bairro:hover,.opcao-bairro:focus-visible{background:rgba(62,107,69,.15)}
         html.dark .hover\:bg-stone-100:hover{background:#333!important}
+        html.modal-aberto,html.modal-aberto body{overflow:hidden}
+        #checkout-scroll,#flavors-selection-list,#confirm-content{overscroll-behavior:contain}
+        #toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:70;display:none;align-items:center;gap:14px;max-width:92vw;background:#222;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+        #toast button{color:#E6C36A;font-weight:800;text-decoration:underline;white-space:nowrap}
+        #toast.show{animation:toastIn .25s ease}
+        @keyframes toastIn{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
         /* MODO ESCURO */
         html.dark body{background:#141414;color:#eee}
         html.dark .bg-white,html.dark .bg-white\/95{background:#1e1e1e!important}
@@ -236,6 +242,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <p class="text-stone-500">&copy; Todos os direitos reservados.</p>
     </footer>
 
+    <div id="toast" role="status" aria-live="polite"></div>
+
     <!-- MODAL DE CONFIRMAÇÃO -->
     <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-end sm:items-center hidden">
         <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -263,6 +271,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 <button type="button" onclick="copiarPixCopiaECola()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg">Copiar Pix copia e cola</button>
             </div>
             <a id="sent-link" href="#" target="_blank" rel="noopener" class="block text-xs text-emerald-700 underline">O WhatsApp não abriu? Toque aqui</a>
+            <button type="button" onclick="copiarPedido()" class="w-full bg-white border-2 border-emerald-600 text-emerald-700 font-bold py-2.5 rounded-xl text-sm"><i class="fa-regular fa-copy"></i> Copiar mensagem do pedido</button>
+            <textarea id="sent-texto" readonly class="hidden w-full h-28 border border-stone-200 rounded-lg p-2 text-[11px] text-left"></textarea>
+            <p class="text-[11px] text-stone-500">Sem WhatsApp neste aparelho? Copie a mensagem e envie para (71) 99412-5510 por outro aparelho.</p>
             <button type="button" onclick="document.getElementById('sent-modal').classList.add('hidden')" class="w-full bg-brand-secondary text-white font-bold py-3 rounded-xl text-sm">Fechar</button>
         </div>
     </div>
@@ -382,11 +393,13 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                         <div>
                             <label class="block text-xs font-semibold text-stone-700 mb-1">CEP (Opcional)</label>
                             <input type="text" id="cust-cep" name="postal-code" autocomplete="postal-code" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="mascaraCep(this)" onblur="consultarViaCep()" class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                            <p id="cep-status" class="text-[11px] font-medium mt-1 min-h-[16px]" aria-live="polite"></p>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-stone-700 mb-1">Rua / Avenida *</label>
                             <input type="text" id="cust-rua" name="street-address" autocomplete="address-line1" autocapitalize="words" required placeholder="Digite sua rua..." class="w-full bg-white border border-stone-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-brand-secondary focus:outline-none shadow-sm">
+                            <div id="rua-confirma" class="hidden mt-2"></div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
@@ -582,6 +595,13 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         let pendingPedido = null;
         let bairroPendenteConfirmacao = false;
         let ultimoCepConsultado = '';
+        let cepInfo = null;
+        let ultimaRuaAutomatica = '';
+        let ruaPendenteConfirmacao = false;
+        let ruaConfirmadaTexto = '';
+        let toastTimer = null;
+        let estadoModalEmpilhado = false;
+        let ignorarPopstate = false;
         let pixAtual = '';
 
         function marcarErro(id, msg) {
@@ -692,6 +712,170 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const box = document.getElementById('bairro-confirma');
             box.innerHTML = `<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">O CEP indica o bairro <b>${escapeHtml(nome)}</b>, que não está na nossa lista de entregas. Busque o bairro mais próximo acima ou fale com a gente pelo WhatsApp.</div>`;
             box.classList.remove('hidden');
+        }
+
+        /* --- AVISOS RÁPIDOS (TOAST) --- */
+        function esconderToast() {
+            document.getElementById('toast').style.display = 'none';
+            clearTimeout(toastTimer);
+        }
+
+        function mostrarToast(msg, acaoTexto, acaoFn, ms) {
+            const el = document.getElementById('toast');
+            el.innerHTML = '';
+            const span = document.createElement('span');
+            span.textContent = msg;
+            el.appendChild(span);
+            if (acaoTexto && acaoFn) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.textContent = acaoTexto;
+                b.onclick = () => { esconderToast(); acaoFn(); };
+                el.appendChild(b);
+            }
+            el.style.display = 'flex';
+            el.classList.remove('show');
+            void el.offsetWidth;
+            el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(esconderToast, ms || 4500);
+        }
+
+        /* --- JANELAS: botão voltar, Esc, toque fora e trava de rolagem --- */
+        const MODAIS_ORDEM = ['sent-modal', 'confirm-modal', 'flavors-modal', 'checkout-modal'];
+
+        function modalEstaAberto(id) {
+            const el = document.getElementById(id);
+            return !!el && !el.classList.contains('hidden');
+        }
+
+        function fecharModalPorId(id) {
+            if (id === 'checkout-modal') {
+                closeCheckoutModal();
+            } else if (id === 'flavors-modal') {
+                if (Object.keys(selectedFlavors).length && !confirm('Descartar a montagem deste combo?')) return;
+                closeFlavorsModal();
+            } else {
+                document.getElementById(id).classList.add('hidden');
+            }
+        }
+
+        function fecharModalDoTopo() {
+            const id = MODAIS_ORDEM.find(modalEstaAberto);
+            if (id) fecharModalPorId(id);
+        }
+
+        function sincronizarModais() {
+            const n = MODAIS_ORDEM.filter(modalEstaAberto).length;
+            document.documentElement.classList.toggle('modal-aberto', n > 0);
+            if (n > 0 && !estadoModalEmpilhado) {
+                history.pushState({ modal: true }, '');
+                estadoModalEmpilhado = true;
+            } else if (n === 0 && estadoModalEmpilhado) {
+                estadoModalEmpilhado = false;
+                ignorarPopstate = true;
+                setTimeout(() => { ignorarPopstate = false; }, 600);
+                history.back();
+            }
+        }
+
+        function iniciarModais() {
+            if (history.state && history.state.modal) history.replaceState(null, '');
+            const obs = new MutationObserver(sincronizarModais);
+            MODAIS_ORDEM.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                obs.observe(el, { attributes: true, attributeFilter: ['class'] });
+                el.addEventListener('click', e => { if (e.target === el) fecharModalPorId(id); });
+            });
+            window.addEventListener('popstate', () => {
+                if (ignorarPopstate) { ignorarPopstate = false; return; }
+                estadoModalEmpilhado = false;
+                fecharModalDoTopo();
+                sincronizarModais();
+            });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModalDoTopo(); });
+        }
+
+        /* --- COPIAR O PEDIDO --- */
+        async function copiarPedido() {
+            const texto = pendingPedido && pendingPedido.fullText;
+            if (!texto) return;
+            try {
+                await navigator.clipboard.writeText(texto);
+                mostrarToast('Pedido copiado! Cole no WhatsApp.');
+            } catch (e) {
+                const ta = document.getElementById('sent-texto');
+                ta.value = texto;
+                ta.classList.remove('hidden');
+                ta.focus();
+                ta.select();
+                let ok = false;
+                try { ok = document.execCommand('copy'); } catch (e2) {}
+                mostrarToast(ok ? 'Pedido copiado! Cole no WhatsApp.' : 'Selecione o texto abaixo e copie.');
+            }
+        }
+
+        /* --- CONFERIR RUA x CEP --- */
+        function normalizarRua(t) {
+            return normalizarTexto(t).replace(/[^a-z0-9 ]/g, ' ')
+                .replace(/\b(rua|r|avenida|av|travessa|tv|alameda|al|estrada|estr|praca|pc|largo|ladeira|beco|rodovia|rod)\b/g, ' ')
+                .replace(/\b(de|da|do|das|dos)\b/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function ruasParecidas(a, b) {
+            const x = normalizarRua(a), y = normalizarRua(b);
+            if (!x || !y) return true;
+            if (x.includes(y) || y.includes(x)) return true;
+            const tx = x.split(' '), ty = y.split(' ');
+            const comuns = tx.filter(w => ty.includes(w)).length;
+            return comuns / Math.min(tx.length, ty.length) >= 0.6;
+        }
+
+        function esconderAvisoRua() {
+            const b = document.getElementById('rua-confirma');
+            if (b) { b.classList.add('hidden'); b.innerHTML = ''; }
+        }
+
+        function verificarRuaComCep() {
+            const rua = document.getElementById('cust-rua').value.trim();
+            const cepAtual = document.getElementById('cust-cep').value.replace(/\D/g, '');
+            if (!cepInfo || !cepInfo.logradouro || cepInfo.cep !== cepAtual || !rua
+                || rua === ruaConfirmadaTexto || ruasParecidas(rua, cepInfo.logradouro)) {
+                ruaPendenteConfirmacao = false;
+                esconderAvisoRua();
+                return;
+            }
+            const box = document.getElementById('rua-confirma');
+            if (ruaPendenteConfirmacao && !box.classList.contains('hidden')) return;
+            ruaPendenteConfirmacao = true;
+            box.innerHTML = `<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs space-y-2"><p class="text-amber-900">O CEP indica <b>${escapeHtml(cepInfo.logradouro)}</b>. Está certo?</p><div class="flex gap-2"><button type="button" onclick="usarRuaDoCep()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg">Usar a rua do CEP</button><button type="button" onclick="manterRuaDigitada()" class="flex-1 bg-white border border-stone-300 text-stone-700 font-bold py-2 rounded-lg">Manter a que digitei</button></div></div>`;
+            box.classList.remove('hidden');
+        }
+
+        function usarRuaDoCep() {
+            const campo = document.getElementById('cust-rua');
+            campo.value = cepInfo.logradouro;
+            ultimaRuaAutomatica = campo.value;
+            ruaPendenteConfirmacao = false;
+            esconderAvisoRua();
+            limparErro('cust-rua');
+        }
+
+        function manterRuaDigitada() {
+            ruaConfirmadaTexto = document.getElementById('cust-rua').value.trim();
+            ruaPendenteConfirmacao = false;
+            esconderAvisoRua();
+            limparErro('cust-rua');
+        }
+
+        function iniciarEndereco() {
+            const rua = document.getElementById('cust-rua');
+            rua.addEventListener('blur', verificarRuaComCep);
+            rua.addEventListener('input', () => { ruaPendenteConfirmacao = false; esconderAvisoRua(); });
+            document.getElementById('cust-cep').addEventListener('input', () => {
+                document.getElementById('cep-status').innerHTML = '';
+            });
         }
 
         function escapeHtml(t) {
@@ -832,6 +1016,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             cartCombos.splice(i + 1, 0, { ...c, cartId: Date.now().toString() });
             updateCartUI();
             animarCarrinho();
+            mostrarToast('Combo duplicado.');
         }
 
         function montagemAutomatica() {
@@ -1017,23 +1202,53 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
 
         async function consultarViaCep() {
-            let cep = document.getElementById('cust-cep').value.replace(/\D/g, '');
-            if (cep.length !== 8 || cep === ultimoCepConsultado) return;
+            const cep = document.getElementById('cust-cep').value.replace(/\D/g, '');
+            const st = document.getElementById('cep-status');
+            if (cep.length !== 8) { st.innerHTML = ''; return; }
+            if (cep === ultimoCepConsultado) return;
             ultimoCepConsultado = cep;
+            cepInfo = null;
+            const msg = (cls, html) => { st.innerHTML = `<span class="${cls}">${html}</span>`; };
+            msg('text-stone-500', '<i class="fa-solid fa-spinner animate-spin"></i> Consultando CEP...');
 
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 8000);
             try {
-                let response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-                let data = await response.json();
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: ctrl.signal });
+                if (!response.ok) throw new Error('http');
+                const data = await response.json();
+                clearTimeout(timer);
 
-                if (!data.erro) {
-                    if (data.logradouro) document.getElementById('cust-rua').value = data.logradouro;
-                    if (data.bairro) {
-                        // CORREÇÃO: ao achar o bairro, já atualiza o frete
-                        if (selecionarBairroNoSelect(data.bairro)) { aoMudarBairroManualmente(); pedirConfirmacaoBairro(); }
-                        else avisarBairroForaDaLista(data.bairro);
+                if (data.erro) {
+                    msg('text-amber-700', 'CEP não encontrado. Confira os números ou preencha o endereço abaixo.');
+                    return;
+                }
+                msg('text-emerald-600', '<i class="fa-solid fa-circle-check"></i> CEP encontrado.');
+                cepInfo = { cep, logradouro: data.logradouro || '', bairro: data.bairro || '' };
+
+                if (data.logradouro) {
+                    const campo = document.getElementById('cust-rua');
+                    const atual = campo.value.trim();
+                    if (!atual || atual === ultimaRuaAutomatica) {
+                        campo.value = data.logradouro;
+                        ultimaRuaAutomatica = data.logradouro;
+                        ruaConfirmadaTexto = '';
+                        ruaPendenteConfirmacao = false;
+                        esconderAvisoRua();
+                        limparErro('cust-rua');
+                    } else {
+                        verificarRuaComCep();
                     }
                 }
-            } catch (err) { ultimoCepConsultado = ''; }
+                if (data.bairro) {
+                    if (selecionarBairroNoSelect(data.bairro)) { aoMudarBairroManualmente(); pedirConfirmacaoBairro(); }
+                    else avisarBairroForaDaLista(data.bairro);
+                }
+            } catch (err) {
+                clearTimeout(timer);
+                ultimoCepConsultado = '';
+                msg('text-red-500', 'Não consegui consultar o CEP agora. Escolha o bairro na lista.');
+            }
         }
 
         // CORREÇÃO: correspondência exata primeiro, depois "começa com", depois "contém"
@@ -1315,7 +1530,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             closeFlavorsModal();
             updateCartUI();
             animarCarrinho();
-            if (estavaEditando) openCheckoutModal();
+            if (estavaEditando) { openCheckoutModal(); mostrarToast('Combo atualizado.'); }
+            else mostrarToast('Combo adicionado.', 'Ver pedido', openCheckoutModal);
         }
 
         function updateCartUI() {
@@ -1380,8 +1596,15 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
 
         function removeCartItem(index) {
+            const removido = cartCombos[index];
+            if (!removido) return;
             cartCombos.splice(index, 1);
             updateCartUI();
+            mostrarToast('Combo removido.', 'Desfazer', () => {
+                cartCombos.splice(Math.min(index, cartCombos.length), 0, removido);
+                updateCartUI();
+                animarCarrinho();
+            }, 6000);
         }
 
         function openCheckoutModal() {
@@ -1476,12 +1699,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const troco = document.getElementById('cust-troco').value.trim();
             const obs = document.getElementById('cust-obs').value.trim();
 
+            verificarRuaComCep();
             limparTodosErros();
             const erros = [];
             if (!name) erros.push(['cust-name', 'Informe seu nome completo.']);
             const telDigitos = phone.replace(/\D/g, '');
             if (telDigitos.length < 10 || telDigitos.length > 13) erros.push(['cust-phone', 'Digite um telefone válido com DDD. Ex: (71) 99999-9999']);
             if (!rua) erros.push(['cust-rua', 'Informe a rua ou avenida.']);
+            else if (ruaPendenteConfirmacao) erros.push(['cust-rua', 'Confirme se a rua está correta (veja o aviso abaixo).']);
             if (!numero) erros.push(['cust-numero', 'Informe o número (ou S/N).']);
             if (!bairro) erros.push(['cust-bairro', 'Selecione o seu bairro.']);
             else if (bairroPendenteConfirmacao) erros.push(['cust-bairro', 'Confirme se o bairro identificado pelo CEP está correto.']);
@@ -1580,7 +1805,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
             const fullText = lines.join('\n');
             const whatsappUrl = `https://wa.me/5571994125510?text=${encodeURIComponent(fullText)}`;
-            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice });
+            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice, fullText });
         }
 
         window.onload = function() {
@@ -1592,6 +1817,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             mostrarAvisoFimDeSemana();
             iniciarValidacao();
             iniciarEtapas();
+            iniciarModais();
+            iniciarEndereco();
             restaurarCarrinho();
             atualizarIconeTema();
             renderFreteBanner();
