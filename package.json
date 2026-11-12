@@ -1,0 +1,7 @@
+{
+  "name":"tempero-da-ilma",
+  "private":true,
+  "version":"1.0.0",
+  "description":"Cardápio digital estático do Tempero da Ilma",
+  "scripts":{"test":"node --test js/tests/*.test.mjs"}
+}

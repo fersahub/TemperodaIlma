@@ -1,0 +1,27 @@
+name: Verificações do projeto
+on:
+  push:
+    branches:
+      - main
+      - 'improvements/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quality:
+    name: Testes e integridade
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verificar sintaxe JavaScript
+        run: find js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Executar testes
+        run: npm test

@@ -179,6 +179,7 @@
             <a href="https://wa.me/5571994125510?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20um%20pedido%20recente." target="_blank" rel="noopener" class="bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition">📝 Alterar pedido</a>
             <a href="https://wa.me/5571994125510?text=Ol%C3%A1!%20Gostaria%20de%20conversar%20sobre%20parcerias%20ou%20pedidos%20corporativos." target="_blank" rel="noopener" class="bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition">💼 Parcerias e empresas</a>
         </div>
+        <button type="button" onclick="apagarDadosSalvos()" class="text-stone-400 hover:text-white underline underline-offset-2">Apagar dados salvos neste navegador</button>
         <p class="text-stone-500">&copy; Todos os direitos reservados.</p>
     </footer>
 
@@ -239,8 +240,8 @@
     <div id="sent-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex justify-center items-center hidden p-4">
         <div class="bg-white w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl p-6 text-center space-y-3">
             <div class="w-14 h-14 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl"><i class="fa-solid fa-check"></i></div>
-            <h3 class="font-bold text-stone-800 text-lg">Pedido enviado!</h3>
-            <p class="text-xs text-stone-600">Aguarde a confirmação pelo WhatsApp. Seu carrinho foi limpo.</p>
+            <h3 id="sent-modal-title" class="font-bold text-stone-800 text-lg">Comanda preparada para envio</h3>
+            <p class="text-xs text-stone-600">O WhatsApp foi aberto com sua comanda. O site não consegue confirmar se a mensagem foi enviada: confira a conversa antes de concluir. Seu carrinho foi preservado neste aparelho.</p>
             <div id="sent-pix" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-2">
                 <p class="font-bold text-emerald-900">Pague via Pix: <span id="sent-pix-valor"></span></p>
                 <div id="sent-pix-qr" class="inline-block pix-qr-frame"></div>
@@ -250,7 +251,8 @@
             <button type="button" onclick="copiarPedido()" class="w-full bg-white border-2 border-emerald-600 text-emerald-700 font-bold py-2.5 rounded-xl text-sm"><i class="fa-regular fa-copy"></i> Copiar mensagem do pedido</button>
             <textarea id="sent-texto" readonly class="hidden w-full h-28 border border-stone-200 rounded-lg p-2 text-[11px] text-left"></textarea>
             <p class="text-[11px] text-stone-500">Sem WhatsApp neste aparelho? Copie a mensagem e envie para (71) 99412-5510 por outro aparelho.</p>
-            <button type="button" onclick="document.getElementById('sent-modal').classList.add('hidden')" class="w-full bg-brand-secondary text-white font-bold py-3 rounded-xl text-sm">Fechar</button>
+            <button type="button" onclick="limparCarrinhoAposEnvio()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm">Já enviei a mensagem — limpar carrinho</button>
+            <button type="button" onclick="document.getElementById('sent-modal').classList.add('hidden')" class="w-full bg-brand-secondary text-white font-bold py-3 rounded-xl text-sm">Voltar à loja e manter carrinho</button>
         </div>
     </div>
 
@@ -561,6 +563,20 @@
         </div>
     </div>
 
+    <script src="js/config/loja.js"></script>
+    <script src="js/data/combos.js"></script>
+    <script src="js/data/pratos.js"></script>
+    <script src="js/core/estado.js"></script>
+    <script src="js/modules/interface.js"></script>
+    <script src="js/services/endereco.js"></script>
+    <script src="js/modules/experiencia.js"></script>
+    <script src="js/modules/pedidos.js"></script>
+    <script src="js/modules/operacao.js"></script>
+    <script src="js/services/pix.js"></script>
+    <script src="js/modules/horarios.js"></script>
+    <script src="js/modules/cardapio.js"></script>
+    <script src="js/modules/carrinho.js"></script>
+    <script src="js/modules/checkout.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
