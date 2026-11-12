@@ -451,7 +451,7 @@
         /* --- CONFIGURAÇÕES (edite aqui) --- */
         const CONFIG = {
             pixChave: '+5571994125510', // CPF/CNPJ só números, celular com +55 (ex: +5571999999999), e-mail ou chave aleatória
-            pixNome: 'TEMPERO DA ILMA', // nome do recebedor (até 25 letras, sem acento)
+            pixNome: 'Ilma Celi Santana Ferreira', // nome do recebedor (até 25 letras, sem acento)
             pixCidade: 'SALVADOR' // cidade do recebedor (até 15 letras, sem acento)
         };
 
