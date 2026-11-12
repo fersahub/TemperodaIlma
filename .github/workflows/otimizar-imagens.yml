@@ -17,7 +17,7 @@ jobs:
       - name: Baixar repositório
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.ref_name }}
+          ref: ${{ github.ref_name }}
       - name: Preparar Node.js
         uses: actions/setup-node@v4
         with:
@@ -40,4 +40,4 @@ jobs:
             exit 1
           fi
           git commit -m "Otimiza fotografias do cardápio para WebP"
-          git push origin "HEAD:\${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
