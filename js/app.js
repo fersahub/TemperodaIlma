@@ -819,37 +819,37 @@
         }
 
         const combos = [
-            { id: 'combo-5-350g', name: "Combo 5 Marmitas - 350g", qty: 5, price: 100.00, description: "Escolha 5 marmitas tradicionais de 350g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional", destaque: true },
-            { id: 'combo-10-350g', freteGratis: true, name: "Combo 10 Marmitas - 350g", qty: 10, price: 200.00, description: "Escolha 10 marmitas tradicionais de 350g variadas para a sua semana.", image: "Combo 10.1.png", type: "Tradicional", destaque: false },
-            { id: 'combo-5-500g', name: "Combo 5 Marmitas - 500g", qty: 5, price: 125.00, description: "Escolha 5 marmitas tradicionais de 500g para a sua semana.", image: "Combo 5.1.png", type: "Tradicional", destaque: false },
-            { id: 'combo-10-500g', freteGratis: true, name: "Combo 10 Marmitas - 500g", qty: 10, price: 250.00, description: "Escolha 10 marmitas tradicionais de 500g variadas para a sua semana.", image: "Combo 10.png", type: "Tradicional", destaque: false },
-            { id: 'combo-5-300g-fit', name: "Combo 5 Marmitas FIT - 300g", qty: 5, price: 130.00, description: "Escolha 5 marmitas da nossa linha fit leve de 300g.", image: "Combo 5.1.png", type: "Linha Fit", destaque: true },
-            { id: 'combo-10-300g-fit', name: "Combo 10 Marmitas FIT - 300g", qty: 10, price: 260.00, description: "Escolha 10 marmitas da nossa linha fit leve de 300g variadas.", image: "Combo 10.1.png", type: "Linha Fit", destaque: false }
+            { id: 'combo-5-350g', name: "Combo 5 Marmitas - 350g", qty: 5, price: 100.00, description: "Escolha 5 marmitas tradicionais de 350g para a sua semana.", image: "assets/images/combos/Combo 5.1.png", type: "Tradicional", destaque: true },
+            { id: 'combo-10-350g', freteGratis: true, name: "Combo 10 Marmitas - 350g", qty: 10, price: 200.00, description: "Escolha 10 marmitas tradicionais de 350g variadas para a sua semana.", image: "assets/images/combos/Combo 10.1.png", type: "Tradicional", destaque: false },
+            { id: 'combo-5-500g', name: "Combo 5 Marmitas - 500g", qty: 5, price: 125.00, description: "Escolha 5 marmitas tradicionais de 500g para a sua semana.", image: "assets/images/combos/Combo 5.1.png", type: "Tradicional", destaque: false },
+            { id: 'combo-10-500g', freteGratis: true, name: "Combo 10 Marmitas - 500g", qty: 10, price: 250.00, description: "Escolha 10 marmitas tradicionais de 500g variadas para a sua semana.", image: "assets/images/combos/Combo 10.png", type: "Tradicional", destaque: false },
+            { id: 'combo-5-300g-fit', name: "Combo 5 Marmitas FIT - 300g", qty: 5, price: 130.00, description: "Escolha 5 marmitas da nossa linha fit leve de 300g.", image: "assets/images/combos/Combo 5.1.png", type: "Linha Fit", destaque: true },
+            { id: 'combo-10-300g-fit', name: "Combo 10 Marmitas FIT - 300g", qty: 10, price: 260.00, description: "Escolha 10 marmitas da nossa linha fit leve de 300g variadas.", image: "assets/images/combos/Combo 10.1.png", type: "Linha Fit", destaque: false }
         ];
 
         const availableFlavors = [
-            { id: 'f1', name: 'Panqueca de Frango', desc: 'Frango desfiado, molho de tomate e queijo parmesão', tag: 'Tradicional', img: 'Panqueca frango.png' },
-            { id: 'f2', name: 'Bife de Carne Temperada', desc: 'Feijão preto, Arroz branco e Caponata', tag: 'Tradicional', img: 'Bife carne temparada.png' },
-            { id: 'f3', name: 'Carne Moída com Caponata', desc: 'Carne moída, Arroz branco e Caponata', tag: 'Tradicional', img: 'Carne camponata.png' },
-            { id: 'f4', name: 'Feijoada de Feijão Preto', desc: 'Arroz branco e couve folha', tag: 'Tradicional', img: 'Feijão preto.png' },
-            { id: 'f5', name: 'Carne de Panela com Batatas', desc: 'Arroz branco e Feijão carioca', tag: 'Tradicional', img: 'Bife panela.jpg' },
-            { id: 'f7', name: 'Strogonoff de Frango', desc: 'Frango, Batata doce assada com páprica defumada', tag: 'Tradicional', img: 'Strogonoff.jpg' },
-            { id: 'f8', name: 'Quiabada de Frango', desc: 'Feijão e Arroz branco', tag: 'Tradicional', img: 'Quiabada.jpg' },
-            { id: 'f9', name: 'Panqueca de Carne Moída', desc: 'Carne moída, Molho de tomate e Queijo parmesão', tag: 'Tradicional', img: 'Panqueca carne.jpg' },
-            { id: 'f10', name: 'Bife de Carne Acebolado', desc: 'Feijão carioca, Arroz branco e Brócolis', tag: 'Tradicional', img: 'Bife acebolado.jpg' },
-            { id: 'f11', name: 'Carne Moída com Mix de Verduras', desc: 'Carne moída, Arroz branco e Mix de Verduras', tag: 'Tradicional', img: 'Carne moida mix.jpg' },
-            { id: 'f12', name: 'Penne a Bolonhesa', desc: 'Massa Penne, Molho de tomate e Carne moída', tag: 'Linha Fit', img: 'Penne.jpg' },
-            { id: 'f13', name: 'Espaguete com Almôndegas', desc: 'Massa Espaguete, Molho de tomate e Almôndegas de Carne', tag: 'Tradicional', img: 'Almondegas.jpg' },
-            { id: 'f14', name: 'Frango ao Creme de Milho', desc: 'Com milho e Arroz com Brócolis', tag: 'Tradicional', img: 'Frango milho.jpg' },
-            { id: 'f15', name: 'Carne de Panela Desfiada', desc: 'Carne desfiada, Arroz branco, Purê de abóbora e Mix de verduras', tag: 'Tradicional', img: 'Carne desfiada.jpg' },
-            { id: 'f16', name: 'Lombo de Boi recheado', desc: 'Lombo de boi, Arroz branco, Feijão e Brócolis', tag: 'Tradicional', img: 'Lombo de boi.jpg' },
-            { id: 'f17', name: 'Omelete de Frango', desc: 'Omelete de Frango, Arroz branco, Purê de batata e Mix de Verduras', tag: 'Tradicional', img: 'Omelete frango.jpg' },
-            { id: 'f18', name: 'Bife de Frango Acebolado', desc: 'Bife de frango, Feijão, Arroz branco e Cenoura', tag: 'Tradicional', img: 'Frango acebolado.jpg' },
-            { id: 'f19', name: 'Panqueca de Frango (Farinha Integral)', desc: 'Frango desfiado, Molho de tomate e Queijo parmesão', tag: 'Linha Fit', img: 'Panqueca frango integral.jpg' },
-            { id: 'f20', name: 'Frango com Purê de Mandioquinha', desc: 'Frango desfiado, Purê de mandioquinha e Legumes assados', tag: 'Linha Fit', img: 'Frango mandioquinha.jpg' },
-            { id: 'f21', name: 'Escondidinho Fit', desc: 'Purê de batata doce e Frango desfiado', tag: 'Linha Fit', img: 'Escondidinho.jpg' },
-            { id: 'f22', name: 'Macarrão Integral com Almôndegas', desc: 'Massa integral, Molho de tomate e Almôndegas', tag: 'Linha Fit', img: 'Integral almondegas.jpg' },
-            { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'Arroz funcional.jpg' }
+            { id: 'f1', name: 'Panqueca de Frango', desc: 'Frango desfiado, molho de tomate e queijo parmesão', tag: 'Tradicional', img: 'assets/images/pratos/Panqueca frango.png' },
+            { id: 'f2', name: 'Bife de Carne Temperada', desc: 'Feijão preto, Arroz branco e Caponata', tag: 'Tradicional', img: 'assets/images/pratos/Bife carne temparada.png' },
+            { id: 'f3', name: 'Carne Moída com Caponata', desc: 'Carne moída, Arroz branco e Caponata', tag: 'Tradicional', img: 'assets/images/pratos/Carne camponata.png' },
+            { id: 'f4', name: 'Feijoada de Feijão Preto', desc: 'Arroz branco e couve folha', tag: 'Tradicional', img: 'assets/images/pratos/Feijão preto.png' },
+            { id: 'f5', name: 'Carne de Panela com Batatas', desc: 'Arroz branco e Feijão carioca', tag: 'Tradicional', img: 'assets/images/pratos/Bife panela.jpg' },
+            { id: 'f7', name: 'Strogonoff de Frango', desc: 'Frango, Batata doce assada com páprica defumada', tag: 'Tradicional', img: 'assets/images/pratos/Strogonoff.jpg' },
+            { id: 'f8', name: 'Quiabada de Frango', desc: 'Feijão e Arroz branco', tag: 'Tradicional', img: 'assets/images/pratos/Quiabada.jpg' },
+            { id: 'f9', name: 'Panqueca de Carne Moída', desc: 'Carne moída, Molho de tomate e Queijo parmesão', tag: 'Tradicional', img: 'assets/images/pratos/Panqueca carne.jpg' },
+            { id: 'f10', name: 'Bife de Carne Acebolado', desc: 'Feijão carioca, Arroz branco e Brócolis', tag: 'Tradicional', img: 'assets/images/pratos/Bife acebolado.jpg' },
+            { id: 'f11', name: 'Carne Moída com Mix de Verduras', desc: 'Carne moída, Arroz branco e Mix de Verduras', tag: 'Tradicional', img: 'assets/images/pratos/Carne moida mix.jpg' },
+            { id: 'f12', name: 'Penne a Bolonhesa', desc: 'Massa Penne, Molho de tomate e Carne moída', tag: 'Linha Fit', img: 'assets/images/pratos/Penne.jpg' },
+            { id: 'f13', name: 'Espaguete com Almôndegas', desc: 'Massa Espaguete, Molho de tomate e Almôndegas de Carne', tag: 'Tradicional', img: 'assets/images/pratos/Almondegas.jpg' },
+            { id: 'f14', name: 'Frango ao Creme de Milho', desc: 'Com milho e Arroz com Brócolis', tag: 'Tradicional', img: 'assets/images/pratos/Frango milho.jpg' },
+            { id: 'f15', name: 'Carne de Panela Desfiada', desc: 'Carne desfiada, Arroz branco, Purê de abóbora e Mix de verduras', tag: 'Tradicional', img: 'assets/images/pratos/Carne desfiada.jpg' },
+            { id: 'f16', name: 'Lombo de Boi recheado', desc: 'Lombo de boi, Arroz branco, Feijão e Brócolis', tag: 'Tradicional', img: 'assets/images/pratos/Lombo de boi.jpg' },
+            { id: 'f17', name: 'Omelete de Frango', desc: 'Omelete de Frango, Arroz branco, Purê de batata e Mix de Verduras', tag: 'Tradicional', img: 'assets/images/pratos/Omelete frango.jpg' },
+            { id: 'f18', name: 'Bife de Frango Acebolado', desc: 'Bife de frango, Feijão, Arroz branco e Cenoura', tag: 'Tradicional', img: 'assets/images/pratos/Frango acebolado.jpg' },
+            { id: 'f19', name: 'Panqueca de Frango (Farinha Integral)', desc: 'Frango desfiado, Molho de tomate e Queijo parmesão', tag: 'Linha Fit', img: 'assets/images/pratos/Panqueca frango integral.jpg' },
+            { id: 'f20', name: 'Frango com Purê de Mandioquinha', desc: 'Frango desfiado, Purê de mandioquinha e Legumes assados', tag: 'Linha Fit', img: 'assets/images/pratos/Frango mandioquinha.jpg' },
+            { id: 'f21', name: 'Escondidinho Fit', desc: 'Purê de batata doce e Frango desfiado', tag: 'Linha Fit', img: 'assets/images/pratos/Escondidinho.jpg' },
+            { id: 'f22', name: 'Macarrão Integral com Almôndegas', desc: 'Massa integral, Molho de tomate e Almôndegas', tag: 'Linha Fit', img: 'assets/images/pratos/Integral almondegas.jpg' },
+            { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'assets/images/pratos/Arroz funcional.jpg' }
         ];
 
         function renderFlavorsDisplay() {
