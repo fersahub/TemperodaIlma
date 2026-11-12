@@ -1,7 +1,7 @@
-const C = 'tempero-v1';
+const C = 'tempero-v2';
 self.addEventListener('install', e => {
   self.skipWaiting();
-  e.waitUntil(caches.open(C).then(c => c.addAll(['./', 'index.html'])).catch(() => {}));
+  e.waitUntil(caches.open(C).then(c => c.addAll(['./', 'index.html', 'css/styles.css', 'js/theme-init.js', 'js/vendor/qrcode-generator.js', 'js/tailwind-config.js', 'js/splash.js', 'js/app.js'])).catch(() => {}));
 });
 self.addEventListener('activate', e => e.waitUntil(clients.claim()));
 self.addEventListener('fetch', e => {

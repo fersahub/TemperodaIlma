@@ -1,0 +1,1 @@
+try{var _s=document.getElementById('splash');if(sessionStorage.getItem('splash_visto')){_s.remove()}else{sessionStorage.setItem('splash_visto','1');setTimeout(function(){if(_s.parentNode)_s.remove()},2000)}}catch(e){}
