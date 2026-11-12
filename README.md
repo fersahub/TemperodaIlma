@@ -1,99 +1,87 @@
 # Tempero da Ilma — Cardápio Digital
 
-Aplicação web estática para apresentação do cardápio semanal, montagem de combos de marmitas e preparação de pedidos para atendimento pelo WhatsApp.
+Aplicação web estática publicada pelo **GitHub Pages**, sem Backend e sem banco de dados. GitHub Actions e Node.js são usados somente para testes durante o desenvolvimento.
 
-O projeto é publicado pelo **GitHub Pages** e utiliza HTML, CSS e JavaScript puro, sem etapa de build ou dependência de framework.
-
-## Estrutura do repositório
+## Estrutura
 
 ```text
 TemperodaIlma/
-├── assets/
-│   └── images/
-│       ├── combos/        # Imagens dos combos
-│       ├── marca/         # Logotipo da loja
-│       ├── pratos/        # Fotos dos pratos
-│       └── pwa/           # Ícones de instalação
-├── css/
-│   └── styles.css         # Estilos próprios e tema
+├── assets/                 # Fotografias, logotipo e ícones
+├── css/styles.css          # Aparência e tema
 ├── js/
-│   ├── app.js             # Lógica principal da aplicação
-│   ├── splash.js          # Tela de abertura
-│   ├── tailwind-config.js # Configuração do Tailwind CDN
-│   ├── theme-init.js      # Inicialização do tema
-│   └── vendor/
-│       └── qrcode-generator.js
-├── 404.html               # Página de rota não encontrada
-├── index.html             # Entrada do site
-├── manifest.json          # Configuração do PWA
+│   ├── config/loja.js      # Configurações públicas da loja e Pix
+│   ├── core/estado.js      # Estado compartilhado
+│   ├── data/combos.js      # Cadastro de combos
+│   ├── data/pratos.js      # Cadastro de pratos
+│   ├── modules/            # Interface, pedidos, frete, cardápio e checkout
+│   ├── services/           # Endereço e Pix
+│   ├── tests/              # Testes de integridade
+│   ├── vendor/             # Biblioteca QR Code
+│   └── app.js              # Inicialização
+├── .github/workflows/      # Verificações automáticas
+├── 404.html
+├── index.html
+├── offline.html
+├── manifest.json
+├── package.json
 ├── README.md
-└── sw.js                  # Service Worker e cache offline
+└── sw.js
 ```
 
-A raiz contém somente três pastas principais (**assets**, **css** e **js**) e os arquivos de entrada/configuração do site.
-
-## Funcionalidades existentes
-
-- Cardápio com pratos tradicionais e da linha Fit, pesquisa e filtros.
-- Combos de 5 e 10 marmitas, com seleção e edição de sabores.
-- Carrinho com duplicação, edição, remoção e restauração local.
-- Cálculo de entrega por bairro e consulta de CEP pelo ViaCEP.
-- Regras de frete grátis para os combos tradicionais elegíveis.
-- Validação dos dados e preparação da comanda para WhatsApp.
-- Geração local de payload Pix e QR Code.
-- Compartilhamento do cardápio, tema escuro e recursos de PWA.
-- Persistência local do carrinho e dos últimos dados de atendimento no navegador.
-
-## Tecnologias e integrações
-
-- HTML5, CSS e JavaScript sem framework.
-- Tailwind CSS via CDN, Google Fonts e Font Awesome via CDN.
-- canvas-confetti via CDN (efeito opcional).
-- Biblioteca QR Code local em `js/vendor/`.
-- ViaCEP para consulta de CEP.
-- Links do WhatsApp para encaminhamento da comanda.
-
-A aplicação é frontend estático. Não há backend, banco de dados compartilhado, painel administrativo ou gateway de pagamento integrado. O QR Code Pix é montado no navegador e não confirma o recebimento do pagamento. A comanda é preparada para o WhatsApp; o usuário ainda precisa concluir o envio no aplicativo.
-
-## Executar localmente
-
-Não é necessário instalar dependências ou compilar o projeto. Sirva a pasta pela raiz com um servidor HTTP local:
-
-```bash
-python -m http.server 8000
-```
-
-Depois abra `http://localhost:8000`.
-
-Também é possível usar a extensão Live Server do Visual Studio Code. O acesso por `file://` não é recomendado porque recursos do navegador, especialmente o Service Worker, exigem HTTP ou HTTPS.
+As três pastas principais continuam sendo **assets**, **css** e **js**. A pasta oculta `.github` contém a automação do GitHub.
 
 ## Onde editar
 
-- **Cardápio e combos:** arrays `availableFlavors` e `combos` em `js/app.js`.
-- **Regras e fluxos operacionais:** funções em `js/app.js`.
-- **Dados comerciais e configuração Pix:** objeto `CONFIG` em `js/app.js`.
-- **Bairros e taxas de entrega:** opções do campo de bairro em `index.html`.
-- **Aparência:** `css/styles.css` e classes Tailwind no HTML.
-- **Imagens:** diretórios dentro de `assets/images/`.
-- **Instalação e cache PWA:** `manifest.json` e `sw.js`.
+- Pratos: `js/data/pratos.js`.
+- Combos e preços: `js/data/combos.js`.
+- Dados da loja e Pix: `js/config/loja.js`.
+- Aparência: `css/styles.css` e classes Tailwind.
+- Cardápio: `js/modules/cardapio.js`.
+- Carrinho: `js/modules/carrinho.js`.
+- Pedidos: `js/modules/pedidos.js` e `js/modules/checkout.js`.
+- Frete: `js/modules/operacao.js`.
+- CEP/endereço: `js/modules/horarios.js` e `js/services/endereco.js`.
+- Cache e instalação: `manifest.json` e `sw.js`.
 
-Os dados comerciais e a chave Pix definidos no JavaScript ficam visíveis ao navegador. Não coloque senhas, tokens privados ou credenciais secretas no frontend.
+Os arquivos JavaScript continuam como scripts clássicos carregados em ordem no final de `index.html`. Isso preserva as funções globais chamadas pelos eventos inline. Não adicione `type="module"` sem migrar primeiro esses eventos.
 
-## Publicação
+## Melhorias desta etapa
 
-O GitHub Pages deve publicar a partir da branch `main`, na raiz do repositório. Ao adicionar, renomear ou mover imagens, atualize todas as referências correspondentes em HTML/JavaScript e valide os caminhos do manifest e do Service Worker.
+- Dados de pratos e combos separados da lógica.
+- Configuração pública centralizada; valores Pix preservados.
+- JavaScript dividido por responsabilidade.
+- Carrinho preservado ao abrir o WhatsApp; só é limpo por ação manual após o cliente confirmar o envio.
+- Mensagem esclarece que o site não consegue confirmar o envio no WhatsApp.
+- Opção para apagar dados pessoais e carrinho salvos neste navegador.
+- Tratamento de dados locais corrompidos.
+- Service Worker versionado, limpeza de caches antigos, armazenamento de respostas válidas e tela offline.
+- Dimensões nas imagens dinâmicas para reduzir deslocamento de layout.
+- Testes automáticos de integridade via GitHub Actions.
 
-O Service Worker usa cache versionado. Quando arquivos centrais ou caminhos de assets mudarem, incremente a constante `C` em `sw.js` para que os navegadores instalem um cache novo.
+## Dados locais e WhatsApp
 
-## Checklist antes de integrar mudanças
+O carrinho e os dados do último atendimento ficam somente no navegador via `localStorage`. A opção **Apagar dados salvos neste navegador** remove o histórico local e o carrinho deste dispositivo; não apaga mensagens enviadas pelo WhatsApp.
 
-1. Conferir referências locais a scripts, estilos, imagens, manifest e ícones.
-2. Validar a sintaxe de JavaScript e JSON.
-3. Testar combos, limite de sabores, carrinho e frete.
-4. Testar consulta de CEP, validação do checkout, Pix e mensagem WhatsApp.
-5. Conferir o site em celular e desktop e testar instalação/atualização do PWA.
-6. Integrar por revisão e manter uma branch de backup antes de mudanças estruturais.
+O navegador prepara a comanda e abre o WhatsApp, mas não consegue verificar se a mensagem foi enviada. Por isso, o carrinho permanece salvo até o cliente confirmar o envio e optar por limpá-lo.
 
-## Organização dos assets
+## Pix
 
-Os nomes atuais dos arquivos de imagem foram mantidos para evitar alterações desnecessárias nos próprios arquivos. As imagens sem uso atual também foram preservadas em `assets/images/combos/`, sem remoção de conteúdo legado. O arquivo `Combo.png` tem somente 2 bytes no repositório original e precisa ser conferido antes de ser reutilizado.
+A geração local do payload Pix e do QR Code foi preservada. Esta etapa não adiciona confirmação de recebimento nem gateway de pagamento.
+
+## Imagens
+
+As fotografias originais foram mantidas. O carregamento sob demanda já existia; agora também foram adicionadas dimensões às imagens dinâmicas. A conversão física para WebP/AVIF exigirá regravar e comparar visualmente os arquivos originais em etapa própria.
+
+## Testes
+
+Execute na raiz com `npm test`. O GitHub Actions verifica sintaxe e integridade nas alterações da `main`, em branches `improvements/*` e em Pull Requests para `main`. Os testes cobrem dados, IDs, imagens, ordem dos scripts, pré-cache, preservação do carrinho e opção de apagar dados locais. Eles complementam, mas não substituem, o teste visual em navegador real.
+
+## Executar localmente
+
+Use `python -m http.server 8000` e acesse `http://localhost:8000`. O Service Worker exige HTTP ou HTTPS.
+
+## Publicação e segurança
+
+O GitHub Pages continua servindo os arquivos estáticos pela raiz da branch `main`. As mudanças desta etapa ficam em branch separada e devem ser revisadas/testadas visualmente antes da integração.
+
+Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arquivos públicos podem ser lidos por qualquer visitante.
