@@ -3,7 +3,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 const root=process.cwd(), dirs=['assets/images/pratos','assets/images/combos','assets/images/marca'];
 const sources=['index.html','js/data/pratos.js','js/data/combos.js','sw.js'], minPsnr=40, qualities=[86,90,92,94,96], report=[], refs=new Map();
-for(const f of sources){const c=await fs.readFile(path.join(root,f),'utf8');for(const m of c.matchAll(/assets\/images\/(?:pratos|combos|marca)\/[^"'()]+/g))refs.set(m[0],(refs.get(m[0])||0)+1);}
+for(const f of sources){const c=await fs.readFile(path.join(root,f),'utf8');for(const m of c.matchAll(/assets\/images\/(?:pratos|combos|marca|optimized\/(?:pratos|combos))\/[^"'()]+/g))refs.set(m[0],(refs.get(m[0])||0)+1);}
 function psnr(a,b){if(a.length!==b.length||!a.length)return 0;let e=0,n=0;for(let i=0;i<a.length;i+=64){for(let c=0;c<4;c++){const d=a[i+c]-b[i+c];e+=d*d;n++;}}e/=n;return e===0?99:10*Math.log10(65025/e);}
 const fmt=n=>(n/1024).toFixed(1)+' KB';
 for(const dir of dirs){const entries=await fs.readdir(path.join(root,dir),{withFileTypes:true});for(const ent of entries.filter(e=>e.isFile())){const rel=path.posix.join(dir,ent.name),ext=path.extname(rel).toLowerCase();if(!['.png','.jpg','.jpeg','.webp'].includes(ext))continue;const out='assets/images/optimized/'+path.basename(dir)+'/'+path.basename(rel,ext)+'.webp',bytes=(await fs.stat(path.join(root,rel))).size,used=refs.has(rel)||refs.has(out);try{
