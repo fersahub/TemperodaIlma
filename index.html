@@ -243,7 +243,7 @@
             <p class="text-xs text-stone-600">Aguarde a confirmação pelo WhatsApp. Seu carrinho foi limpo.</p>
             <div id="sent-pix" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-2">
                 <p class="font-bold text-emerald-900">Pague via Pix: <span id="sent-pix-valor"></span></p>
-                <div id="sent-pix-qr" class="inline-block" style="background:#fff;padding:6px;border-radius:8px;width:188px;height:188px"></div>
+                <div id="sent-pix-qr" class="inline-block pix-qr-frame"></div>
                 <button type="button" onclick="copiarPixCopiaECola()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg">Copiar Pix copia e cola</button>
             </div>
             <a id="sent-link" href="#" target="_blank" rel="noopener" class="block text-xs text-emerald-700 underline">O WhatsApp não abriu? Toque aqui</a>
@@ -533,7 +533,7 @@
                         <p class="font-bold text-emerald-900">Pague via Pix</p>
                         <p class="text-stone-700">Valor: <span id="pix-valor" class="font-bold"></span></p>
                         <div id="pix-qr-area" class="hidden space-y-2 text-center">
-                            <div id="pix-qr" class="inline-block" style="background:#fff;padding:6px;border-radius:8px;width:188px;height:188px"></div>
+                            <div id="pix-qr" class="inline-block pix-qr-frame"></div>
                             <button type="button" onclick="copiarPixCopiaECola()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg">Copiar Pix copia e cola</button>
                             <p class="text-stone-600">No app do seu banco, escolha Pix e leia o QR Code ou cole o código copiado.</p>
                         </div>

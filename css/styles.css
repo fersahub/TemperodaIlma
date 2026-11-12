@@ -68,3 +68,8 @@
         html.dark .border-stone-200,html.dark .border-stone-100,html.dark .border-stone-300,html.dark .border-emerald-200,html.dark .border-amber-200{border-color:#3a3a3a!important}
         html.dark input,html.dark select,html.dark textarea{background:#1e1e1e!important;color:#eee}
     
+        /* Elementos que antes recebiam estilos inline no HTML. */
+        .pix-qr-frame{background:#fff;padding:6px;border-radius:8px;width:188px;height:188px}
+        .frete-progresso-0{width:0%}
+        .frete-progresso-50{width:50%}
+        .frete-progresso-100{width:100%}
