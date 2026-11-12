@@ -1,18 +1,18 @@
 {
   "minPsnr": 40,
   "totals": {
-    "convertedUsed": 5,
-    "originalBytes": 484377,
-    "webpBytes": 325974,
-    "savedBytes": 158403,
-    "savedPercent": 32.7
+    "convertedUsed": 20,
+    "originalBytes": 13876990,
+    "webpBytes": 2445550,
+    "savedBytes": 11431440,
+    "savedPercent": 82.4
   },
   "files": [
     {
       "source": "assets/images/pratos/Almondegas.jpg",
       "optimized": "assets/images/optimized/pratos/Almondegas.webp",
-      "used": true,
-      "references": 1,
+      "used": false,
+      "references": 0,
       "width": 1024,
       "height": 559,
       "originalBytes": 109669,
@@ -20,14 +20,14 @@
       "savedBytes": 32823,
       "savedPercent": 29.9,
       "quality": 86,
-      "psnrDb": 41.42,
-      "replaced": "sim"
+      "psnrDb": 41.28,
+      "replaced": "não"
     },
     {
       "source": "assets/images/pratos/Arroz funcional.jpg",
       "optimized": "assets/images/optimized/pratos/Arroz funcional.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1254,
       "height": 1254,
       "originalBytes": 341779,
@@ -35,14 +35,14 @@
       "savedBytes": 150915,
       "savedPercent": 44.2,
       "quality": 86,
-      "psnrDb": 41.64,
-      "replaced": "não"
+      "psnrDb": 41.69,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Bife acebolado.jpg",
       "optimized": "assets/images/optimized/pratos/Bife acebolado.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 95623,
@@ -50,14 +50,14 @@
       "savedBytes": 31285,
       "savedPercent": 32.7,
       "quality": 86,
-      "psnrDb": 42.03,
-      "replaced": "não"
+      "psnrDb": 41.87,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Bife carne temparada.png",
       "optimized": "assets/images/optimized/pratos/Bife carne temparada.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1536,
       "height": 1024,
       "originalBytes": 1973359,
@@ -65,14 +65,14 @@
       "savedBytes": 1806111,
       "savedPercent": 91.5,
       "quality": 86,
-      "psnrDb": 41.26,
-      "replaced": "não"
+      "psnrDb": 41.24,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Bife panela.jpg",
       "optimized": "assets/images/optimized/pratos/Bife panela.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 88609,
@@ -80,14 +80,14 @@
       "savedBytes": 29473,
       "savedPercent": 33.3,
       "quality": 86,
-      "psnrDb": 42.09,
-      "replaced": "não"
+      "psnrDb": 41.96,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Carne camponata.png",
       "optimized": "assets/images/optimized/pratos/Carne camponata.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1536,
       "height": 1024,
       "originalBytes": 2046523,
@@ -95,14 +95,14 @@
       "savedBytes": 1852749,
       "savedPercent": 90.5,
       "quality": 86,
-      "psnrDb": 40.31,
-      "replaced": "não"
+      "psnrDb": 40.25,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Carne desfiada.jpg",
       "optimized": "assets/images/optimized/pratos/Carne desfiada.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 94698,
@@ -110,14 +110,14 @@
       "savedBytes": 32360,
       "savedPercent": 34.2,
       "quality": 86,
-      "psnrDb": 41.68,
-      "replaced": "não"
+      "psnrDb": 41.49,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Carne moida mix.jpg",
       "optimized": "assets/images/optimized/pratos/Carne moida mix.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 99237,
@@ -125,14 +125,14 @@
       "savedBytes": 32415,
       "savedPercent": 32.7,
       "quality": 86,
-      "psnrDb": 41.65,
-      "replaced": "não"
+      "psnrDb": 41.44,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Escondidinho.jpg",
       "optimized": "assets/images/optimized/pratos/Escondidinho.webp",
-      "used": true,
-      "references": 1,
+      "used": false,
+      "references": 0,
       "width": 1024,
       "height": 559,
       "originalBytes": 88885,
@@ -140,14 +140,14 @@
       "savedBytes": 30117,
       "savedPercent": 33.9,
       "quality": 86,
-      "psnrDb": 41.82,
-      "replaced": "sim"
+      "psnrDb": 41.63,
+      "replaced": "não"
     },
     {
       "source": "assets/images/pratos/Feijão preto.png",
       "optimized": "assets/images/optimized/pratos/Feijão preto.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1536,
       "height": 1024,
       "originalBytes": 1968567,
@@ -155,14 +155,14 @@
       "savedBytes": 1797241,
       "savedPercent": 91.3,
       "quality": 86,
-      "psnrDb": 41.68,
-      "replaced": "não"
+      "psnrDb": 41.66,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Frango acebolado.jpg",
       "optimized": "assets/images/optimized/pratos/Frango acebolado.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 82190,
@@ -170,14 +170,14 @@
       "savedBytes": 29368,
       "savedPercent": 35.7,
       "quality": 86,
-      "psnrDb": 42.16,
-      "replaced": "não"
+      "psnrDb": 41.94,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Frango mandioquinha.jpg",
       "optimized": "assets/images/optimized/pratos/Frango mandioquinha.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 87198,
@@ -185,14 +185,14 @@
       "savedBytes": 29404,
       "savedPercent": 33.7,
       "quality": 86,
-      "psnrDb": 42,
-      "replaced": "não"
+      "psnrDb": 41.84,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Frango milho.jpg",
       "optimized": "assets/images/optimized/pratos/Frango milho.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 85909,
@@ -200,14 +200,14 @@
       "savedBytes": 30529,
       "savedPercent": 35.5,
       "quality": 86,
-      "psnrDb": 42.11,
-      "replaced": "não"
+      "psnrDb": 41.93,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Integral almondegas.jpg",
       "optimized": "assets/images/optimized/pratos/Integral almondegas.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1254,
       "height": 1254,
       "originalBytes": 308950,
@@ -215,14 +215,14 @@
       "savedBytes": 144956,
       "savedPercent": 46.9,
       "quality": 86,
-      "psnrDb": 41.79,
-      "replaced": "não"
+      "psnrDb": 41.84,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Lombo de boi.jpg",
       "optimized": "assets/images/optimized/pratos/Lombo de boi.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 94653,
@@ -230,14 +230,14 @@
       "savedBytes": 30427,
       "savedPercent": 32.1,
       "quality": 86,
-      "psnrDb": 42.09,
-      "replaced": "não"
+      "psnrDb": 41.86,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Omelete frango.jpg",
       "optimized": "assets/images/optimized/pratos/Omelete frango.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 94734,
@@ -245,14 +245,14 @@
       "savedBytes": 31470,
       "savedPercent": 33.2,
       "quality": 86,
-      "psnrDb": 41.63,
-      "replaced": "não"
+      "psnrDb": 41.43,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Panqueca carne.jpg",
       "optimized": "assets/images/optimized/pratos/Panqueca carne.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 100978,
@@ -260,14 +260,14 @@
       "savedBytes": 30668,
       "savedPercent": 30.4,
       "quality": 86,
-      "psnrDb": 41.64,
-      "replaced": "não"
+      "psnrDb": 41.48,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Panqueca frango integral.jpg",
       "optimized": "assets/images/optimized/pratos/Panqueca frango integral.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1024,
       "height": 559,
       "originalBytes": 94576,
@@ -275,14 +275,14 @@
       "savedBytes": 31116,
       "savedPercent": 32.9,
       "quality": 86,
-      "psnrDb": 41.85,
-      "replaced": "não"
+      "psnrDb": 41.64,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Panqueca frango.png",
       "optimized": "assets/images/optimized/pratos/Panqueca frango.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1536,
       "height": 1024,
       "originalBytes": 1987024,
@@ -290,14 +290,14 @@
       "savedBytes": 1752346,
       "savedPercent": 88.2,
       "quality": 90,
-      "psnrDb": 41.11,
-      "replaced": "não"
+      "psnrDb": 41.15,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/pratos/Penne.jpg",
       "optimized": "assets/images/optimized/pratos/Penne.webp",
-      "used": true,
-      "references": 1,
+      "used": false,
+      "references": 0,
       "width": 1024,
       "height": 559,
       "originalBytes": 105345,
@@ -305,14 +305,14 @@
       "savedBytes": 33413,
       "savedPercent": 31.7,
       "quality": 86,
-      "psnrDb": 41.49,
-      "replaced": "sim"
+      "psnrDb": 41.3,
+      "replaced": "não"
     },
     {
       "source": "assets/images/pratos/Quiabada.jpg",
       "optimized": "assets/images/optimized/pratos/Quiabada.webp",
-      "used": true,
-      "references": 1,
+      "used": false,
+      "references": 0,
       "width": 1024,
       "height": 559,
       "originalBytes": 88421,
@@ -320,14 +320,14 @@
       "savedBytes": 30963,
       "savedPercent": 35,
       "quality": 86,
-      "psnrDb": 42.04,
-      "replaced": "sim"
+      "psnrDb": 41.85,
+      "replaced": "não"
     },
     {
       "source": "assets/images/pratos/Strogonoff.jpg",
       "optimized": "assets/images/optimized/pratos/Strogonoff.webp",
-      "used": true,
-      "references": 1,
+      "used": false,
+      "references": 0,
       "width": 1024,
       "height": 559,
       "originalBytes": 92057,
@@ -335,14 +335,14 @@
       "savedBytes": 31087,
       "savedPercent": 33.8,
       "quality": 86,
-      "psnrDb": 41.83,
-      "replaced": "sim"
+      "psnrDb": 41.51,
+      "replaced": "não"
     },
     {
       "source": "assets/images/combos/Combo 10.1.png",
       "optimized": "assets/images/optimized/combos/Combo 10.1.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 2,
       "width": 1220,
       "height": 1215,
       "originalBytes": 162001,
@@ -350,14 +350,14 @@
       "savedBytes": 19677,
       "savedPercent": 12.1,
       "quality": 86,
-      "psnrDb": 42.64,
-      "replaced": "não"
+      "psnrDb": 42.41,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/combos/Combo 10.png",
       "optimized": "assets/images/optimized/combos/Combo 10.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 1,
       "width": 1216,
       "height": 1293,
       "originalBytes": 2529941,
@@ -365,14 +365,14 @@
       "savedBytes": 2156697,
       "savedPercent": 85.2,
       "quality": 90,
-      "psnrDb": 40.73,
-      "replaced": "não"
+      "psnrDb": 40.68,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/combos/Combo 5.1.png",
       "optimized": "assets/images/optimized/combos/Combo 5.1.webp",
-      "used": false,
-      "references": 0,
+      "used": true,
+      "references": 3,
       "width": 1024,
       "height": 1024,
       "originalBytes": 1540441,
@@ -380,8 +380,8 @@
       "savedBytes": 1412233,
       "savedPercent": 91.7,
       "quality": 86,
-      "psnrDb": 41.41,
-      "replaced": "não"
+      "psnrDb": 41.54,
+      "replaced": "sim"
     },
     {
       "source": "assets/images/combos/Combo 5.2.png",
@@ -395,7 +395,7 @@
       "savedBytes": 56369,
       "savedPercent": 32.9,
       "quality": 86,
-      "psnrDb": 42.23,
+      "psnrDb": 41.76,
       "replaced": "não"
     },
     {
@@ -410,7 +410,7 @@
       "savedBytes": 1599670,
       "savedPercent": 93,
       "quality": 86,
-      "psnrDb": 41.91,
+      "psnrDb": 41.81,
       "replaced": "não"
     },
     {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v4-modular';
+const CACHE_NAME = 'tempero-v5-webp';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
