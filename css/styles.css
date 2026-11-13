@@ -73,3 +73,9 @@
         .frete-progresso-0{width:0%}
         .frete-progresso-50{width:50%}
         .frete-progresso-100{width:100%}
+
+/* Estado visual dos botões de favoritos, inclusive no tema escuro. */
+.prato-favorito-btn.is-favorito,
+#dish-detail-favorite.is-favorito{background:#fff1f2!important;color:#be123c!important;border-color:#fecdd3!important}
+html.dark .prato-favorito-btn.is-favorito,
+html.dark #dish-detail-favorite.is-favorito{background:#4a1d2b!important;color:#fda4af!important;border-color:#713047!important}

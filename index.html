@@ -106,7 +106,7 @@
                 </div>
 
                 <!-- BOTOES DE FILTRO RÁPIDO -->
-                <div class="flex items-center gap-1.5 bg-stone-200 p-1 rounded-xl self-start sm:self-auto">
+                <div class="flex flex-wrap items-center gap-1.5 bg-stone-200 p-1 rounded-xl self-start sm:self-auto">
                     <button onclick="filtrarPratos('Todos')" id="filter-btn-Todos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-stone-800 shadow-sm">
                         Todos
                     </button>
@@ -117,7 +117,7 @@
                         Linha Fit
                     </button>
                     <button type="button" onclick="filtrarPratos('Favoritos')" id="filter-btn-Favoritos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800" aria-label="Mostrar pratos favoritos">
-                        <i class="fa-regular fa-heart text-rose-500"></i> Favoritos <span id="favorites-count" class="font-extrabold">0</span>
+                        <i class="fa-regular fa-heart text-rose-500"></i> Favoritos <span id="favorites-count" class="font-extrabold" aria-live="polite" aria-atomic="true">0</span>
                     </button>
                 </div>
             </div>

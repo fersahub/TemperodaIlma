@@ -37,6 +37,8 @@ As três pastas principais continuam sendo **assets**, **css** e **js**. A pasta
 - Dados da loja e Pix: `js/config/loja.js`.
 - Aparência: `css/styles.css` e classes Tailwind.
 - Cardápio: `js/modules/cardapio.js`.
+- Detalhes dos pratos: `js/modules/detalhes-prato.js` e modal em `index.html`.
+- Favoritos: `js/modules/favoritos.js`; a lista fica salva no navegador do próprio cliente.
 - Carrinho: `js/modules/carrinho.js`.
 - Pedidos: `js/modules/pedidos.js` e `js/modules/checkout.js`.
 - Frete: `js/modules/operacao.js`.
@@ -85,3 +87,12 @@ Use `python -m http.server 8000` e acesse `http://localhost:8000`. O Service Wor
 O GitHub Pages continua servindo os arquivos estáticos pela raiz da branch `main`. As mudanças desta etapa ficam em branch separada e devem ser revisadas/testadas visualmente antes da integração.
 
 Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arquivos públicos podem ser lidos por qualquer visitante.
+
+
+## Detalhes dos pratos e favoritos
+
+- Ao tocar na foto, no nome ou em **Ver detalhes**, o cliente abre a ficha do prato com sua foto, categoria e descrição cadastrada.
+- O coração no cardápio e o botão na ficha adicionam/removem o prato dos favoritos.
+- O filtro **Favoritos** mostra os pratos guardados e informa quando a lista está vazia.
+- Os favoritos são salvos no armazenamento local (`localStorage`) deste navegador. Não exigem Backend ou Supabase e não sincronizam automaticamente entre dispositivos.
+- A opção **Apagar dados salvos neste navegador** também remove a lista de favoritos.
