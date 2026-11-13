@@ -26,7 +26,7 @@ test('HTML: referências locais existem e scripts carregam na ordem',()=>{
  for(const m of html.matchAll(/<(?:script|link|img)\b[^>]*(?:src|href)=["']([^"']+)["'][^>]*>/gi)){const v=m[1];if(v&&!/^(?:https?:|data:|#|mailto:|tel:|javascript:)/i.test(v))refs.push(v.split(/[?#]/)[0]);}
  for(const p of refs)assert.ok(exists(p),p);
  const appAt=html.indexOf('<script src="js/app.js">');
- for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p+'">');assert.ok(i>=0&&i<appAt,p);}
+ for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/favoritos.js','js/modules/detalhes-prato.js','js/modules/cardapio.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p+'">');assert.ok(i>=0&&i<appAt,p);}
 });
 test('Service Worker: pré-cache contém arquivos existentes e remove versões antigas',()=>{
  const s=read('sw.js'),m=s.match(/const CORE_ASSETS\s*=\s*(\[[\s\S]*?\]);/);assert.ok(m);
@@ -41,3 +41,40 @@ test('cliente pode apagar dados guardados localmente',()=>{
  assert.match(read('js/modules/checkout.js'),/function apagarDadosSalvos\(\)/);assert.match(read('index.html'),/Apagar dados salvos neste navegador/);
 });
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
+
+ 
+test('favoritos: salvamento local, remoção e IDs válidos',()=>{
+ const store=new Map(),messages=[];
+ const sandbox={
+  availableFlavors:[{id:'f1',name:'Panqueca'},{id:'f2',name:'Feijoada'}],
+  localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},
+  document:{getElementById:()=>null},
+  mostrarToast:m=>messages.push(m),
+  atualizarBotaoFavoritoDetalhe:()=>{},
+  renderFlavorsDisplay:()=>{}
+ };
+ runInNewContext(read('js/modules/favoritos.js'),sandbox);
+ assert.equal(sandbox.pratoEstaFavoritado('f1'),false);
+ sandbox.alternarFavoritoPrato('f1');
+ assert.equal(sandbox.pratoEstaFavoritado('f1'),true);
+ assert.deepEqual(JSON.parse(store.get('tempero_ilma_favoritos_v1')),['f1']);
+ sandbox.alternarFavoritoPrato('f1');
+ assert.equal(sandbox.pratoEstaFavoritado('f1'),false);
+ assert.deepEqual(JSON.parse(store.get('tempero_ilma_favoritos_v1')),[]);
+ assert.equal(messages.length,2);
+});
+
+test('detalhes dos pratos: modal e ações conectados ao cardápio',()=>{
+ const html=read('index.html'),cardapio=read('js/modules/cardapio.js');
+ assert.match(html,/id="dish-detail-modal"/);
+ assert.match(html,/id="dish-detail-favorite"/);
+ assert.match(html,/id="filter-btn-Favoritos"/);
+ assert.match(cardapio,/abrirDetalhesPrato/);
+ assert.match(cardapio,/alternarFavoritoPrato/);
+ assert.match(read('js/modules/detalhes-prato.js'),/function verCombosDoPrato/);
+});
+
+test('apagar dados locais também remove favoritos',()=>{
+ assert.match(read('js/modules/checkout.js'),/tempero_ilma_favoritos_v1/);
+ assert.match(read('js/modules/checkout.js'),/pratosFavoritos = \[\]/);
+});

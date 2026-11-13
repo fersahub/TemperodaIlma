@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v4-modular';
+const CACHE_NAME = 'tempero-v6-detalhes-favoritos';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
@@ -20,6 +20,8 @@ const CORE_ASSETS = [
   './js/modules/operacao.js',
   './js/services/pix.js',
   './js/modules/horarios.js',
+  './js/modules/favoritos.js',
+  './js/modules/detalhes-prato.js',
   './js/modules/cardapio.js',
   './js/modules/carrinho.js',
   './js/modules/checkout.js',

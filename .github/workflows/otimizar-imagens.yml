@@ -1,0 +1,43 @@
+name: Otimizar fotografias WebP
+on:
+  push:
+    branches:
+      - 'improvements/webp-optimization-*'
+    paths:
+      - '.github/workflows/otimizar-imagens.yml'
+      - 'scripts/otimizar-imagens.mjs'
+      - 'js/data/**'
+      - 'assets/images/**'
+permissions:
+  contents: write
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Instalar conversor de imagens
+        run: npm install --no-save --package-lock=false sharp
+      - name: Converter imagens e medir qualidade
+        run: node scripts/otimizar-imagens.mjs
+      - name: Validar JavaScript e testes
+        run: |
+          find js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+          npm test
+      - name: Salvar WebP e relatório na branch de trabalho
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/images/optimized index.html js/data/pratos.js js/data/combos.js sw.js docs/otimizacao-imagens.md docs/otimizacao-imagens.json
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração de otimização para salvar."
+            exit 1
+          fi
+          git commit -m "Otimiza fotografias do cardápio para WebP"
+          git push origin "HEAD:${{ github.ref_name }}"
