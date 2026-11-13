@@ -20,15 +20,15 @@ function renderFlavorsDisplay() {
 
     if (!filtered.length) {
         if (currentFlavorFilter === 'Favoritos' && !availableFlavors.some(flavor => pratoEstaFavoritado(flavor.id))) {
-            grid.innerHTML = \`
+            grid.innerHTML = `
                 <div class="col-span-full bg-white border border-dashed border-stone-300 rounded-2xl p-8 text-center space-y-3">
                     <div class="w-12 h-12 mx-auto rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-xl"><i class="fa-regular fa-heart"></i></div>
                     <p class="font-bold text-stone-800 text-sm">Sua lista de favoritos está vazia.</p>
                     <p class="text-xs text-stone-500">Toque no coração de um prato para guardá-lo aqui.</p>
                     <button type="button" onclick="filtrarPratos('Todos')" class="inline-flex items-center gap-2 bg-brand-secondary hover:bg-brand-accent text-white font-bold text-xs px-4 py-2.5 rounded-xl">Explorar cardápio</button>
-                </div>\`;
+                </div>`;
         } else {
-            grid.innerHTML = \`<p class="col-span-full text-center text-xs text-stone-500 py-6">Nenhum prato encontrado${currentFlavorSearch ? \` para "${escapeHtml(currentFlavorSearch)}"\` : ''}.</p>\`;
+            grid.innerHTML = `<p class="col-span-full text-center text-xs text-stone-500 py-6">Nenhum prato encontrado${currentFlavorSearch ? ` para "${escapeHtml(currentFlavorSearch)}"` : ''}.</p>`;
         }
         return;
     }
@@ -43,7 +43,7 @@ function renderFlavorsDisplay() {
         const imagemSegura = escapeHtml(flavor.img);
         const tamanhoImagem = modoExibicaoPratos === 'lista' ? 'w-14 h-14' : 'w-16 h-16';
         el.className = 'bg-white p-3 rounded-xl border border-stone-200 shadow-sm';
-        el.innerHTML = \`
+        el.innerHTML = `
             <div class="flex items-center gap-3">
                 <button type="button" data-prato-id="${idSeguro}" onclick="abrirDetalhesPrato(this.dataset.pratoId)" class="shrink-0 rounded-lg focus:outline-none" aria-label="Ver detalhes de ${nomeSeguro}">
                     <img loading="lazy" decoding="async" width="64" height="64" src="${imagemSegura}" alt="${nomeSeguro}" class="${tamanhoImagem} rounded-lg object-cover">
@@ -63,7 +63,7 @@ function renderFlavorsDisplay() {
                         Ver detalhes <i class="fa-solid fa-arrow-right text-[9px]"></i>
                     </button>
                 </div>
-            </div>\`;
+            </div>`;
         grid.appendChild(el);
     });
 }
@@ -75,7 +75,7 @@ function renderCombos() {
     combos.forEach(combo => {
         const card = document.createElement('div');
         card.className = "bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between relative";
-        card.innerHTML = \`
+        card.innerHTML = `
             <div>
                 <div class="h-44 w-full overflow-hidden relative">
                     <img loading="lazy" decoding="async" width="640" height="352" src="${combo.image}" alt="${combo.name}" class="w-full h-full object-cover">
@@ -93,7 +93,7 @@ function renderCombos() {
                     <span class="text-base font-extrabold text-stone-800">R$ ${combo.price.toFixed(2).replace('.', ',')}</span>
                 </div>
                 <button onclick="openFlavorsModal('${combo.id}')" class="bg-brand-secondary hover:bg-brand-accent text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-plus text-xs"></i> Montar & Adicionar</button>
-            </div>\`;
+            </div>`;
         grid.appendChild(card);
     });
 }

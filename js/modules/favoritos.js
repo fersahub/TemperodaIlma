@@ -18,7 +18,7 @@ function atualizarContadorFavoritos() {
     const contador = document.getElementById('favorites-count');
     if (contador) contador.textContent = String(pratosFavoritos.length);
     const botao = document.getElementById('filter-btn-Favoritos');
-    if (botao) botao.setAttribute('aria-label', \`Mostrar ${pratosFavoritos.length} pratos favoritos\`);
+    if (botao) botao.setAttribute('aria-label', `Mostrar ${pratosFavoritos.length} pratos favoritos`);
 }
 function iniciarFavoritos() { atualizarContadorFavoritos(); }
 function alternarFavoritoPrato(id) {
@@ -32,5 +32,5 @@ function alternarFavoritoPrato(id) {
     atualizarContadorFavoritos();
     if (typeof atualizarBotaoFavoritoDetalhe === 'function') atualizarBotaoFavoritoDetalhe(prato.id);
     if (typeof renderFlavorsDisplay === 'function') renderFlavorsDisplay();
-    mostrarToast(jaFavoritado ? \`"${prato.name}" removido dos favoritos.\` : \`"${prato.name}" adicionado aos favoritos.\`);
+    mostrarToast(jaFavoritado ? `"${prato.name}" removido dos favoritos.` : `"${prato.name}" adicionado aos favoritos.`);
 }
