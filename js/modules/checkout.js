@@ -95,16 +95,20 @@ function openCheckoutModal() {
         }
 
         function apagarDadosSalvos() {
-            const confirmado = window.confirm('Isso apagará deste navegador os dados do último cliente e o carrinho salvo. Não apaga mensagens já enviadas pelo WhatsApp. Deseja continuar?');
+            const confirmado = window.confirm('Isso apagará deste navegador os dados do último cliente, o carrinho e sua lista de favoritos. Não apaga mensagens já enviadas pelo WhatsApp. Deseja continuar?');
             if (!confirmado) return;
             try {
                 localStorage.removeItem('tempero_ilma_historico_pedido');
                 localStorage.removeItem('tempero_ilma_carrinho');
+                localStorage.removeItem('tempero_ilma_favoritos_v1');
             } catch (erro) {
                 mostrarToast('Não foi possível apagar os dados salvos neste navegador.');
                 return;
             }
             cartCombos = [];
+            if (typeof pratosFavoritos !== 'undefined') pratosFavoritos = [];
+            if (typeof atualizarContadorFavoritos === 'function') atualizarContadorFavoritos();
+            if (currentFlavorFilter === 'Favoritos') filtrarPratos('Todos');
             currentShippingFee = null;
             cepInfo = null;
             ultimoCepConsultado = '';
@@ -127,7 +131,7 @@ function openCheckoutModal() {
             closeCheckoutModal();
             updateCartUI();
             try { localStorage.removeItem('tempero_ilma_carrinho'); } catch (erro) {}
-            mostrarToast('Dados e carrinho apagados deste navegador.');
+            mostrarToast('Dados, carrinho e favoritos apagados deste navegador.');
         }
 
         function sendToWhatsApp() {

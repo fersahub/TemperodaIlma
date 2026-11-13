@@ -27,7 +27,7 @@
         }
 
         /* --- JANELAS: botão voltar, Esc, toque fora e trava de rolagem --- */
-        const MODAIS_ORDEM = ['quiz-modal', 'sent-modal', 'confirm-modal', 'flavors-modal', 'checkout-modal'];
+        const MODAIS_ORDEM = ['dish-detail-modal', 'quiz-modal', 'sent-modal', 'confirm-modal', 'flavors-modal', 'checkout-modal'];
 
         function modalEstaAberto(id) {
             const el = document.getElementById(id);
@@ -40,6 +40,8 @@
             } else if (id === 'flavors-modal') {
                 if (Object.keys(selectedFlavors).length && !confirm('Descartar a montagem deste combo?')) return;
                 closeFlavorsModal();
+            } else if (id === 'dish-detail-modal') {
+                fecharDetalhesPrato();
             } else {
                 document.getElementById(id).classList.add('hidden');
             }
