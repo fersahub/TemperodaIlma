@@ -126,6 +126,9 @@ test('planejador familiar compõe vários combos existentes e calcula o valor co
  const familia=JSON.parse(JSON.stringify(sandbox.gerarPlanoCombosQuiz(20,'Tradicional 350g')));
  assert.deepEqual(familia.ids,['combo-10-350g','combo-10-350g']);
  assert.equal(familia.total,400);
+ const reforcado=JSON.parse(JSON.stringify(sandbox.gerarPlanoCombosQuiz(10,'Tradicional 500g')));
+ assert.deepEqual(reforcado.ids,['combo-10-500g']);
+ assert.equal(reforcado.total,250);
  const fit=JSON.parse(JSON.stringify(sandbox.gerarPlanoCombosQuiz(10,'Linha Fit 300g')));
  assert.deepEqual(fit.ids,['combo-10-300g-fit']);
  assert.equal(fit.temFreteGratis,false);
