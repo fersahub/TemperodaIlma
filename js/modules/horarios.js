@@ -43,7 +43,7 @@
                 btn.classList.remove('bg-white', 'text-stone-800', 'shadow-sm');
                 btn.classList.add('text-stone-600');
             });
-            const activeBtn = document.getElementById(`filter-btn-${tag}`);
+            const activeBtn = Array.from(document.querySelectorAll('.filter-btn')).find(btn => btn.dataset.filter === tag);
             if (activeBtn) {
                 activeBtn.classList.add('bg-white', 'text-stone-800', 'shadow-sm');
                 activeBtn.classList.remove('text-stone-600');
