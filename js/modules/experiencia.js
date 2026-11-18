@@ -68,8 +68,8 @@
             const escolha = opcoes[estilo];
             if (!escolha || !Number.isInteger(Number(quantidade)) || Number(quantidade) < 5 || Number(quantidade) % 5 !== 0) return null;
 
-            const combo5 = combos.find(c => c.type === escolha.tipo && c.qty === 5 && c.name.includes(escolha.peso));
-            const combo10 = combos.find(c => c.type === escolha.tipo && c.qty === 10 && c.name.includes(escolha.peso));
+            const combo5 = combos.find(c => c.type === escolha.tipo && c.qty === 5);
+            const combo10 = combos.find(c => c.type === escolha.tipo && c.qty === 10);
             if (!combo5 || !combo10) return null;
 
             let restante = Number(quantidade);
