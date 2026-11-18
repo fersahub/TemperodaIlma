@@ -104,3 +104,13 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - O Empadão de Frango está cadastrado com o selo **Em breve**.
 - Produtos marcados como em breve ou indisponíveis não aparecem nas opções de montagem dos combos.
 - A fotografia do empadão é otimizada em WebP e incluída no pré-cache para disponibilidade offline após a instalação/atualização do Service Worker.
+
+
+## Mini Quiz — Planejador de refeições da família
+
+- Calcula a quantidade de marmitas a partir do número de pessoas, dias e refeições por pessoa ao dia.
+- Arredonda para múltiplos de 5, pois os combos cadastrados atualmente são de 5 e 10 unidades.
+- Apresenta o detalhamento dos combos existentes e o total estimado com base nos preços do catálogo.
+- Permite montar uma sequência de combos, escolhendo os sabores de cada um, antes de adicioná-los ao carrinho.
+- Se a sequência for cancelada, preserva no carrinho os combos que já foram concluídos.
+- Todos os cálculos acontecem localmente no navegador, sem backend ou banco de dados.

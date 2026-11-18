@@ -16,6 +16,13 @@ function openFlavorsModal(comboId, editIdx) {
 
         function closeFlavorsModal() {
             document.getElementById('flavors-modal').classList.add('hidden');
+            if (quizMontagemAtiva && !quizConfirmandoEtapa) {
+                quizMontagemAtiva = false;
+                quizCombosPendentes = [];
+                quizIndiceCombo = 0;
+                quizPlanoAtual = [];
+                mostrarToast('Montagem interrompida. Os combos já adicionados continuam no pedido.');
+            }
             if (editandoIndex !== null) { editandoIndex = null; openCheckoutModal(); }
         }
 
@@ -94,6 +101,7 @@ function openFlavorsModal(comboId, editIdx) {
             };
 
             const estavaEditando = editandoIndex !== null;
+            const montagemPorQuiz = quizMontagemAtiva && !estavaEditando;
             if (estavaEditando) {
                 cartItem.cartId = cartCombos[editandoIndex].cartId;
                 cartCombos[editandoIndex] = cartItem;
@@ -101,11 +109,31 @@ function openFlavorsModal(comboId, editIdx) {
                 cartCombos.push(cartItem);
             }
             editandoIndex = null;
+            if (montagemPorQuiz) quizConfirmandoEtapa = true;
             closeFlavorsModal();
+            quizConfirmandoEtapa = false;
             updateCartUI();
             animarCarrinho();
-            if (estavaEditando) { openCheckoutModal(); mostrarToast('Combo atualizado.'); }
-            else mostrarToast('Combo adicionado.', 'Ver pedido', openCheckoutModal);
+
+            if (estavaEditando) {
+                openCheckoutModal();
+                mostrarToast('Combo atualizado.');
+            } else if (montagemPorQuiz) {
+                quizIndiceCombo++;
+                if (quizIndiceCombo < quizCombosPendentes.length) {
+                    abrirProximoComboQuiz();
+                    mostrarToast('Combo ' + quizIndiceCombo + ' de ' + quizCombosPendentes.length + ' adicionado. Agora monte o próximo.');
+                } else {
+                    const quantidadeMontada = quizCombosPendentes.length;
+                    quizMontagemAtiva = false;
+                    quizCombosPendentes = [];
+                    quizIndiceCombo = 0;
+                    quizPlanoAtual = [];
+                    mostrarToast(quantidadeMontada + ' combo(s) montado(s) e adicionado(s) ao pedido.', 'Ver pedido', openCheckoutModal);
+                }
+            } else {
+                mostrarToast('Combo adicionado.', 'Ver pedido', openCheckoutModal);
+            }
         }
 
         function updateCartUI() {

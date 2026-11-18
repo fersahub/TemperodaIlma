@@ -100,3 +100,49 @@ test('Produtos em breve ficam fora da seleção e montagem automática de combos
  assert.match(read('js/modules/carrinho.js'),/flavor\.tag === currentEditingCombo\.type && !flavor\.emBreve && flavor\.disponivel !== false/);
  assert.match(read('js/modules/operacao.js'),/f\.tag === currentEditingCombo\.type && !f\.emBreve && f\.disponivel !== false/);
 });
+
+
+test('planejador familiar calcula a necessidade e arredonda em múltiplos de cinco',()=>{
+ const combos=data('js/data/combos.js').combos;
+ const sandbox={combos};
+ runInNewContext(read('js/modules/experiencia.js'),sandbox);
+ const exato=JSON.parse(JSON.stringify(sandbox.calcularNecessidadeQuiz(4,5,1)));
+ assert.deepEqual(exato,{pessoas:4,dias:5,refeicoes:1,total:20,sugerido:20,excedente:0});
+ const arredondado=JSON.parse(JSON.stringify(sandbox.calcularNecessidadeQuiz(3,3,1)));
+ assert.deepEqual(arredondado,{pessoas:3,dias:3,refeicoes:1,total:9,sugerido:10,excedente:1});
+ assert.equal(sandbox.calcularNecessidadeQuiz(0,5,1),null);
+ assert.equal(sandbox.calcularNecessidadeQuiz(21,5,1),null);
+});
+
+test('planejador familiar compõe vários combos existentes e calcula o valor correto',()=>{
+ const combos=data('js/data/combos.js').combos;
+ const sandbox={combos};
+ runInNewContext(read('js/modules/experiencia.js'),sandbox);
+ const plano=JSON.parse(JSON.stringify(sandbox.gerarPlanoCombosQuiz(15,'Tradicional 350g')));
+ assert.deepEqual(plano.ids,['combo-10-350g','combo-5-350g']);
+ assert.equal(plano.quantidade,15);
+ assert.equal(plano.total,300);
+ assert.equal(plano.temFreteGratis,true);
+ const familia=JSON.parse(JSON.stringify(sandbox.gerarPlanoCombosQuiz(20,'Tradicional 350g')));
+ assert.deepEqual(familia.ids,['combo-10-350g','combo-10-350g']);
+ assert.equal(familia.total,400);
+ const reforcado=JSON.parse(JSON.stringify(sandbox.gerarPlanoCombosQuiz(10,'Tradicional 500g')));
+ assert.deepEqual(reforcado.ids,['combo-10-500g']);
+ assert.equal(reforcado.total,250);
+ const fit=JSON.parse(JSON.stringify(sandbox.gerarPlanoCombosQuiz(10,'Linha Fit 300g')));
+ assert.deepEqual(fit.ids,['combo-10-300g-fit']);
+ assert.equal(fit.temFreteGratis,false);
+});
+
+test('mini quiz apresenta quatro perguntas e montagem sequencial dos combos',()=>{
+ const html=read('index.html');
+ const experiencia=read('js/modules/experiencia.js');
+ const carrinho=read('js/modules/carrinho.js');
+ for(const id of ['quiz-pessoas','quiz-dias','quiz-refeicoes','quiz-estilo','quiz-resultado','quiz-acoes-resultado']) assert.match(html,new RegExp('id="'+id+'"'));
+ assert.match(experiencia,/function calcularNecessidadeQuiz/);
+ assert.match(experiencia,/function gerarPlanoCombosQuiz/);
+ assert.match(experiencia,/function iniciarMontagemSugestaoQuiz/);
+ assert.match(experiencia,/function abrirProximoComboQuiz/);
+ assert.match(carrinho,/const montagemPorQuiz = quizMontagemAtiva/);
+ assert.match(carrinho,/Montagem interrompida/);
+});

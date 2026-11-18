@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v8-empadao-sem-coentro';
+const CACHE_NAME = 'tempero-v9-planejador-familia';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
