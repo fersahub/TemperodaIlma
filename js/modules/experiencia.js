@@ -78,7 +78,7 @@
                 ids.push(combo10.id);
                 restante -= 10;
             }
-            if (restante === 5) ids.push(combo5.id);
+            if (restante === 5) { ids.push(combo5.id); restante -= 5; }
             if (restante !== 0) return null;
 
             const itens = ids.map(id => combos.find(c => c.id === id));
