@@ -32,7 +32,7 @@ As três pastas principais continuam sendo **assets**, **css** e **js**. A pasta
 
 ## Onde editar
 
-- Pratos: `js/data/pratos.js` (inclui as categorias Tradicional, Linha Fit e Tortas e Empadões).
+- Pratos: `js/data/pratos.js` (inclui as categorias Tradicional, Linha Fit e Especiais da Casa).
 - Combos e preços: `js/data/combos.js`.
 - Dados da loja e Pix: `js/config/loja.js`.
 - Aparência: `css/styles.css` e classes Tailwind.
@@ -98,7 +98,7 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - A opção **Apagar dados salvos neste navegador** também remove a lista de favoritos.
 
 
-## Categoria Tortas e Empadões
+## Categoria Especiais da Casa
 
 - A categoria possui filtro próprio no cardápio.
 - O Empadão de Frango está cadastrado com o selo **Em breve**.

@@ -15,7 +15,7 @@ test('combos: IDs, preços, quantidades e imagens',()=>{
 });
 test('pratos: IDs, categorias e imagens',()=>{
  const xs=data('js/data/pratos.js').pratos;assert.ok(xs.length>0);assert.equal(new Set(xs.map(x=>x.id)).size,xs.length);
- for(const x of xs){assert.ok(x.name&&x.desc);assert.ok(['Tradicional','Linha Fit','Tortas e Empadões'].includes(x.tag));assert.ok(exists(x.img),x.img);}
+ for(const x of xs){assert.ok(x.name&&x.desc);assert.ok(['Tradicional','Linha Fit','Especiais da Casa'].includes(x.tag));assert.ok(exists(x.img),x.img);}
 });
 test('configuração pública da loja e Pix preenchida',()=>{
  const window={};runInNewContext(read('js/config/loja.js'),{window});const c=window.TEMPERO_CONFIG;
@@ -84,12 +84,14 @@ test('Empadão de Frango: categoria própria, imagem e aviso de disponibilidade'
  const p=xs.find(x=>x.id==='f24');
  assert.ok(p);
  assert.equal(p.name,'Empadão de Frango');
- assert.equal(p.tag,'Tortas e Empadões');
+ assert.equal(p.tag,'Especiais da Casa');
  assert.equal(p.emBreve,true);
  assert.equal(p.disponivel,false);
  assert.ok(exists(p.img),p.img);
  const html=read('index.html');
- assert.match(html,/data-filter="Tortas e Empadões"/);
+ assert.match(html,/data-filter="Especiais da Casa"/);
+ assert.match(html,/<button[^>]*data-filter="Especiais da Casa"[^>]*>\s*Especiais da Casa\s*<\/button>/);
+ assert.doesNotMatch(html,/<i[^>]*>\s*Especiais da Casa/);
  assert.match(html,/dish-detail-coming-soon/);
  assert.match(read('js/modules/cardapio.js'),/Em breve/);
  assert.match(read('js/modules/detalhes-prato.js'),/const emBreve = prato.emBreve === true/);
