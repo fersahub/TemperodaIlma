@@ -21,6 +21,13 @@ function abrirDetalhesPrato(id) {
     document.getElementById('dish-detail-tag').textContent = prato.tag;
     document.getElementById('dish-detail-description').textContent = prato.desc;
     atualizarBotaoFavoritoDetalhe(prato.id);
+    const emBreve = prato.emBreve === true || prato.disponivel === false;
+    const avisoEmBreve = document.getElementById('dish-detail-coming-soon');
+    const notaDisponibilidade = document.getElementById('dish-detail-availability-note');
+    const acaoCombos = document.getElementById('dish-detail-combo-action');
+    if (avisoEmBreve) avisoEmBreve.classList.toggle('hidden', !emBreve);
+    if (notaDisponibilidade) notaDisponibilidade.classList.toggle('hidden', emBreve);
+    if (acaoCombos) acaoCombos.classList.toggle('hidden', emBreve);
     document.getElementById('dish-detail-modal').classList.remove('hidden');
     document.getElementById('dish-detail-close').focus({ preventScroll: true });
 }

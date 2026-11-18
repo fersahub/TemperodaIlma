@@ -22,5 +22,6 @@ window.TEMPERO_DADOS.pratos = [
             { id: 'f20', name: 'Frango com Purê de Mandioquinha', desc: 'Frango desfiado, Purê de mandioquinha e Legumes assados', tag: 'Linha Fit', img: 'assets/images/optimized/pratos/Frango mandioquinha.webp' },
             { id: 'f21', name: 'Escondidinho Fit', desc: 'Purê de batata doce e Frango desfiado', tag: 'Linha Fit', img: 'assets/images/optimized/pratos/Escondidinho.webp' },
             { id: 'f22', name: 'Macarrão Integral com Almôndegas', desc: 'Massa integral, Molho de tomate e Almôndegas', tag: 'Linha Fit', img: 'assets/images/optimized/pratos/Integral almondegas.webp' },
-            { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'assets/images/optimized/pratos/Arroz funcional.webp' }
+            { id: 'f23', name: 'Carne Moída com Arroz Funcional', desc: 'Carne moída, Arroz funcional e Mix de Verduras', tag: 'Linha Fit', img: 'assets/images/optimized/pratos/Arroz funcional.webp' },
+            { id: 'f24', name: 'Empadão de Frango', desc: 'Empadão assado com recheio de frango desfiado.', tag: 'Tortas e Empadões', img: 'assets/images/optimized/pratos/Empadao de frango.webp', emBreve: true, disponivel: false }
         ];

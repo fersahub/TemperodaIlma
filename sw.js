@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v6-detalhes-favoritos';
+const CACHE_NAME = 'tempero-v7-empadao-em-breve';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
@@ -27,6 +27,7 @@ const CORE_ASSETS = [
   './js/modules/checkout.js',
   './js/app.js',
   './assets/images/marca/LOGO.PNG',
+  './assets/images/optimized/pratos/Empadao de frango.webp',
   './assets/images/pwa/icon-192.png',
   './assets/images/pwa/icon-512.png'
 ];

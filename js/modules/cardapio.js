@@ -50,7 +50,10 @@ function renderFlavorsDisplay() {
                 </button>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-2">
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-2 py-0.5 rounded">${categoriaSegura}</span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-2 py-0.5 rounded">${categoriaSegura}</span>
+                            ${flavor.emBreve ? '<span class="text-[9px] font-extrabold uppercase tracking-wider text-amber-900 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded">Em breve</span>' : ''}
+                        </div>
                         <button type="button" data-prato-id="${idSeguro}" onclick="alternarFavoritoPrato(this.dataset.pratoId)" class="prato-favorito-btn w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition ${favorito ? 'is-favorito' : 'bg-stone-100 text-stone-500 hover:text-rose-600'}" aria-label="${favorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}: ${nomeSeguro}" aria-pressed="${favorito}" title="${favorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
                             <i class="${favorito ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
                         </button>

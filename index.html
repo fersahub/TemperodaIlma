@@ -107,16 +107,19 @@
 
                 <!-- BOTOES DE FILTRO RÁPIDO -->
                 <div class="flex flex-wrap items-center gap-1.5 bg-stone-200 p-1 rounded-xl self-start sm:self-auto">
-                    <button onclick="filtrarPratos('Todos')" id="filter-btn-Todos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-stone-800 shadow-sm">
+                    <button onclick="filtrarPratos('Todos')" id="filter-btn-Todos" data-filter="Todos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-stone-800 shadow-sm">
                         Todos
                     </button>
-                    <button onclick="filtrarPratos('Tradicional')" id="filter-btn-Tradicional" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">
+                    <button onclick="filtrarPratos('Tradicional')" id="filter-btn-Tradicional" data-filter="Tradicional" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">
                         Tradicional
                     </button>
-                    <button onclick="filtrarPratos('Linha Fit')" id="filter-btn-Linha Fit" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">
+                    <button onclick="filtrarPratos('Linha Fit')" id="filter-btn-Linha Fit" data-filter="Linha Fit" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">
                         Linha Fit
                     </button>
-                    <button type="button" onclick="filtrarPratos('Favoritos')" id="filter-btn-Favoritos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800" aria-label="Mostrar pratos favoritos">
+                    <button type="button" onclick="filtrarPratos('Tortas e Empadões')" id="filter-btn-tortas-empadoes" data-filter="Tortas e Empadões" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800">
+                        <i class="fa-solid fa-utensils text-amber-700"></i> Tortas e Empadões
+                    </button>
+                    <button type="button" onclick="filtrarPratos('Favoritos')" id="filter-btn-Favoritos" data-filter="Favoritos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-800" aria-label="Mostrar pratos favoritos">
                         <i class="fa-regular fa-heart text-rose-500"></i> Favoritos <span id="favorites-count" class="font-extrabold" aria-live="polite" aria-atomic="true">0</span>
                     </button>
                 </div>
@@ -199,13 +202,14 @@
                 <span id="dish-detail-tag" class="inline-flex text-[10px] font-bold uppercase tracking-wider text-brand-secondary bg-emerald-50 px-3 py-1 rounded-full"></span>
                 <h3 id="dish-detail-name" class="text-xl font-bold text-stone-800"></h3>
                 <p id="dish-detail-description" class="text-sm leading-relaxed text-stone-600"></p>
-                <div class="bg-stone-50 border border-stone-100 rounded-xl p-3 flex gap-2 text-xs text-stone-600">
+                <div id="dish-detail-availability-note" class="bg-stone-50 border border-stone-100 rounded-xl p-3 flex gap-2 text-xs text-stone-600">
                     <i class="fa-solid fa-circle-info text-brand-secondary mt-0.5"></i>
                     <p>Os pratos fazem parte do cardápio semanal. Consulte os combos disponíveis para montar seu pedido com as opções desta semana.</p>
                 </div>
+                <div id="dish-detail-coming-soon" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900"><strong class="block mb-1">Em breve!</strong> Este produto está chegando ao nosso cardápio. Em breve divulgaremos as informações para pedidos.</div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                     <button id="dish-detail-favorite" type="button" onclick="alternarFavoritoDetalhe()" class="border border-stone-200 bg-white text-stone-700 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition" aria-pressed="false"><i class="fa-regular fa-heart"></i> Adicionar aos favoritos</button>
-                    <button type="button" onclick="verCombosDoPrato()" class="bg-brand-secondary hover:bg-brand-accent text-white font-bold text-xs py-3 px-4 rounded-xl transition flex items-center justify-center gap-2">Ver combos disponíveis <i class="fa-solid fa-arrow-right"></i></button>
+                    <button id="dish-detail-combo-action" type="button" onclick="verCombosDoPrato()" class="bg-brand-secondary hover:bg-brand-accent text-white font-bold text-xs py-3 px-4 rounded-xl transition flex items-center justify-center gap-2">Ver combos disponíveis <i class="fa-solid fa-arrow-right"></i></button>
                 </div>
             </div>
         </div>

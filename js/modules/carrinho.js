@@ -22,7 +22,7 @@ function openFlavorsModal(comboId, editIdx) {
         function renderFlavorsSelectionList() {
             const container = document.getElementById('flavors-selection-list');
             container.innerHTML = '';
-            const filteredFlavors = availableFlavors.filter(flavor => flavor.tag === currentEditingCombo.type);
+            const filteredFlavors = availableFlavors.filter(flavor => flavor.tag === currentEditingCombo.type && !flavor.emBreve && flavor.disponivel !== false);
 
             filteredFlavors.forEach(flavor => {
                 const count = selectedFlavors[flavor.id] || 0;

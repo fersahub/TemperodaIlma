@@ -57,7 +57,7 @@
 
         function montagemAutomatica() {
             selectedFlavors = {};
-            const lista = availableFlavors.filter(f => f.tag === currentEditingCombo.type)
+            const lista = availableFlavors.filter(f => f.tag === currentEditingCombo.type && !f.emBreve && f.disponivel !== false)
                 .sort(() => Math.random() - 0.5);
             for (let i = 0; i < currentEditingCombo.qty; i++) {
                 const f = lista[i % lista.length];
