@@ -32,7 +32,7 @@ As três pastas principais continuam sendo **assets**, **css** e **js**. A pasta
 
 ## Onde editar
 
-- Pratos: `js/data/pratos.js`.
+- Pratos: `js/data/pratos.js` (inclui as categorias Tradicional, Linha Fit e Tortas e Empadões).
 - Combos e preços: `js/data/combos.js`.
 - Dados da loja e Pix: `js/config/loja.js`.
 - Aparência: `css/styles.css` e classes Tailwind.
@@ -96,3 +96,11 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - O filtro **Favoritos** mostra os pratos guardados e informa quando a lista está vazia.
 - Os favoritos são salvos no armazenamento local (`localStorage`) deste navegador. Não exigem Backend ou Supabase e não sincronizam automaticamente entre dispositivos.
 - A opção **Apagar dados salvos neste navegador** também remove a lista de favoritos.
+
+
+## Categoria Tortas e Empadões
+
+- A categoria possui filtro próprio no cardápio.
+- O Empadão de Frango está cadastrado com o selo **Em breve**.
+- Produtos marcados como em breve ou indisponíveis não aparecem nas opções de montagem dos combos.
+- A fotografia do empadão é otimizada em WebP e incluída no pré-cache para disponibilidade offline após a instalação/atualização do Service Worker.
