@@ -63,13 +63,13 @@
             const opcoes = {
                 'Tradicional 350g': { tipo: 'Tradicional', peso: '350g' },
                 'Tradicional 500g': { tipo: 'Tradicional', peso: '500g' },
-                'Linha Fit 300g': { tipo: 'Linha Fit', peso: '300g FIT' }
+                'Linha Fit 300g': { tipo: 'Linha Fit', peso: '300g' }
             };
             const escolha = opcoes[estilo];
             if (!escolha || !Number.isInteger(Number(quantidade)) || Number(quantidade) < 5 || Number(quantidade) % 5 !== 0) return null;
 
-            const combo5 = combos.find(c => c.type === escolha.tipo && c.qty === 5);
-            const combo10 = combos.find(c => c.type === escolha.tipo && c.qty === 10);
+            const combo5 = combos.find(c => c.type === escolha.tipo && c.qty === 5 && c.name.includes(escolha.peso));
+            const combo10 = combos.find(c => c.type === escolha.tipo && c.qty === 10 && c.name.includes(escolha.peso));
             if (!combo5 || !combo10) return null;
 
             let restante = Number(quantidade);
