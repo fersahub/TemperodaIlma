@@ -196,15 +196,21 @@ test('pedido misto: Pix, histórico, limpeza e comanda consideram avulsas',()=>{
  assert.ok(pedidos.includes('cartAvulsas = []'));
 });
 
-test('seção de avulsas informa e aplica a regra de combo obrigatório',()=>{
+test('avulsas ficam no carrinho e podem ser acessadas pelo cardápio',()=>{
  const html=read('index.html');
+ const cardapio=read('js/modules/cardapio.js');
  const avulsas=read('js/modules/avulsas.js');
+ assert.ok(html.includes('id="avulsas-carrinho-section"'));
  assert.ok(html.includes('id="avulsas-display-grid"'));
- assert.match(html,/<a href="#avulsas-section"[^>]*>\s*<span[^>]*>[\s\S]*Adicionar avulsas/);
+ assert.ok(html.indexOf('id="checkout-modal"') < html.indexOf('id="avulsas-carrinho-section"'));
+ assert.doesNotMatch(html,/<section id="avulsas-section"/);
+ assert.match(cardapio,/Adicionar avulsa/);
+ assert.match(cardapio,/abrirAvulsasNoCarrinho/);
+ assert.match(avulsas,/function abrirAvulsasNoCarrinho\(pratoId\)/);
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v13-acesso-avulsas'));
+ assert.ok(read('sw.js').includes('tempero-v14-avulsas-no-carrinho'));
 });
 
 

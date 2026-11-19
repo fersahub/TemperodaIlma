@@ -100,6 +100,7 @@ function renderAvulsasDisplay() {
         const descricao = escapeHtml(prato.desc);
         const categoria = escapeHtml(prato.tag);
         const card = document.createElement('article');
+        card.id = 'avulsa-card-' + prato.id;
         card.className = 'bg-white border border-stone-200 rounded-xl p-3 shadow-sm flex flex-col gap-3';
         card.innerHTML = `
             <div class="flex gap-3 items-center">
@@ -126,6 +127,16 @@ function renderAvulsasDisplay() {
             </div>`;
         grid.appendChild(card);
     });
+}
+
+function abrirAvulsasNoCarrinho(pratoId) {
+    if (!temComboNoCarrinho()) {
+        mostrarToast('Para adicionar uma marmita avulsa, escolha primeiro um combo.');
+        return;
+    }
+    openCheckoutModal();
+    const card = document.getElementById('avulsa-card-' + String(pratoId));
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function adicionarAvulsa(pratoId) {

@@ -62,9 +62,12 @@ function renderFlavorsDisplay() {
                         <h4 class="font-bold text-stone-800 text-xs leading-snug">${nomeSeguro}</h4>
                     </button>
                     <p class="text-[10px] text-stone-500 leading-tight mt-1 line-clamp-2">${descricaoSegura}</p>
-                    <button type="button" data-prato-id="${idSeguro}" onclick="abrirDetalhesPrato(this.dataset.pratoId)" class="mt-2 text-[10px] font-bold text-brand-secondary hover:underline inline-flex items-center gap-1">
-                        Ver detalhes <i class="fa-solid fa-arrow-right text-[9px]"></i>
-                    </button>
+                    <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <button type="button" data-prato-id="${idSeguro}" onclick="abrirDetalhesPrato(this.dataset.pratoId)" class="text-[10px] font-bold text-brand-secondary hover:underline inline-flex items-center gap-1">
+                            Ver detalhes <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                        </button>
+                        ${!flavor.emBreve && flavor.disponivel !== false && ['Tradicional', 'Linha Fit'].includes(flavor.tag) ? `<button type="button" data-prato-id="${idSeguro}" onclick="abrirAvulsasNoCarrinho(this.dataset.pratoId)" class="text-[10px] font-bold text-emerald-700 hover:text-emerald-900 inline-flex items-center gap-1"><i class="fa-solid fa-cart-plus"></i> Adicionar avulsa</button>` : ''}
+                    </div>
                 </div>
             </div>`;
         grid.appendChild(el);
