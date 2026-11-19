@@ -90,7 +90,7 @@ function openCheckoutModal() {
                 cartCombos = historico.itensCarrinho.filter(i => i && combos.some(c => c.id === i.comboId))
                     .map(i => {
                         const combo = combos.find(c => c.id === i.comboId);
-                        return { ...i, name: combo.name, price: combo.price, qty: combo.qty, freteGratis: !!combo.freteGratis };
+                        return { ...i, name: combo.name, price: combo.price, qty: combo.qty };
                     });
             } else {
                 cartCombos = [];
