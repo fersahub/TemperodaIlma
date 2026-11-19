@@ -41,11 +41,12 @@ test('limpeza do rodapé: opção de apagar dados salvos não é exibida ao clie
  assert.match(read('js/modules/checkout.js'),/function apagarDadosSalvos\(\)/);
  assert.doesNotMatch(read('index.html'),/Apagar dados salvos neste navegador/);
 });
-test('avulsas: opções ficam recolhidas até solicitação e abrem pelo atalho do cardápio',()=>{
+test('avulsas: pergunta Sim/Não inicia recolhida e as opções são compactas',()=>{
  const html=read('index.html'),avulsas=read('js/modules/avulsas.js');
- assert.match(html,/<details id="avulsas-carrinho-section"/);
- assert.match(html,/Deseja adicionar marmitas avulsas ao seu combo\?/);
- assert.match(avulsas,/secaoAvulsas\.open = true/);
+ assert.match(html,/<section id="avulsas-carrinho-section"/);
+ assert.match(html,/id="avulsas-opcoes-container" class="hidden/);
+ assert.match(html,/responderOpcaoAvulsas\('sim'\)/);
+ assert.match(html,/responderOpcaoAvulsas\('nao'\)/);
  assert.match(avulsas,/width="56" height="56"/);
 });
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
