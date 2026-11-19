@@ -17,7 +17,7 @@ function restaurarCarrinho() {
         cartCombos = combosSalvos.filter(i => i && typeof i === 'object' && combos.some(c => c.id === i.comboId))
             .map(i => {
                 const c = combos.find(x => x.id === i.comboId);
-                return { ...i, name: c.name, price: c.price, qty: c.qty, freteGratis: !!c.freteGratis };
+                return { ...i, name: c.name, price: c.price, qty: c.qty };
             });
         cartAvulsas = cartCombos.length ? normalizarListaAvulsas(avulsasSalvas) : [];
         if (temItensCarrinho()) updateCartUI();
