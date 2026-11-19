@@ -100,6 +100,7 @@ function confirmarEnvio() {
         sentPix.classList.remove('hidden');
     }
     window.open(pendingWhatsUrl, '_blank');
+    if (dp && typeof registrarPedidoPendenteAvaliacao === 'function') registrarPedidoPendenteAvaliacao(dp);
     document.getElementById('confirm-modal').classList.add('hidden');
     closeCheckoutModal();
     document.getElementById('sent-link').href = pendingWhatsUrl;
