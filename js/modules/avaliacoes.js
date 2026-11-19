@@ -167,6 +167,11 @@ function htmlResumoAvaliacaoSabor(pratoId) {
 function renderResumoAvaliacaoDetalhe(pratoId) {
     const alvo = document.getElementById('dish-detail-rating');
     if (!alvo) return;
+    if (!urlApiAvaliacoes()) {
+        alvo.innerHTML = '';
+        alvo.classList.add('hidden');
+        return;
+    }
     const resumo = dadosPublicosAvaliacoes.flavors[String(pratoId)];
     if (!resumo || !Number(resumo.count)) {
         alvo.textContent = 'Este sabor ainda não recebeu avaliações.';
