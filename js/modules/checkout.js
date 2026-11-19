@@ -96,6 +96,7 @@ function openCheckoutModal() {
                 cartCombos = [];
             }
             cartAvulsas = cartCombos.length ? normalizarListaAvulsas(historico.itensAvulsas || []) : [];
+            reiniciarPreferenciaAvulsas();
             if (temItensCarrinho()) updateCartUI();
 
             mostrarToast('Pedido anterior carregado no carrinho.');
@@ -115,6 +116,7 @@ function openCheckoutModal() {
             }
             cartCombos = [];
             cartAvulsas = [];
+            reiniciarPreferenciaAvulsas();
             if (typeof pratosFavoritos !== 'undefined') pratosFavoritos = [];
             if (typeof atualizarContadorFavoritos === 'function') atualizarContadorFavoritos();
             if (currentFlavorFilter === 'Favoritos') filtrarPratos('Todos');

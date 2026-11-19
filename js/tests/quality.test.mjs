@@ -41,11 +41,12 @@ test('limpeza do rodapé: opção de apagar dados salvos não é exibida ao clie
  assert.match(read('js/modules/checkout.js'),/function apagarDadosSalvos\(\)/);
  assert.doesNotMatch(read('index.html'),/Apagar dados salvos neste navegador/);
 });
-test('avulsas: opções ficam recolhidas até solicitação e abrem pelo atalho do cardápio',()=>{
+test('avulsas: pergunta Sim/Não inicia recolhida e as opções são compactas',()=>{
  const html=read('index.html'),avulsas=read('js/modules/avulsas.js');
- assert.match(html,/<details id="avulsas-carrinho-section"/);
- assert.match(html,/Deseja adicionar marmitas avulsas ao seu combo\?/);
- assert.match(avulsas,/secaoAvulsas\.open = true/);
+ assert.match(html,/<section id="avulsas-carrinho-section"/);
+ assert.match(html,/id="avulsas-opcoes-container" class="hidden/);
+ assert.match(html,/responderOpcaoAvulsas\('sim'\)/);
+ assert.match(html,/responderOpcaoAvulsas\('nao'\)/);
  assert.match(avulsas,/width="56" height="56"/);
 });
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -204,21 +205,74 @@ test('pedido misto: Pix, histórico, limpeza e comanda consideram avulsas',()=>{
  assert.ok(pedidos.includes('cartAvulsas = []'));
 });
 
-test('avulsas ficam no carrinho e podem ser acessadas pelo cardápio',()=>{
+test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo cardápio',()=>{
  const html=read('index.html');
  const cardapio=read('js/modules/cardapio.js');
  const avulsas=read('js/modules/avulsas.js');
  assert.ok(html.includes('id="avulsas-carrinho-section"'));
- assert.ok(html.includes('id="avulsas-display-grid"'));
+ assert.ok(html.includes('id="avulsas-opcoes-container" class="hidden'));
+ assert.match(html,/responderOpcaoAvulsas\('sim'\)/);
+ assert.match(html,/responderOpcaoAvulsas\('nao'\)/);
  assert.ok(html.indexOf('id="checkout-modal"') < html.indexOf('id="avulsas-carrinho-section"'));
  assert.doesNotMatch(html,/<section id="avulsas-section"/);
  assert.match(cardapio,/Adicionar avulsa/);
  assert.match(cardapio,/abrirAvulsasNoCarrinho/);
- assert.match(avulsas,/function abrirAvulsasNoCarrinho\(pratoId\)/);
+ assert.match(avulsas,/function responderOpcaoAvulsas\(resposta\)/);
+ assert.match(avulsas,/function reiniciarPreferenciaAvulsas\(\)/);
+ assert.match(avulsas,/responderOpcaoAvulsas\('sim'\)/);
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v15-avulsas-opcionais'));
+ assert.ok(read('sw.js').includes('tempero-v16-avulsas-sim-nao'));
+});
+
+test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
+ const classes=()=>{const values=new Set();return {add:v=>values.add(v),remove:v=>values.delete(v),toggle:(v,force)=>{if(force===undefined){if(values.has(v))values.delete(v);else values.add(v);}else if(force)values.add(v);else values.delete(v);},contains:v=>values.has(v)};};
+ const makeElement=()=>({classList:classes(),attributes:{},setAttribute(k,v){this.attributes[k]=v;},scrollIntoView(){this.scrolled=true;}});
+ const elements={
+  'avulsas-carrinho-section':makeElement(),
+  'avulsas-opcoes-container':makeElement(),
+  'avulsas-resposta-sim':makeElement(),
+  'avulsas-resposta-nao':makeElement(),
+  'avulsa-card-f1':makeElement()
+ };
+ elements['avulsas-opcoes-container'].classList.add('hidden');
+ let salvou=0, abriu=0;
+ const sandbox={
+  cartCombos:[{comboId:'combo-5-350g'}],
+  avulsasOcultasNestePedido:false,
+  avulsasOpcoesExpandidas:false,
+  document:{getElementById:id=>elements[id]||null},
+  salvarCarrinho:()=>{salvou++;},
+  openCheckoutModal:()=>{abriu++;},
+  mostrarToast:()=>{},
+ };
+ runInNewContext(read('js/modules/avulsas.js'),sandbox);
+ sandbox.responderOpcaoAvulsas('nao');
+ assert.equal(sandbox.avulsasOcultasNestePedido,true);
+ assert.equal(elements['avulsas-carrinho-section'].classList.contains('hidden'),true);
+ sandbox.responderOpcaoAvulsas('sim');
+ assert.equal(sandbox.avulsasOcultasNestePedido,false);
+ assert.equal(sandbox.avulsasOpcoesExpandidas,true);
+ assert.equal(elements['avulsas-opcoes-container'].classList.contains('hidden'),false);
+ sandbox.responderOpcaoAvulsas('nao');
+ sandbox.abrirAvulsasNoCarrinho('f1');
+ assert.equal(sandbox.avulsasOcultasNestePedido,false);
+ assert.equal(sandbox.avulsasOpcoesExpandidas,true);
+ assert.equal(abriu,1);
+ assert.equal(salvou,4);
+ assert.equal(elements['avulsa-card-f1'].scrolled,true);
+});
+
+test('preferência Sim/Não das avulsas é preservada no carrinho local e reiniciada em novo pedido',()=>{
+ const pedidos=read('js/modules/pedidos.js');
+ const limpar=read('js/modules/checkout.js');
+ assert.match(pedidos,/avulsasOcultas: avulsasOcultasNestePedido/);
+ assert.match(pedidos,/avulsasOpcoesExpandidas/);
+ assert.match(pedidos,/salvo\.avulsasOcultas/);
+ assert.match(pedidos,/atualizarPreferenciaVisualAvulsas\(\)/);
+ assert.match(pedidos,/reiniciarPreferenciaAvulsas\(\)/);
+ assert.match(limpar,/reiniciarPreferenciaAvulsas\(\)/);
 });
 
 

@@ -377,20 +377,26 @@
                     <div id="cart-combos-container" class="space-y-3"></div>
                 </div>
 
-                <details id="avulsas-carrinho-section" class="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3">
-                    <summary class="cursor-pointer list-none flex items-center justify-between gap-3 text-sm font-bold text-stone-800">
-                        <span class="flex items-center gap-2"><i class="fa-solid fa-circle-plus text-brand-secondary"></i> Deseja adicionar marmitas avulsas ao seu combo?</span>
-                        <i class="fa-solid fa-chevron-down text-xs text-stone-500 shrink-0"></i>
-                    </summary>
-                    <div class="space-y-3 pt-3">
-                        <p class="text-xs text-stone-600">Opcional: escolha outros pratos, tamanho e quantidade para complementar seu pedido.</p>
+                <section id="avulsas-carrinho-section" class="space-y-3">
+                    <div id="avulsas-pergunta" class="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+                        <p class="font-bold text-sm text-stone-800 flex items-center gap-2 min-w-0">
+                            <i class="fa-solid fa-circle-plus text-brand-secondary shrink-0"></i>
+                            <span>Deseja adicionar marmitas avulsas ao seu combo?</span>
+                        </p>
+                        <div class="flex gap-2 sm:ml-auto shrink-0" role="group" aria-label="Adicionar marmitas avulsas">
+                            <button type="button" id="avulsas-resposta-sim" onclick="responderOpcaoAvulsas('sim')" aria-controls="avulsas-opcoes-container" aria-expanded="false" aria-pressed="false" class="flex-1 sm:flex-none px-5 py-2 rounded-lg bg-brand-secondary hover:bg-brand-accent text-white text-xs font-bold transition">Sim</button>
+                            <button type="button" id="avulsas-resposta-nao" onclick="responderOpcaoAvulsas('nao')" aria-pressed="false" class="flex-1 sm:flex-none px-5 py-2 rounded-lg bg-white border border-stone-300 text-stone-700 hover:bg-stone-100 text-xs font-bold transition">Não</button>
+                        </div>
+                    </div>
+                    <div id="avulsas-opcoes-container" class="hidden space-y-3 rounded-xl border border-emerald-200 bg-emerald-50/40 p-3">
+                        <p class="text-xs text-stone-600">Escolha os pratos, tamanho e quantidade para complementar seu pedido.</p>
                         <div id="avulsas-regra-aviso" class="rounded-xl border p-3 text-xs font-semibold bg-amber-50 border-amber-200 text-amber-900">
                             <i class="fa-solid fa-lock text-amber-600"></i> Para adicionar marmitas avulsas, primeiro escolha pelo menos um combo. Não vendemos pedidos somente de 1 ou 2 marmitas.
                         </div>
                         <div id="avulsas-display-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
                         <p class="text-[10px] text-stone-500">O valor unitário é baseado no preço por unidade do combo de 5 correspondente.</p>
                     </div>
-                </details>
+                </section>
 
                 <div class="pt-3 border-t border-stone-200 space-y-1.5 text-xs">
                     <div class="flex justify-between text-stone-600">

@@ -3,7 +3,9 @@ function salvarCarrinho() {
     try {
         localStorage.setItem('tempero_ilma_carrinho', JSON.stringify({
             combos: cartCombos,
-            avulsas: cartAvulsas
+            avulsas: cartAvulsas,
+            avulsasOcultas: avulsasOcultasNestePedido,
+            avulsasOpcoesExpandidas
         }));
     } catch (e) {}
 }
@@ -14,16 +16,22 @@ function restaurarCarrinho() {
         // Compatibilidade com a versão antiga, que salvava somente um array de combos.
         const combosSalvos = Array.isArray(salvo) ? salvo : (salvo && Array.isArray(salvo.combos) ? salvo.combos : []);
         const avulsasSalvas = !Array.isArray(salvo) && salvo && Array.isArray(salvo.avulsas) ? salvo.avulsas : [];
+        avulsasOcultasNestePedido = !Array.isArray(salvo) && Boolean(salvo && salvo.avulsasOcultas);
+        avulsasOpcoesExpandidas = !avulsasOcultasNestePedido && !Array.isArray(salvo) && Boolean(salvo && salvo.avulsasOpcoesExpandidas);
         cartCombos = combosSalvos.filter(i => i && typeof i === 'object' && combos.some(c => c.id === i.comboId))
             .map(i => {
                 const c = combos.find(x => x.id === i.comboId);
                 return { ...i, name: c.name, price: c.price, qty: c.qty };
             });
         cartAvulsas = cartCombos.length ? normalizarListaAvulsas(avulsasSalvas) : [];
+        atualizarPreferenciaVisualAvulsas();
         if (temItensCarrinho()) updateCartUI();
     } catch (e) {
         cartCombos = [];
         cartAvulsas = [];
+        avulsasOcultasNestePedido = false;
+        avulsasOpcoesExpandidas = false;
+        atualizarPreferenciaVisualAvulsas();
         try { localStorage.removeItem('tempero_ilma_carrinho'); } catch (erro) {}
     }
 }
@@ -103,6 +111,7 @@ function limparCarrinhoAposEnvio() {
     if (!confirmado) return;
     cartCombos = [];
     cartAvulsas = [];
+    reiniciarPreferenciaAvulsas();
     currentShippingFee = null;
     pendingWhatsUrl = '';
     pendingPedido = null;
