@@ -6,6 +6,7 @@ const CONFIG = window.TEMPERO_CONFIG.pix;
 
 let currentShippingFee = null;
         let cartCombos = [];
+        let cartAvulsas = [];
         let currentEditingCombo = null;
         let selectedFlavors = {};
         let currentFlavorFilter = 'Todos';
