@@ -218,7 +218,7 @@ test('avulsas ficam no carrinho e podem ser acessadas pelo cardápio',()=>{
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v14-avulsas-no-carrinho'));
+ assert.ok(read('sw.js').includes('tempero-v15-avulsas-opcionais'));
 });
 
 
