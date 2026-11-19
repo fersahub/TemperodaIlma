@@ -2,12 +2,9 @@
 /* --- REGRAS DE FRETE E OPERAÇÃO DA LOJA --- */
         
 
-        // Frete grátis: somente com Combo de 10 (350g ou 500g)
-        function temFreteGratis() { return cartCombos.some(c => c.freteGratis); }
-
+        // Todas as entregas são cobradas conforme a taxa do bairro selecionado.
         function freteEfetivo() {
-            if (currentShippingFee === null) return null;
-            return temFreteGratis() ? 0 : currentShippingFee;
+            return currentShippingFee;
         }
 
         // Data do sábado de entrega (dd/mm): de seg a sex é o sábado da semana; no fim de semana é o sábado seguinte
@@ -30,18 +27,14 @@
         }
 
         function renderFreteBanner() {
-            const ok = temFreteGratis();
             const hint = document.getElementById('cart-ship-hint');
             const el = document.getElementById('free-ship-banner');
-            const pct = ok ? 100 : (cartCombos.length ? 50 : 0);
             if (hint) {
-                hint.innerText = ok ? 'Frete grátis garantido!' : 'Combo de 10 = frete grátis';
-                hint.className = 'text-[10px] font-semibold ' + (ok ? 'text-emerald-600' : 'text-amber-600');
+                hint.innerText = 'Frete conforme o bairro';
+                hint.className = 'text-[10px] font-semibold text-stone-500';
             }
             if (el) {
-                el.innerHTML = ok
-                    ? `<div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-2"><p class="font-bold text-emerald-900"><i class="fa-solid fa-truck-fast"></i> Frete grátis garantido pelo Combo de 10!</p><div class="h-2 bg-stone-200 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 frete-progresso-100"></div></div></div>`
-                    : `<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs space-y-2"><p class="font-bold text-amber-900"><i class="fa-solid fa-truck-fast"></i> Peça um Combo de 10 marmitas (350g ou 500g) e ganhe frete grátis!</p><div class="h-2 bg-stone-200 rounded-full overflow-hidden"><div class="h-full bg-amber-500 frete-progresso-${pct}"></div></div><div class="flex gap-2"><button type="button" onclick="closeCheckoutModal();openFlavorsModal('combo-10-350g')" class="flex-1 bg-amber-500 text-stone-900 font-bold py-1.5 rounded-lg">+ Combo 10 (350g)</button><button type="button" onclick="closeCheckoutModal();openFlavorsModal('combo-10-500g')" class="flex-1 bg-amber-500 text-stone-900 font-bold py-1.5 rounded-lg">+ Combo 10 (500g)</button></div></div>`;
+                el.innerHTML = '<div class="bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs"><p class="font-semibold text-stone-700"><i class="fa-solid fa-truck text-brand-secondary"></i> O frete é calculado conforme o bairro informado e será cobrado normalmente.</p></div>';
             }
             atualizarPixBox();
         }
