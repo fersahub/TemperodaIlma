@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v17-avaliacoes';
+const CACHE_NAME = 'tempero-v18-carrossel-reset';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
