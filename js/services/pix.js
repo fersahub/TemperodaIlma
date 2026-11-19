@@ -63,7 +63,7 @@
             const pix = document.getElementById('cust-payment').value === 'Pix';
             box.classList.toggle('hidden', !pix);
             if (!pix) return;
-            const sub = cartCombos.reduce((sum, i) => sum + i.price, 0);
+            const sub = calcularSubtotalCarrinho();
             const fe = freteEfetivo();
             const area = document.getElementById('pix-qr-area');
             document.getElementById('pix-chave').innerText = CONFIG.pixChave;

@@ -26,7 +26,7 @@ test('HTML: referências locais existem e scripts carregam na ordem',()=>{
  for(const m of html.matchAll(/<(?:script|link|img)\b[^>]*(?:src|href)=["']([^"']+)["'][^>]*>/gi)){const v=m[1];if(v&&!/^(?:https?:|data:|#|mailto:|tel:|javascript:)/i.test(v))refs.push(v.split(/[?#]/)[0]);}
  for(const p of refs)assert.ok(exists(p),p);
  const appAt=html.indexOf('<script src="js/app.js">');
- for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/favoritos.js','js/modules/detalhes-prato.js','js/modules/cardapio.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p+'">');assert.ok(i>=0&&i<appAt,p);}
+ for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/favoritos.js','js/modules/detalhes-prato.js','js/modules/cardapio.js','js/modules/avulsas.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p+'">');assert.ok(i>=0&&i<appAt,p);}
 });
 test('Service Worker: pré-cache contém arquivos existentes e remove versões antigas',()=>{
  const s=read('sw.js'),m=s.match(/const CORE_ASSETS\s*=\s*(\[[\s\S]*?\]);/);assert.ok(m);
@@ -145,4 +145,64 @@ test('mini quiz apresenta quatro perguntas e montagem sequencial dos combos',()=
  assert.match(experiencia,/function abrirProximoComboQuiz/);
  assert.match(carrinho,/const montagemPorQuiz = quizMontagemAtiva/);
  assert.match(carrinho,/Montagem interrompida/);
+});
+
+test('marmitas avulsas exigem combo e usam o preço unitário de referência dos combos de 5',()=>{
+ const combos=data('js/data/combos.js').combos;
+ const availableFlavors=data('js/data/pratos.js').pratos;
+ const sandbox={combos,availableFlavors,cartCombos:[],cartAvulsas:[]};
+ runInNewContext(read('js/modules/avulsas.js'),sandbox);
+ assert.equal(sandbox.criarItemAvulso('f1','350g',1),null);
+ sandbox.cartCombos.push({comboId:'combo-5-350g'});
+ const tradicional350=sandbox.criarItemAvulso('f1','350g',2);
+ assert.equal(tradicional350.unitPrice,20);
+ assert.equal(tradicional350.totalPrice,40);
+ const tradicional500=sandbox.criarItemAvulso('f1','500g',1);
+ assert.equal(tradicional500.unitPrice,25);
+ const fit=sandbox.criarItemAvulso('f12','300g',1);
+ assert.equal(fit.unitPrice,26);
+ assert.equal(sandbox.criarItemAvulso('f12','350g',1),null);
+ assert.equal(sandbox.criarItemAvulso('f24','350g',1),null);
+ assert.equal(sandbox.criarItemAvulso('f1','350g',0),null);
+});
+
+test('carrinho misto soma combos e avulsas e impede remover o último combo',()=>{
+ const mensagens=[];
+ const sandbox={
+  cartCombos:[{qty:5,price:100}],
+  cartAvulsas:[{quantity:2,totalPrice:40}],
+  mostrarToast:m=>mensagens.push(m),
+  document:{}
+ };
+ runInNewContext(read('js/modules/carrinho.js'),sandbox);
+ assert.equal(sandbox.calcularSubtotalCarrinho(),140);
+ assert.equal(sandbox.quantidadeMarmitasCarrinho(),7);
+ assert.equal(sandbox.temItensCarrinho(),true);
+ sandbox.removeCartItem(0);
+ assert.equal(sandbox.cartCombos.length,1);
+ assert.equal(sandbox.cartAvulsas.length,1);
+ assert.equal(mensagens.length,1);
+});
+
+test('pedido misto: Pix, histórico, limpeza e comanda consideram avulsas',()=>{
+ const checkout=read('js/modules/checkout.js');
+ const pix=read('js/services/pix.js');
+ const pedidos=read('js/modules/pedidos.js');
+ assert.ok(checkout.includes('itensAvulsas: cartAvulsas'));
+ assert.ok(checkout.includes('calcularSubtotalCarrinho()'));
+ assert.ok(checkout.includes('MARMITAS AVULSAS'));
+ assert.ok(checkout.includes('cartAvulsas = []'));
+ assert.ok(pix.includes('calcularSubtotalCarrinho()'));
+ assert.ok(pedidos.includes('avulsas: cartAvulsas'));
+ assert.ok(pedidos.includes('cartAvulsas = []'));
+});
+
+test('seção de avulsas informa e aplica a regra de combo obrigatório',()=>{
+ const html=read('index.html');
+ const avulsas=read('js/modules/avulsas.js');
+ assert.ok(html.includes('id="avulsas-display-grid"'));
+ assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
+ assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
+ assert.ok(avulsas.includes('disabled'));
+ assert.ok(read('sw.js').includes('tempero-v10-carrinho-misto'));
 });

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
             iniciarFavoritos();
             renderFlavorsDisplay();
             renderCombos();
+            renderAvulsasDisplay();
             verificarUltimoCliente();
             mostrarAvisoFimDeSemana();
             iniciarValidacao();

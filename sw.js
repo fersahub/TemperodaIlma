@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v9-planejador-familia';
+const CACHE_NAME = 'tempero-v10-carrinho-misto';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
@@ -23,6 +23,7 @@ const CORE_ASSETS = [
   './js/modules/favoritos.js',
   './js/modules/detalhes-prato.js',
   './js/modules/cardapio.js',
+  './js/modules/avulsas.js',
   './js/modules/carrinho.js',
   './js/modules/checkout.js',
   './js/app.js',

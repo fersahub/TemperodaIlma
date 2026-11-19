@@ -40,6 +40,7 @@ As três pastas principais continuam sendo **assets**, **css** e **js**. A pasta
 - Detalhes dos pratos: `js/modules/detalhes-prato.js` e modal em `index.html`.
 - Favoritos: `js/modules/favoritos.js`; a lista fica salva no navegador do próprio cliente.
 - Carrinho: `js/modules/carrinho.js`.
+- Marmitas avulsas complementares: `js/modules/avulsas.js`.
 - Pedidos: `js/modules/pedidos.js` e `js/modules/checkout.js`.
 - Frete: `js/modules/operacao.js`.
 - CEP/endereço: `js/modules/horarios.js` e `js/services/endereco.js`.
@@ -114,3 +115,16 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - Permite montar uma sequência de combos, escolhendo os sabores de cada um, antes de adicioná-los ao carrinho.
 - Se a sequência for cancelada, preserva no carrinho os combos que já foram concluídos.
 - Todos os cálculos acontecem localmente no navegador, sem backend ou banco de dados.
+
+
+## Carrinho misto: combos + marmitas avulsas
+
+- O cliente precisa adicionar pelo menos um combo antes de incluir marmitas avulsas.
+- Pedidos compostos somente por marmitas avulsas não são permitidos.
+- As avulsas podem ser escolhidas nos tamanhos Tradicional 350g, Tradicional 500g e Fit 300g, conforme a categoria do prato.
+- A quantidade pode ser ajustada no cardápio e no carrinho.
+- O carrinho, resumo, comanda de WhatsApp e valor Pix somam combos e avulsas.
+- O frete grátis continua dependendo exclusivamente dos combos que já possuem a regra `freteGratis`.
+- Os preços unitários iniciais são derivados do valor por unidade dos combos de 5 correspondentes: Tradicional 350g, Tradicional 500g e Fit 300g. Esses valores devem ser revisados comercialmente antes de divulgar a venda avulsa.
+- Carrinhos antigos salvos no navegador (formato de array, contendo apenas combos) continuam sendo restaurados.
+- Sem Backend ou banco de dados; os dados permanecem no navegador.

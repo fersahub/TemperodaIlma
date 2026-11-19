@@ -1,7 +1,7 @@
 /* Checkout e dados do cliente. */
 function openCheckoutModal() {
             if (cartCombos.length === 0) {
-                mostrarToast('Seu carrinho está vazio. Escolha um combo para começar.');
+                mostrarToast('Escolha pelo menos um combo. Marmitas avulsas só podem complementar um combo.');
                 return;
             }
             document.getElementById('checkout-modal').classList.remove('hidden');
@@ -27,7 +27,8 @@ function openCheckoutModal() {
         function salvarUltimoCliente(dados) {
             const historicoCompleto = {
                 cliente: dados,
-                itensCarrinho: cartCombos
+                itensCarrinho: cartCombos,
+                itensAvulsas: cartAvulsas
             };
             try {
                 localStorage.setItem('tempero_ilma_historico_pedido', JSON.stringify(historicoCompleto));
@@ -85,10 +86,17 @@ function openCheckoutModal() {
                 if (selecionarBairroNoSelect(dados.bairro)) aoMudarBairroManualmente();
             }
 
-            if (historico.itensCarrinho && historico.itensCarrinho.length > 0) {
-                cartCombos = historico.itensCarrinho.map(i => ({ ...i, freteGratis: !!(combos.find(c => c.id === i.comboId) || {}).freteGratis }));
-                updateCartUI();
+            if (Array.isArray(historico.itensCarrinho) && historico.itensCarrinho.length > 0) {
+                cartCombos = historico.itensCarrinho.filter(i => i && combos.some(c => c.id === i.comboId))
+                    .map(i => {
+                        const combo = combos.find(c => c.id === i.comboId);
+                        return { ...i, name: combo.name, price: combo.price, qty: combo.qty, freteGratis: !!combo.freteGratis };
+                    });
+            } else {
+                cartCombos = [];
             }
+            cartAvulsas = cartCombos.length ? normalizarListaAvulsas(historico.itensAvulsas || []) : [];
+            if (temItensCarrinho()) updateCartUI();
 
             mostrarToast('Pedido anterior carregado no carrinho.');
             openCheckoutModal();
@@ -106,6 +114,7 @@ function openCheckoutModal() {
                 return;
             }
             cartCombos = [];
+            cartAvulsas = [];
             if (typeof pratosFavoritos !== 'undefined') pratosFavoritos = [];
             if (typeof atualizarContadorFavoritos === 'function') atualizarContadorFavoritos();
             if (currentFlavorFilter === 'Favoritos') filtrarPratos('Todos');
@@ -136,7 +145,7 @@ function openCheckoutModal() {
 
         function sendToWhatsApp() {
             if (cartCombos.length === 0) {
-                mostrarToast('Adicione pelo menos um combo ao carrinho.');
+                mostrarToast('Adicione pelo menos um combo. A venda de marmitas avulsas é somente complementar.');
                 return;
             }
 
@@ -212,18 +221,22 @@ function openCheckoutModal() {
             lines.push(`${eMemo} *--- COMANDA DIGITAL ---*`);
 
             cartCombos.forEach((item, index) => {
-                lines.push(``);
-                lines.push(`${eBox} *Combo ${index + 1}: ${item.name}* (R$ ${item.price.toFixed(2).replace('.', ',')})`);
-                if (item.obs) lines.push(`   *Obs do combo:* ${item.obs}`);
-                lines.push(`   *Sabores Escolhidos:*`);
-
-                const saboresArray = item.flavorsSummary.split(', ');
-                saboresArray.forEach(sabor => {
-                    lines.push(`   - ${sabor}`);
-                });
+                lines.push('');
+                lines.push(eBox + ' *Combo ' + (index + 1) + ': ' + item.name + '* (R$ ' + item.price.toFixed(2).replace('.', ',') + ')');
+                if (item.obs) lines.push('   *Obs do combo:* ' + item.obs);
+                lines.push('   *Sabores Escolhidos:*');
+                String(item.flavorsSummary || '').split(', ').filter(Boolean).forEach(sabor => lines.push('   - ' + sabor));
             });
 
-            const subtotalPrice = cartCombos.reduce((sum, item) => sum + item.price, 0);
+            if (cartAvulsas.length) {
+                lines.push('');
+                lines.push(eBox + ' *MARMITAS AVULSAS*');
+                cartAvulsas.forEach(item => {
+                    lines.push('- ' + item.quantity + 'x ' + item.name + ' (' + item.size + ') — R$ ' + item.unitPrice.toFixed(2).replace('.', ',') + ' cada — Subtotal R$ ' + item.totalPrice.toFixed(2).replace('.', ','));
+                });
+            }
+
+            const subtotalPrice = calcularSubtotalCarrinho();
             const feFinal = freteEfetivo();
             const totalPrice = subtotalPrice + feFinal;
 
@@ -235,6 +248,12 @@ function openCheckoutModal() {
             lines.push(``);
             lines.push(`${eNote} *TOTAL POR SABOR*`);
             Object.entries(tot).forEach(([n, q]) => lines.push(`- ${q}x ${n}`));
+
+            if (cartAvulsas.length) {
+                lines.push('');
+                lines.push(eNote + ' *RESUMO DAS AVULSAS*');
+                cartAvulsas.forEach(item => lines.push('- ' + item.quantity + 'x ' + item.name + ' (' + item.size + ')'));
+            }
 
             lines.push(``);
             lines.push(`${eMoney} *RESUMO FINANCEIRO*`);
