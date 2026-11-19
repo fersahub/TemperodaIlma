@@ -11,7 +11,7 @@ function data(p){const window={TEMPERO_DADOS:{}};runInNewContext(read(p),{window
 
 test('combos: IDs, preços, quantidades e imagens',()=>{
  const xs=data('js/data/combos.js').combos;assert.ok(xs.length>0);assert.equal(new Set(xs.map(x=>x.id)).size,xs.length);
- for(const x of xs){assert.ok(x.name&&x.description);assert.ok([5,10].includes(x.qty));assert.ok(Number.isFinite(x.price)&&x.price>0);assert.ok(['Tradicional','Linha Fit'].includes(x.type));assert.ok(exists(x.image),x.image);if(x.freteGratis)assert.equal(x.type,'Tradicional');}
+ for(const x of xs){assert.ok(x.name&&x.description);assert.ok([5,10].includes(x.qty));assert.ok(Number.isFinite(x.price)&&x.price>0);assert.ok(['Tradicional','Linha Fit'].includes(x.type));assert.ok(exists(x.image),x.image);assert.equal(Object.hasOwn(x,'freteGratis'),false);}
 });
 test('pratos: IDs, categorias e imagens',()=>{
  const xs=data('js/data/pratos.js').pratos;assert.ok(xs.length>0);assert.equal(new Set(xs.map(x=>x.id)).size,xs.length);
@@ -122,7 +122,6 @@ test('planejador familiar compõe vários combos existentes e calcula o valor co
  assert.deepEqual(plano.ids,['combo-10-350g','combo-5-350g']);
  assert.equal(plano.quantidade,15);
  assert.equal(plano.total,300);
- assert.equal(plano.temFreteGratis,true);
  const familia=JSON.parse(JSON.stringify(sandbox.gerarPlanoCombosQuiz(20,'Tradicional 350g')));
  assert.deepEqual(familia.ids,['combo-10-350g','combo-10-350g']);
  assert.equal(familia.total,400);
@@ -131,7 +130,6 @@ test('planejador familiar compõe vários combos existentes e calcula o valor co
  assert.equal(reforcado.total,250);
  const fit=JSON.parse(JSON.stringify(sandbox.gerarPlanoCombosQuiz(10,'Linha Fit 300g')));
  assert.deepEqual(fit.ids,['combo-10-300g-fit']);
- assert.equal(fit.temFreteGratis,false);
 });
 
 test('mini quiz apresenta quatro perguntas e montagem sequencial dos combos',()=>{
@@ -205,4 +203,26 @@ test('seção de avulsas informa e aplica a regra de combo obrigatório',()=>{
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
  assert.ok(read('sw.js').includes('tempero-v10-carrinho-misto'));
+});
+
+
+test('Combo 10 não concede frete grátis: todas as taxas de bairro são cobradas',()=>{
+ const combos=data('js/data/combos.js').combos;
+ assert.ok(combos.filter(c=>c.qty===10).length>=1);
+ assert.ok(combos.every(c=>!Object.hasOwn(c,'freteGratis')));
+ const sandbox={currentShippingFee:12,cartCombos:[{comboId:'combo-10-350g',freteGratis:true}],document:{getElementById:()=>null},atualizarPixBox:()=>{}};
+ runInNewContext(read('js/modules/operacao.js'),sandbox);
+ assert.equal(sandbox.freteEfetivo(),12);
+ sandbox.cartCombos=[{comboId:'combo-10-500g',freteGratis:true}];
+ assert.equal(sandbox.freteEfetivo(),12);
+ sandbox.currentShippingFee=null;
+ assert.equal(sandbox.freteEfetivo(),null);
+ assert.equal(typeof sandbox.temFreteGratis,'undefined');
+ assert.doesNotMatch(read('js/modules/operacao.js'),/frete grátis garantido|Combo de 10 = frete grátis|ganhe frete grátis/i);
+});
+
+test('planejador informa que o frete é cobrado conforme o bairro',()=>{
+ const experiencia=read('js/modules/experiencia.js');
+ assert.match(experiencia,/frete será calculado no checkout conforme o bairro informado/i);
+ assert.doesNotMatch(experiencia,/temFreteGratis|oferece frete grátis/i);
 });
