@@ -279,7 +279,7 @@ function obterResumoPublico_() {
     }
 
     var data = linha[1] instanceof Date
-      ? Utilities.formatDate(linha[1], Session.getScriptTimeZone(), 'yyyy-MM-dd')
+      ? Utilities.formatDate(linha[1], 'America/Bahia', 'yyyy-MM-dd')
       : String(linha[1] || '');
 
     var comentario = String(linha[5] || '');
