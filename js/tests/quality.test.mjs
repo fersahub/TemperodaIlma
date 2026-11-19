@@ -237,14 +237,15 @@ test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',
   'avulsa-card-f1':makeElement()
  };
  elements['avulsas-opcoes-container'].classList.add('hidden');
+ let salvou=0, abriu=0;
  const sandbox={
   cartCombos:[{comboId:'combo-5-350g'}],
   avulsasOcultasNestePedido:false,
   avulsasOpcoesExpandidas:false,
   document:{getElementById:id=>elements[id]||null},
-  salvarCarrinho(){this.salvou=true;},
-  openCheckoutModal(){this.abriu=true;},
-  mostrarToast(){},
+  salvarCarrinho:()=>{salvou++;},
+  openCheckoutModal:()=>{abriu++;},
+  mostrarToast:()=>{},
  };
  runInNewContext(read('js/modules/avulsas.js'),sandbox);
  sandbox.responderOpcaoAvulsas('nao');
@@ -258,7 +259,8 @@ test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',
  sandbox.abrirAvulsasNoCarrinho('f1');
  assert.equal(sandbox.avulsasOcultasNestePedido,false);
  assert.equal(sandbox.avulsasOpcoesExpandidas,true);
- assert.equal(sandbox.abriu,true);
+ assert.equal(abriu,1);
+ assert.equal(salvou,4);
  assert.equal(elements['avulsa-card-f1'].scrolled,true);
 });
 
