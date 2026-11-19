@@ -71,7 +71,7 @@ function lerPedidosPendentesAvaliacao() {
 
 function salvarPedidosPendentesAvaliacao(lista) {
     try {
-        localStorage.setItem(CHAVE_PEDIDOS_PARA_AVALIAR, JSON.stringify(lista.slice(-12)));
+        localStorage.setItem(CHAVE_PEDIDOS_PARA_AVALIAR, JSON.stringify(lista.slice(-30)));
     } catch (erro) {
         mostrarToast('Não foi possível guardar o convite de avaliação neste navegador.');
     }
@@ -360,7 +360,7 @@ function enviarAvaliacao(evento) {
         overallRating: notaGeralAvaliacao,
         overallComment: comentario,
         flavorRatings: sabores,
-        website: ''
+        website: document.getElementById('avaliacao-site').value.trim()
     };
 
     envioAvaliacaoEmAndamento = true;
@@ -372,7 +372,7 @@ function postarAvaliacaoComFormulario(payload) {
     const endpoint = urlApiAvaliacoes();
     const formulario = new URLSearchParams();
     formulario.set('payload', JSON.stringify(payload));
-    formulario.set('website', '');
+    formulario.set('website', String(payload.website || ''));
 
     fetch(endpoint, {
         method: 'POST',
