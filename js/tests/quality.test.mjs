@@ -94,7 +94,7 @@ test('Empadão de Frango: categoria própria, imagem e aviso de disponibilidade'
  assert.doesNotMatch(html,/<i[^>]*>\s*Especiais da Casa/);
  assert.match(html,/dish-detail-coming-soon/);
  assert.match(read('js/modules/cardapio.js'),/badge-em-breve[^>]*>Em breve/);
- assert.match(read('css/styles.css'),/html\\.dark \\.badge-em-breve\\{background:#3b2f16!important;color:#ffe08a!important;border-color:#8b6b22!important\\}/);
+ assert.ok(read('css/styles.css').includes('html.dark .badge-em-breve{background:#3b2f16!important;color:#ffe08a!important;border-color:#8b6b22!important}'));
  assert.match(read('js/modules/detalhes-prato.js'),/const emBreve = prato.emBreve === true/);
 });
 test('Produtos em breve ficam fora da seleção e montagem automática de combos',()=>{
