@@ -77,6 +77,44 @@ function atualizarPrecoAvulsaCard(pratoId) {
     preco.textContent = unitPrice === null ? 'Preço indisponível' : 'R$ ' + unitPrice.toFixed(2).replace('.', ',') + ' / unidade';
 }
 
+function atualizarPreferenciaVisualAvulsas() {
+    const secao = document.getElementById('avulsas-carrinho-section');
+    const opcoes = document.getElementById('avulsas-opcoes-container');
+    const botaoSim = document.getElementById('avulsas-resposta-sim');
+    const botaoNao = document.getElementById('avulsas-resposta-nao');
+    if (!secao || !opcoes) return;
+
+    secao.classList.toggle('hidden', avulsasOcultasNestePedido);
+    opcoes.classList.toggle('hidden', avulsasOcultasNestePedido || !avulsasOpcoesExpandidas);
+    if (botaoSim) {
+        const ativo = !avulsasOcultasNestePedido && avulsasOpcoesExpandidas;
+        botaoSim.setAttribute('aria-pressed', String(ativo));
+        botaoSim.setAttribute('aria-expanded', String(ativo));
+    }
+    if (botaoNao) botaoNao.setAttribute('aria-pressed', String(avulsasOcultasNestePedido));
+}
+
+function responderOpcaoAvulsas(resposta) {
+    if (resposta === 'sim') {
+        avulsasOcultasNestePedido = false;
+        avulsasOpcoesExpandidas = true;
+    } else if (resposta === 'nao') {
+        avulsasOcultasNestePedido = true;
+        avulsasOpcoesExpandidas = false;
+    } else {
+        return;
+    }
+
+    atualizarPreferenciaVisualAvulsas();
+    salvarCarrinho();
+}
+
+function reiniciarPreferenciaAvulsas() {
+    avulsasOcultasNestePedido = false;
+    avulsasOpcoesExpandidas = false;
+    atualizarPreferenciaVisualAvulsas();
+}
+
 function renderAvulsasDisplay() {
     const grid = document.getElementById('avulsas-display-grid');
     if (!grid) return;
@@ -127,6 +165,7 @@ function renderAvulsasDisplay() {
             </div>`;
         grid.appendChild(card);
     });
+    atualizarPreferenciaVisualAvulsas();
 }
 
 function abrirAvulsasNoCarrinho(pratoId) {
@@ -134,9 +173,8 @@ function abrirAvulsasNoCarrinho(pratoId) {
         mostrarToast('Para adicionar uma marmita avulsa, escolha primeiro um combo.');
         return;
     }
+    responderOpcaoAvulsas('sim');
     openCheckoutModal();
-    const secaoAvulsas = document.getElementById('avulsas-carrinho-section');
-    if (secaoAvulsas) secaoAvulsas.open = true;
     const card = document.getElementById('avulsa-card-' + String(pratoId));
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
