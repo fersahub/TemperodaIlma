@@ -104,7 +104,7 @@ function renderAvulsasDisplay() {
         card.className = 'bg-white border border-stone-200 rounded-xl p-3 shadow-sm flex flex-col gap-3';
         card.innerHTML = `
             <div class="flex gap-3 items-center">
-                <img src="${imagem}" alt="${nome}" loading="lazy" decoding="async" width="80" height="80" class="w-20 h-20 object-cover rounded-lg shrink-0">
+                <img src="${imagem}" alt="${nome}" loading="lazy" decoding="async" width="56" height="56" class="w-14 h-14 object-cover rounded-lg shrink-0">
                 <div class="min-w-0 flex-1">
                     <span class="text-[10px] font-bold uppercase tracking-wide text-brand-secondary">${categoria}</span>
                     <h4 class="font-bold text-stone-800 text-sm leading-snug">${nome}</h4>
@@ -135,6 +135,8 @@ function abrirAvulsasNoCarrinho(pratoId) {
         return;
     }
     openCheckoutModal();
+    const secaoAvulsas = document.getElementById('avulsas-carrinho-section');
+    if (secaoAvulsas) secaoAvulsas.open = true;
     const card = document.getElementById('avulsa-card-' + String(pratoId));
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
