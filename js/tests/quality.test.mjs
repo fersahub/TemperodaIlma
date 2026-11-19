@@ -329,3 +329,19 @@ test('planejador informa que o frete é cobrado conforme o bairro',()=>{
  assert.match(experiencia,/frete será calculado no checkout conforme o bairro informado/i);
  assert.doesNotMatch(experiencia,/temFreteGratis|oferece frete grátis/i);
 });
+
+test('avaliações: comentários aparecem em carrossel compacto com avanço lento',()=>{
+ const html=read('index.html'),module=read('js/modules/avaliacoes.js'),css=read('css/styles.css');
+ assert.match(html,/id="avaliacoes-carrossel"/);
+ assert.match(html,/id="avaliacoes-comentarios" class="flex/);
+ assert.match(module,/window\.setInterval\(\(\) =>/);
+ assert.match(module,/}, 7500\)/);
+ assert.match(module,/translateX\(-'/);
+ assert.match(css,/\.avaliacoes-carrossel \{ min-height: 78px; \}/);
+});
+test('avulsas: novo pedido reinicia e persiste preferência mesmo após escolha Não',()=>{
+ const avulsas=read('js/modules/avulsas.js'),carrinho=read('js/modules/carrinho.js'),pedidos=read('js/modules/pedidos.js');
+ assert.match(avulsas,/function reiniciarPreferenciaAvulsas\(\)[\s\S]*salvarCarrinho\(\)/);
+ assert.match(carrinho,/cartCombos\.length === 0 && cartAvulsas\.length === 0[\s\S]*reiniciarPreferenciaAvulsas\(\)/);
+ assert.match(pedidos,/reiniciarPreferenciaAvulsas\(\)/);
+});
