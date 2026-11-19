@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v15-avulsas-opcionais';
+const CACHE_NAME = 'tempero-v16-avulsas-sim-nao';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
