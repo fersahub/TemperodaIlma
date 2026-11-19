@@ -124,7 +124,7 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - As avulsas podem ser escolhidas nos tamanhos Tradicional 350g, Tradicional 500g e Fit 300g, conforme a categoria do prato.
 - A quantidade pode ser ajustada no cardápio e no carrinho.
 - O carrinho, resumo, comanda de WhatsApp e valor Pix somam combos e avulsas.
-- O frete grátis continua dependendo exclusivamente dos combos que já possuem a regra `freteGratis`.
+- O frete é sempre cobrado conforme a taxa do bairro; combos de 10 não concedem frete grátis.
 - Os preços unitários iniciais são derivados do valor por unidade dos combos de 5 correspondentes: Tradicional 350g, Tradicional 500g e Fit 300g. Esses valores devem ser revisados comercialmente antes de divulgar a venda avulsa.
 - Carrinhos antigos salvos no navegador (formato de array, contendo apenas combos) continuam sendo restaurados.
 - Sem Backend ou banco de dados; os dados permanecem no navegador.
