@@ -62,6 +62,7 @@ function renderFlavorsDisplay() {
                         <h4 class="font-bold text-stone-800 text-xs leading-snug">${nomeSeguro}</h4>
                     </button>
                     <p class="text-[10px] text-stone-500 leading-tight mt-1 line-clamp-2">${descricaoSegura}</p>
+                    <div class="mt-1" data-rating-for="${idSeguro}">${htmlResumoAvaliacaoSabor(flavor.id)}</div>
                     <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
                         <button type="button" data-prato-id="${idSeguro}" onclick="abrirDetalhesPrato(this.dataset.pratoId)" class="text-[10px] font-bold text-brand-secondary hover:underline inline-flex items-center gap-1">
                             Ver detalhes <i class="fa-solid fa-arrow-right text-[9px]"></i>
