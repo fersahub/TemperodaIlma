@@ -5,6 +5,8 @@ let pedidoAtualParaAvaliar = null;
 let notasSaboresAvaliacao = {};
 let notaGeralAvaliacao = 0;
 let envioAvaliacaoEmAndamento = false;
+let intervaloCarrosselAvaliacoes = null;
+let indiceCarrosselAvaliacoes = 0;
 
 function urlApiAvaliacoes() {
     const url = String(window.TEMPERO_CONFIG?.avaliacoes?.apiUrl || '').trim();
@@ -200,23 +202,31 @@ function renderizarResumoAvaliacoes() {
 
     const comentarios = document.getElementById('avaliacoes-comentarios');
     const semComentarios = document.getElementById('avaliacoes-sem-comentarios');
+    const viewport = document.getElementById('avaliacoes-carrossel');
+    if (intervaloCarrosselAvaliacoes) {
+        window.clearInterval(intervaloCarrosselAvaliacoes);
+        intervaloCarrosselAvaliacoes = null;
+    }
+    indiceCarrosselAvaliacoes = 0;
     if (comentarios) {
         comentarios.innerHTML = '';
+        comentarios.style.transform = 'translateX(0)';
         dadosPublicosAvaliacoes.comments.forEach(item => {
             const card = document.createElement('article');
-            card.className = 'rounded-xl border border-stone-200 bg-stone-50 p-3 space-y-1';
+            card.className = 'w-full shrink-0 rounded-lg border border-stone-200 bg-stone-50 p-3 space-y-1';
+            card.style.flex = '0 0 100%';
             const cabecalho = document.createElement('div');
             cabecalho.className = 'flex items-center justify-between gap-2';
             const nome = document.createElement('strong');
             nome.className = 'text-xs text-stone-800';
             nome.textContent = String(item.name || 'Cliente');
             const nota = document.createElement('span');
-            nota.className = 'text-xs font-bold text-amber-600';
+            nota.className = 'text-xs font-bold text-amber-600 shrink-0';
             nota.textContent = '★ ' + String(item.rating || '') + '/5';
             cabecalho.append(nome, nota);
             const texto = document.createElement('p');
-            texto.className = 'text-xs text-stone-600 whitespace-pre-line break-words';
-            texto.textContent = String(item.comment || '');
+            texto.className = 'text-xs text-stone-600 whitespace-pre-line break-words line-clamp-3';
+            texto.textContent = String(item.comment || 'Avaliação registrada por um cliente.');
             card.append(cabecalho, texto);
             if (item.date) {
                 const data = document.createElement('p');
@@ -227,7 +237,28 @@ function renderizarResumoAvaliacoes() {
             comentarios.appendChild(card);
         });
     }
-    if (semComentarios) semComentarios.classList.toggle('hidden', dadosPublicosAvaliacoes.comments.length > 0);
+    const totalComentarios = dadosPublicosAvaliacoes.comments.length;
+    if (semComentarios) semComentarios.classList.toggle('hidden', totalComentarios > 0);
+    if (viewport) viewport.classList.toggle('hidden', totalComentarios === 0);
+    if (comentarios && totalComentarios > 1 && viewport) {
+        if (!viewport.dataset.carrosselPreparado) {
+            viewport.addEventListener('mouseenter', () => { viewport.dataset.carrosselPausado = 'true'; });
+            viewport.addEventListener('mouseleave', () => { viewport.dataset.carrosselPausado = 'false'; });
+            viewport.addEventListener('focusin', () => { viewport.dataset.carrosselPausado = 'true'; });
+            viewport.addEventListener('focusout', () => { viewport.dataset.carrosselPausado = 'false'; });
+            viewport.dataset.carrosselPreparado = 'true';
+            viewport.dataset.carrosselPausado = 'false';
+        }
+        const movimentoReduzido = window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!movimentoReduzido) {
+            intervaloCarrosselAvaliacoes = window.setInterval(() => {
+                if (viewport.dataset.carrosselPausado === 'true') return;
+                indiceCarrosselAvaliacoes = (indiceCarrosselAvaliacoes + 1) % totalComentarios;
+                comentarios.style.transform = 'translateX(-' + (indiceCarrosselAvaliacoes * 100) + '%)';
+            }, 7500);
+        }
+    }
     atualizarBotoesConviteAvaliacao();
 }
 

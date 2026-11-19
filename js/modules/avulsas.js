@@ -113,6 +113,8 @@ function reiniciarPreferenciaAvulsas() {
     avulsasOcultasNestePedido = false;
     avulsasOpcoesExpandidas = false;
     atualizarPreferenciaVisualAvulsas();
+    // Persiste o estado inicial para impedir que a escolha "Não" reapareça em um novo pedido.
+    if (typeof salvarCarrinho === 'function') salvarCarrinho();
 }
 
 function renderAvulsasDisplay() {

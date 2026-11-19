@@ -79,7 +79,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v17-avaliacoes/);
+ assert.match(read('sw.js'),/tempero-v18-carrossel-reset/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -256,7 +256,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v17-avaliacoes'));
+ assert.ok(read('sw.js').includes('tempero-v18-carrossel-reset'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -328,4 +328,20 @@ test('planejador informa que o frete é cobrado conforme o bairro',()=>{
  const experiencia=read('js/modules/experiencia.js');
  assert.match(experiencia,/frete será calculado no checkout conforme o bairro informado/i);
  assert.doesNotMatch(experiencia,/temFreteGratis|oferece frete grátis/i);
+});
+
+test('avaliações: comentários aparecem em carrossel compacto com avanço lento',()=>{
+ const html=read('index.html'),module=read('js/modules/avaliacoes.js'),css=read('css/styles.css');
+ assert.match(html,/id="avaliacoes-carrossel"/);
+ assert.match(html,/id="avaliacoes-comentarios" class="flex/);
+ assert.match(module,/window\.setInterval\(\(\) =>/);
+ assert.match(module,/}, 7500\)/);
+ assert.match(module,/translateX\(-'/);
+ assert.match(css,/\.avaliacoes-carrossel \{ min-height: 78px; \}/);
+});
+test('avulsas: novo pedido reinicia e persiste preferência mesmo após escolha Não',()=>{
+ const avulsas=read('js/modules/avulsas.js'),carrinho=read('js/modules/carrinho.js'),pedidos=read('js/modules/pedidos.js');
+ assert.match(avulsas,/function reiniciarPreferenciaAvulsas\(\)[\s\S]*salvarCarrinho\(\)/);
+ assert.match(carrinho,/cartCombos\.length === 0 && cartAvulsas\.length === 0[\s\S]*reiniciarPreferenciaAvulsas\(\)/);
+ assert.match(pedidos,/reiniciarPreferenciaAvulsas\(\)/);
 });

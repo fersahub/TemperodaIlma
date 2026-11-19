@@ -100,6 +100,10 @@ function openFlavorsModal(comboId, editIdx) {
             };
 
             const estavaEditando = editandoIndex !== null;
+            // Ao adicionar o primeiro combo de um carrinho vazio, inicia uma nova preferência de avulsas.
+            if (!estavaEditando && cartCombos.length === 0 && cartAvulsas.length === 0) {
+                reiniciarPreferenciaAvulsas();
+            }
             const montagemPorQuiz = quizMontagemAtiva && !estavaEditando;
             if (estavaEditando) {
                 cartItem.cartId = cartCombos[editandoIndex].cartId;
