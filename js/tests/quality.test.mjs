@@ -200,10 +200,11 @@ test('seção de avulsas informa e aplica a regra de combo obrigatório',()=>{
  const html=read('index.html');
  const avulsas=read('js/modules/avulsas.js');
  assert.ok(html.includes('id="avulsas-display-grid"'));
+ assert.match(html,/<a href="#avulsas-section"[^>]*>\s*<span[^>]*>[\s\S]*Adicionar avulsas/);
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v12-selo-em-breve'));
+ assert.ok(read('sw.js').includes('tempero-v13-acesso-avulsas'));
 });
 
 
