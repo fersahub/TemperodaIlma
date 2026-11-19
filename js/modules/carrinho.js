@@ -94,7 +94,6 @@ function openFlavorsModal(comboId, editIdx) {
                 name: currentEditingCombo.name,
                 price: currentEditingCombo.price,
                 qty: currentEditingCombo.qty,
-                freteGratis: !!currentEditingCombo.freteGratis,
                 flavors: { ...selectedFlavors },
                 flavorsSummary: summaryFlavors,
                 obs: document.getElementById('combo-obs').value.trim()
@@ -173,11 +172,7 @@ function openFlavorsModal(comboId, editIdx) {
 
             if (shippingEl) {
                 if (currentShippingFee !== null) {
-                    if (temFreteGratis()) {
-                        shippingEl.innerHTML = '<s class="text-stone-400 font-normal">R$ ' + currentShippingFee.toFixed(2).replace('.', ',') + '</s> <span class="text-emerald-600">GRÁTIS</span>';
-                    } else {
-                        shippingEl.innerText = 'R$ ' + currentShippingFee.toFixed(2).replace('.', ',');
-                    }
+                    shippingEl.innerText = 'R$ ' + currentShippingFee.toFixed(2).replace('.', ',');
                     shippingEl.className = 'font-bold text-stone-800';
                 } else {
                     shippingEl.innerText = 'Clique em calcular frete';
