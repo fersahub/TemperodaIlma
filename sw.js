@@ -23,6 +23,7 @@ const CORE_ASSETS = [
   './js/modules/favoritos.js',
   './js/modules/detalhes-prato.js',
   './js/modules/cardapio.js',
+  './js/modules/avulsas.js',
   './js/modules/carrinho.js',
   './js/modules/checkout.js',
   './js/app.js',
