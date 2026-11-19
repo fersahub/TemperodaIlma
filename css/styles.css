@@ -83,3 +83,10 @@ html.dark #dish-detail-favorite.is-favorito{background:#4a1d2b!important;color:#
 /* Selo "Em breve": contraste consistente nos temas claro e escuro. */
 .badge-em-breve{background:#fff3cd!important;color:#704b00!important;border:1px solid #e7c76a!important}
 html.dark .badge-em-breve{background:#3b2f16!important;color:#ffe08a!important;border-color:#8b6b22!important}
+
+/* Carrossel compacto de avaliações dos clientes. */
+.avaliacoes-carrossel { min-height: 78px; }
+#avaliacoes-comentarios > article { min-height: 72px; box-sizing: border-box; }
+@media (prefers-reduced-motion: reduce) {
+  #avaliacoes-comentarios { transition: none !important; }
+}
