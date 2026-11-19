@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v14-avulsas-no-carrinho';
+const CACHE_NAME = 'tempero-v15-avulsas-opcionais';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',

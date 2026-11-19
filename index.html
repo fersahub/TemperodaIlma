@@ -185,7 +185,6 @@
             <a href="https://wa.me/5571994125510?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20um%20pedido%20recente." target="_blank" rel="noopener" class="bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition">📝 Alterar pedido</a>
             <a href="https://wa.me/5571994125510?text=Ol%C3%A1!%20Gostaria%20de%20conversar%20sobre%20parcerias%20ou%20pedidos%20corporativos." target="_blank" rel="noopener" class="bg-stone-800 hover:bg-stone-700 text-stone-300 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition">💼 Parcerias e empresas</a>
         </div>
-        <button type="button" onclick="apagarDadosSalvos()" class="text-stone-400 hover:text-white underline underline-offset-2">Apagar dados salvos neste navegador</button>
         <p class="text-stone-500">&copy; Todos os direitos reservados.</p>
     </footer>
 
@@ -378,17 +377,20 @@
                     <div id="cart-combos-container" class="space-y-3"></div>
                 </div>
 
-                <section id="avulsas-carrinho-section" class="space-y-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-3">
-                    <div>
-                        <h4 class="font-bold text-sm text-stone-800 flex items-center gap-2"><i class="fa-solid fa-bowl-food text-brand-secondary"></i> Adicionar marmitas avulsas</h4>
-                        <p class="text-[11px] text-stone-600 mt-1">Escolha outros pratos, tamanho e quantidade para complementar seu combo.</p>
+                <details id="avulsas-carrinho-section" class="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3">
+                    <summary class="cursor-pointer list-none flex items-center justify-between gap-3 text-sm font-bold text-stone-800">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-circle-plus text-brand-secondary"></i> Deseja adicionar marmitas avulsas ao seu combo?</span>
+                        <i class="fa-solid fa-chevron-down text-xs text-stone-500 shrink-0"></i>
+                    </summary>
+                    <div class="space-y-3 pt-3">
+                        <p class="text-xs text-stone-600">Opcional: escolha outros pratos, tamanho e quantidade para complementar seu pedido.</p>
+                        <div id="avulsas-regra-aviso" class="rounded-xl border p-3 text-xs font-semibold bg-amber-50 border-amber-200 text-amber-900">
+                            <i class="fa-solid fa-lock text-amber-600"></i> Para adicionar marmitas avulsas, primeiro escolha pelo menos um combo. Não vendemos pedidos somente de 1 ou 2 marmitas.
+                        </div>
+                        <div id="avulsas-display-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                        <p class="text-[10px] text-stone-500">O valor unitário é baseado no preço por unidade do combo de 5 correspondente.</p>
                     </div>
-                    <div id="avulsas-regra-aviso" class="rounded-xl border p-3 text-xs font-semibold bg-amber-50 border-amber-200 text-amber-900">
-                        <i class="fa-solid fa-lock text-amber-600"></i> Para adicionar marmitas avulsas, primeiro escolha pelo menos um combo. Não vendemos pedidos somente de 1 ou 2 marmitas.
-                    </div>
-                    <div id="avulsas-display-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-                    <p class="text-[10px] text-stone-500">O valor unitário é baseado no preço por unidade do combo de 5 correspondente.</p>
-                </section>
+                </details>
 
                 <div class="pt-3 border-t border-stone-200 space-y-1.5 text-xs">
                     <div class="flex justify-between text-stone-600">
