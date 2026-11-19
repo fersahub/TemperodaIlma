@@ -241,19 +241,19 @@ function renderizarResumoAvaliacoes() {
     if (semComentarios) semComentarios.classList.toggle('hidden', totalComentarios > 0);
     if (viewport) viewport.classList.toggle('hidden', totalComentarios === 0);
     if (comentarios && totalComentarios > 1 && viewport) {
-        let pausado = false;
         if (!viewport.dataset.carrosselPreparado) {
-            viewport.addEventListener('mouseenter', () => { pausado = true; });
-            viewport.addEventListener('mouseleave', () => { pausado = false; });
-            viewport.addEventListener('focusin', () => { pausado = true; });
-            viewport.addEventListener('focusout', () => { pausado = false; });
+            viewport.addEventListener('mouseenter', () => { viewport.dataset.carrosselPausado = 'true'; });
+            viewport.addEventListener('mouseleave', () => { viewport.dataset.carrosselPausado = 'false'; });
+            viewport.addEventListener('focusin', () => { viewport.dataset.carrosselPausado = 'true'; });
+            viewport.addEventListener('focusout', () => { viewport.dataset.carrosselPausado = 'false'; });
             viewport.dataset.carrosselPreparado = 'true';
+            viewport.dataset.carrosselPausado = 'false';
         }
         const movimentoReduzido = window.matchMedia &&
             window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (!movimentoReduzido) {
             intervaloCarrosselAvaliacoes = window.setInterval(() => {
-                if (pausado) return;
+                if (viewport.dataset.carrosselPausado === 'true') return;
                 indiceCarrosselAvaliacoes = (indiceCarrosselAvaliacoes + 1) % totalComentarios;
                 comentarios.style.transform = 'translateX(-' + (indiceCarrosselAvaliacoes * 100) + '%)';
             }, 7500);
