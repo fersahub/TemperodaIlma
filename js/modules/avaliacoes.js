@@ -370,58 +370,20 @@ function enviarAvaliacao(evento) {
 
 function postarAvaliacaoComFormulario(payload) {
     const endpoint = urlApiAvaliacoes();
-    const nomeFrame = 'avaliacoes_post_' + Date.now();
-    const iframe = document.createElement('iframe');
-    iframe.name = nomeFrame;
-    iframe.title = 'Envio da avaliação';
-    iframe.className = 'hidden';
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = endpoint;
-    form.target = nomeFrame;
-    form.acceptCharset = 'UTF-8';
-    const campoPayload = document.createElement('input');
-    campoPayload.type = 'hidden';
-    campoPayload.name = 'payload';
-    campoPayload.value = JSON.stringify(payload);
-    const honeypot = document.createElement('input');
-    honeypot.type = 'hidden';
-    honeypot.name = 'website';
-    honeypot.value = '';
-    form.append(campoPayload, honeypot);
-    document.body.append(form);
+    const formulario = new URLSearchParams();
+    formulario.set('payload', JSON.stringify(payload));
+    formulario.set('website', '');
 
-    let primeiroCarregamento = true;
-    let formularioEnviado = false;
-    let verificacaoIniciada = false;
-    const iniciarVerificacao = () => {
-        if (verificacaoIniciada) return;
-        verificacaoIniciada = true;
-        verificarAvaliacaoNoServidor(payload.orderId, 0);
-    };
-
-    iframe.addEventListener('load', () => {
-        if (primeiroCarregamento) {
-            primeiroCarregamento = false;
-            formularioEnviado = true;
-            try {
-                form.submit();
-                form.remove();
-                window.setTimeout(iniciarVerificacao, 2500);
-            } catch (erro) {
-                form.remove();
-                iframe.remove();
-                falharEnvioAvaliacao();
-            }
-            return;
-        }
-        if (formularioEnviado) {
-            iframe.remove();
-            iniciarVerificacao();
-        }
+    fetch(endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formulario
+    }).then(() => {
+        // O POST é opaco por ser cross-origin; confirmamos o registro por um GET JSONP sem dados pessoais.
+        window.setTimeout(() => verificarAvaliacaoNoServidor(payload.orderId, 0), 900);
+    }).catch(() => {
+        falharEnvioAvaliacao();
     });
-    iframe.src = 'about:blank';
-    document.body.append(iframe);
 }
 
 function verificarAvaliacaoNoServidor(orderId, tentativa) {
