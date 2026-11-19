@@ -20,7 +20,7 @@ test('pratos: IDs, categorias e imagens',()=>{
 test('configuração pública da loja, Pix e endpoint de avaliações',()=>{
  const window={};runInNewContext(read('js/config/loja.js'),{window});const c=window.TEMPERO_CONFIG;
  assert.match(c.loja.whatsappNumero,/^\d{12,13}$/);assert.ok(c.loja.cidade);assert.ok(c.pix.pixChave&&c.pix.pixNome&&c.pix.pixCidade);
- assert.equal(c.avaliacoes.apiUrl,'');
+ assert.match(c.avaliacoes.apiUrl,/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/);
 });
 test('HTML: referências locais existem e scripts carregam na ordem',()=>{
  const html=read('index.html'),refs=[];
