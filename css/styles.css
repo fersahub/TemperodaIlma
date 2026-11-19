@@ -79,3 +79,7 @@
 #dish-detail-favorite.is-favorito{background:#fff1f2!important;color:#be123c!important;border-color:#fecdd3!important}
 html.dark .prato-favorito-btn.is-favorito,
 html.dark #dish-detail-favorite.is-favorito{background:#4a1d2b!important;color:#fda4af!important;border-color:#713047!important}
+
+/* Selo "Em breve": contraste consistente nos temas claro e escuro. */
+.badge-em-breve{background:#fff3cd!important;color:#704b00!important;border:1px solid #e7c76a!important}
+html.dark .badge-em-breve{background:#3b2f16!important;color:#ffe08a!important;border-color:#8b6b22!important}
