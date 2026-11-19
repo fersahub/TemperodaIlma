@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runInNewContext } from 'node:vm';
+import { runInNewContext, Script } from 'node:vm';
 const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const read=p=>readFileSync(resolve(ROOT,p),'utf8');
 const exists=p=>existsSync(resolve(ROOT,p));
@@ -17,16 +17,17 @@ test('pratos: IDs, categorias e imagens',()=>{
  const xs=data('js/data/pratos.js').pratos;assert.ok(xs.length>0);assert.equal(new Set(xs.map(x=>x.id)).size,xs.length);
  for(const x of xs){assert.ok(x.name&&x.desc);assert.ok(['Tradicional','Linha Fit','Especiais da Casa'].includes(x.tag));assert.ok(exists(x.img),x.img);}
 });
-test('configuração pública da loja e Pix preenchida',()=>{
+test('configuração pública da loja, Pix e endpoint de avaliações',()=>{
  const window={};runInNewContext(read('js/config/loja.js'),{window});const c=window.TEMPERO_CONFIG;
  assert.match(c.loja.whatsappNumero,/^\d{12,13}$/);assert.ok(c.loja.cidade);assert.ok(c.pix.pixChave&&c.pix.pixNome&&c.pix.pixCidade);
+ assert.equal(c.avaliacoes.apiUrl,'');
 });
 test('HTML: referências locais existem e scripts carregam na ordem',()=>{
  const html=read('index.html'),refs=[];
  for(const m of html.matchAll(/<(?:script|link|img)\b[^>]*(?:src|href)=["']([^"']+)["'][^>]*>/gi)){const v=m[1];if(v&&!/^(?:https?:|data:|#|mailto:|tel:|javascript:)/i.test(v))refs.push(v.split(/[?#]/)[0]);}
  for(const p of refs)assert.ok(exists(p),p);
  const appAt=html.indexOf('<script src="js/app.js">');
- for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/favoritos.js','js/modules/detalhes-prato.js','js/modules/cardapio.js','js/modules/avulsas.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p+'">');assert.ok(i>=0&&i<appAt,p);}
+ for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/favoritos.js','js/modules/detalhes-prato.js','js/modules/cardapio.js','js/modules/avulsas.js','js/modules/avaliacoes.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p+'">');assert.ok(i>=0&&i<appAt,p);}
 });
 test('Service Worker: pré-cache contém arquivos existentes e remove versões antigas',()=>{
  const s=read('sw.js'),m=s.match(/const CORE_ASSETS\s*=\s*(\[[\s\S]*?\]);/);assert.ok(m);
@@ -49,6 +50,38 @@ test('avulsas: pergunta Sim/Não inicia recolhida e as opções são compactas',
  assert.match(html,/responderOpcaoAvulsas\('nao'\)/);
  assert.match(avulsas,/width="56" height="56"/);
 });
+test('avaliações: interface de sabores e geral, convite no site e backend configurável',()=>{
+ const html=read('index.html'),module=read('js/modules/avaliacoes.js');
+ const checkout=read('js/modules/checkout.js'),pedidos=read('js/modules/pedidos.js'),cardapio=read('js/modules/cardapio.js'),detalhes=read('js/modules/detalhes-prato.js');
+ assert.match(html,/id="avaliacoes-section"/);
+ assert.match(html,/id="avaliacao-form"/);
+ assert.match(html,/id="avaliacao-nota-geral"/);
+ assert.match(html,/id="avaliacao-sabores-lista"/);
+ assert.match(html,/btn-avaliar-pedido-enviado/);
+ assert.match(module,/function htmlResumoAvaliacaoSabor/);
+ assert.match(module,/function coletarSaboresPedidoAvaliacao/);
+ assert.match(module,/function registrarPedidoPendenteAvaliacao/);
+ assert.match(module,/function enviarAvaliacao/);
+ assert.match(cardapio,/htmlResumoAvaliacaoSabor/);
+ assert.match(detalhes,/renderResumoAvaliacaoDetalhe/);
+ assert.match(checkout,/reviewOrderId = gerarCodigoPedidoAvaliacao/);
+ assert.match(checkout,/reviewFlavors = coletarSaboresPedidoAvaliacao/);
+ assert.match(pedidos,/registrarPedidoPendenteAvaliacao\(dp\)/);
+});
+test('backend Apps Script: JSONP somente leitura, validação, deduplicação e publicação automática',()=>{
+ const backend=read('integrations/google-apps-script/Code.gs');
+ assert.doesNotThrow(()=>new Script(backend));
+ assert.match(backend,/function configurarSistemaAvaliacoes\(\)/);
+ assert.match(backend,/function doGet\(e\)/);
+ assert.match(backend,/function doPost\(e\)/);
+ assert.match(backend,/LockService\.getScriptLock\(\)/);
+ assert.match(backend,/pedidoJaAvaliado_\(orderHash\)/);
+ assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
+ assert.match(backend,/SABORES_PERMITIDOS/);
+ assert.match(backend,/callback.*A-Za-z0-9_/s);
+ assert.match(read('sw.js'),/tempero-v17-avaliacoes/);
+});
+
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
 
  
@@ -223,7 +256,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v16-avulsas-sim-nao'));
+ assert.ok(read('sw.js').includes('tempero-v17-avaliacoes'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{

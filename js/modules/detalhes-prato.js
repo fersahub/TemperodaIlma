@@ -20,6 +20,7 @@ function abrirDetalhesPrato(id) {
     document.getElementById('dish-detail-name').textContent = prato.name;
     document.getElementById('dish-detail-tag').textContent = prato.tag;
     document.getElementById('dish-detail-description').textContent = prato.desc;
+    renderResumoAvaliacaoDetalhe(prato.id);
     atualizarBotaoFavoritoDetalhe(prato.id);
     const emBreve = prato.emBreve === true || prato.disponivel === false;
     const avisoEmBreve = document.getElementById('dish-detail-coming-soon');

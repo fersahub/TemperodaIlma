@@ -211,8 +211,11 @@ function openCheckoutModal() {
             const agora = new Date();
             const p2 = n => String(n).padStart(2, '0');
             const numPedido = `${p2(agora.getDate())}${p2(agora.getMonth() + 1)}-${p2(agora.getHours())}${p2(agora.getMinutes())}${p2(agora.getSeconds())}`;
+            const reviewOrderId = gerarCodigoPedidoAvaliacao();
+            const reviewFlavors = coletarSaboresPedidoAvaliacao();
             let lines = [];
             lines.push(`${ePlate} *NOVO PEDIDO #${numPedido} - TEMPERO DA ILMA* ${ePlate}`);
+            lines.push(`Código de avaliação: ${reviewOrderId}`);
             lines.push(``);
             lines.push(`${eUser} *Cliente:* ${name}`);
             lines.push(`${ePhone} *Telefone:* ${phone}`);
@@ -278,5 +281,5 @@ function openCheckoutModal() {
 
             const fullText = lines.join('\n');
             const whatsappUrl = `https://wa.me/${CONFIG_LOJA.whatsappNumero}?text=${encodeURIComponent(fullText)}`;
-            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice, fullText });
+            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice, fullText, reviewOrderId, reviewFlavors });
         }

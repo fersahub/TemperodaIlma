@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
             mostrarAvisoFimDeSemana();
             iniciarValidacao();
             iniciarEtapas();
+            iniciarSistemaAvaliacoes();
             iniciarModais();
             iniciarEndereco();
             restaurarCarrinho();
