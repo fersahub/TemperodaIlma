@@ -87,7 +87,6 @@
                 itens: itens,
                 quantidade: itens.reduce((soma, item) => soma + item.qty, 0),
                 total: itens.reduce((soma, item) => soma + item.price, 0),
-                temFreteGratis: itens.some(item => item.freteGratis)
             };
         }
 
@@ -133,7 +132,7 @@
                     '<ul class="space-y-1 text-[11px] text-stone-700 mt-2">' + linhas + '</ul>' +
                     '<p class="text-[10px] text-stone-600 mt-2">' + (calculo.excedente ? 'A sugestão inclui ' + calculo.excedente + ' marmita(s) extra(s), pois os combos são vendidos em pacotes de 5 e 10.' : 'A quantidade dos combos corresponde exatamente ao planejamento informado.') + '</p></div>' +
                     '<div class="flex items-center justify-between border-t border-emerald-200 pt-3"><span class="text-xs font-bold text-stone-700">Total estimado</span><strong class="text-lg text-stone-900">R$ ' + plano.total.toFixed(2).replace('.', ',') + '</strong></div>' +
-                    '<p class="text-[10px] text-stone-600">' + (plano.temFreteGratis ? 'Seu planejamento inclui Combo 10 tradicional, que oferece frete grátis conforme as condições da loja.' : 'O frete, quando aplicável, será calculado no checkout.') + '</p>' +
+                    '<p class="text-[10px] text-stone-600">O frete será calculado no checkout conforme o bairro informado.</p>' +
                 '</div>';
 
             document.getElementById('quiz-formulario').classList.add('hidden');
