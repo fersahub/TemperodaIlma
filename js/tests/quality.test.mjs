@@ -37,8 +37,16 @@ test('WhatsApp: abrir conversa não limpa carrinho automaticamente',()=>{
  const s=read('js/modules/pedidos.js'),h=read('index.html'),a=s.indexOf('function confirmarEnvio()'),b=s.indexOf('function limparCarrinhoAposEnvio()');
  assert.ok(a>=0&&b>a);assert.ok(!s.slice(a,b).includes('cartCombos = []'));assert.match(h,/Comanda preparada para envio/);assert.match(h,/Seu carrinho foi preservado neste aparelho/);
 });
-test('cliente pode apagar dados guardados localmente',()=>{
- assert.match(read('js/modules/checkout.js'),/function apagarDadosSalvos\(\)/);assert.match(read('index.html'),/Apagar dados salvos neste navegador/);
+test('limpeza do rodapé: opção de apagar dados salvos não é exibida ao cliente',()=>{
+ assert.match(read('js/modules/checkout.js'),/function apagarDadosSalvos\(\)/);
+ assert.doesNotMatch(read('index.html'),/Apagar dados salvos neste navegador/);
+});
+test('avulsas: opções ficam recolhidas até solicitação e abrem pelo atalho do cardápio',()=>{
+ const html=read('index.html'),avulsas=read('js/modules/avulsas.js');
+ assert.match(html,/<details id="avulsas-carrinho-section"/);
+ assert.match(html,/Deseja adicionar marmitas avulsas ao seu combo\?/);
+ assert.match(avulsas,/secaoAvulsas\.open = true/);
+ assert.match(avulsas,/width="56" height="56"/);
 });
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
 
