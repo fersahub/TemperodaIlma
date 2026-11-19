@@ -202,7 +202,7 @@ test('seção de avulsas informa e aplica a regra de combo obrigatório',()=>{
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v10-carrinho-misto'));
+ assert.ok(read('sw.js').includes('tempero-v11-frete-por-bairro'));
 });
 
 
