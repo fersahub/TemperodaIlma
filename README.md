@@ -128,3 +128,28 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - Os preços unitários iniciais são derivados do valor por unidade dos combos de 5 correspondentes: Tradicional 350g, Tradicional 500g e Fit 300g. Esses valores devem ser revisados comercialmente antes de divulgar a venda avulsa.
 - Carrinhos antigos salvos no navegador (formato de array, contendo apenas combos) continuam sendo restaurados.
 - Sem Backend ou banco de dados; os dados permanecem no navegador.
+
+## Sistema de avaliações por sabor e geral
+
+A interface de avaliações fica no próprio site e usa **Google Apps Script + Google Sheets** como serviço central. A planilha não é publicada: o Apps Script executa como a conta que o implantou e expõe somente as médias e comentários publicados.
+
+- O cliente recebe o convite no site após abrir o pedido no WhatsApp; a avaliação é feita depois que receber as marmitas.
+- O formulário usa o pedido salvo neste navegador e permite avaliar cada sabor recebido e a experiência geral.
+- As notas e os comentários são publicados automaticamente. O nome é opcional e telefone/endereço não são enviados para a planilha.
+- Os cards e os detalhes dos pratos exibem a média e a quantidade de avaliações; a página principal exibe a média geral e comentários.
+- O código do pedido impede uma segunda avaliação pelo mesmo pedido. Como o site não confirma a entrega pelo WhatsApp, esse código identifica o pedido gerado no navegador, mas não é uma comprovação antifraude de compra/entrega.
+- A coluna **Status** da planilha começa como `PUBLICADO`. Para ocultar uma avaliação, altere manualmente para `OCULTO`; ela deixa de entrar nas médias e nos comentários públicos.
+- O backend está em `integrations/google-apps-script/Code.gs`. O endpoint é configurado em `js/config/loja.js`, no campo `avaliacoes.apiUrl`. Não coloque senhas ou tokens privados no site.
+
+### Ativação única do Google Apps Script
+
+1. Entre em [script.google.com](https://script.google.com/) com a conta Google da marmitaria e crie um projeto.
+2. Copie todo o conteúdo de `integrations/google-apps-script/Code.gs` para o arquivo `Code.gs`.
+3. No editor, selecione e execute `configurarSistemaAvaliacoes`. Autorize o acesso solicitado. A execução cria a planilha privada e registra o endereço dela no log.
+4. Em **Implantar → Nova implantação**, selecione **App da Web**. Configure **Executar como: Eu** e **Quem pode acessar: Qualquer pessoa**. Implante e copie a URL terminada em `/exec`.
+5. Informe essa URL no campo `avaliacoes.apiUrl` em `js/config/loja.js`, mantendo-a entre aspas. Depois publique essa alteração no site.
+6. Faça um pedido de teste, confirme a abertura do WhatsApp, abra **Avaliar meu pedido**, envie uma avaliação e confira a planilha e a exibição no cardápio.
+
+A URL do Apps Script é pública por necessidade de funcionamento, mas a planilha permanece privada. O endpoint valida notas e IDs de sabores, usa um campo antispam, bloqueio concorrente e uma avaliação por código de pedido. As avaliações são automáticas, portanto comentários inadequados podem aparecer; use a coluna **Status** para ocultá-los. Essa proteção é adequada para começar com baixo volume, mas não substitui autenticação robusta ou verificação de entrega contra fraude coordenada.
+
+Enquanto a URL não for configurada, o formulário e os indicadores ficam ocultos: o site não exibe notas fictícias nem simula avaliações.
