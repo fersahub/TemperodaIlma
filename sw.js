@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v16-avulsas-sim-nao';
+const CACHE_NAME = 'tempero-v17-avaliacoes';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
@@ -24,6 +24,7 @@ const CORE_ASSETS = [
   './js/modules/detalhes-prato.js',
   './js/modules/cardapio.js',
   './js/modules/avulsas.js',
+  './js/modules/avaliacoes.js',
   './js/modules/carrinho.js',
   './js/modules/checkout.js',
   './js/app.js',
