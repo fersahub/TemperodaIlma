@@ -52,7 +52,7 @@
     const button=$('login-button'), message=$('login-message');
     const password=$('admin-password').value;
     message.textContent='';
-    if(password.length<24){message.textContent='A senha-frase precisa ter pelo menos 24 caracteres.';return;}
+    if(password.length<16 || password.length>128 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)){message.textContent='Use uma senha de 16 a 128 caracteres, incluindo letras e números.';return;}
     button.disabled=true; button.textContent='Validando…';
     try {
       const challenge=await jsonp('adminChallenge',{});
@@ -232,6 +232,33 @@
       toast('WhatsApp aberto; não foi possível atualizar o histórico da notificação.');
     }
   }
+  function abrirAlterarSenha() {
+    $('password-message').textContent='';
+    $('password-form').reset();
+    $('password-modal').hidden=false;
+    $('new-admin-password').focus();
+  }
+  function fecharAlterarSenha() { $('password-modal').hidden=true; }
+  async function salvarNovaSenha(event) {
+    event.preventDefault();
+    const senha=$('new-admin-password').value;
+    const confirmacao=$('confirm-admin-password').value;
+    const message=$('password-message'),button=$('password-save');
+    message.textContent='';
+    if(senha.length<16 || senha.length>128 || !/[A-Za-z]/.test(senha) || !/[0-9]/.test(senha)) {
+      message.textContent='Use de 16 a 128 caracteres, incluindo pelo menos uma letra e um número.';return;
+    }
+    if(senha!==confirmacao) { message.textContent='As senhas não coincidem.';return; }
+    button.disabled=true;button.textContent='Salvando…';
+    try {
+      const result=await postarAcao('adminChangePassword',{newPassword:senha});
+      $('password-form').reset();fecharAlterarSenha();
+      sair();
+      $('login-message').textContent=result.message||'Senha alterada. Entre novamente com sua nova senha.';
+    } catch(error) {
+      message.textContent=error.message||'Não foi possível alterar a senha.';
+    } finally { button.disabled=false;button.textContent='Salvar nova senha'; }
+  }
   function sair() {
     token='';sessionStorage.removeItem('tempero_admin_token');
     $('dashboard-view').hidden=true;$('top-actions').hidden=true;$('login-view').hidden=false;
@@ -243,7 +270,8 @@
     $('login-form').addEventListener('submit',entrar);
     $('search-orders').addEventListener('input',renderOrders);
     $('filter-status').addEventListener('change',renderOrders);
+    $('password-form').addEventListener('submit',salvarNovaSenha);
     if(token) await carregarPainel();
   });
-  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp};
+  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp,abrirAlterarSenha,fecharAlterarSenha};
 })();

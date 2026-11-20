@@ -16,6 +16,7 @@
     </a>
     <div class="top-actions" id="top-actions" hidden>
       <span class="connection"><i></i> Conectado</span>
+      <button class="button button-ghost" type="button" onclick="AdminPainel.abrirAlterarSenha()">Alterar senha</button>
       <button class="button button-ghost" type="button" onclick="AdminPainel.atualizar()">Atualizar</button>
       <button class="button button-ghost" type="button" onclick="AdminPainel.sair()">Sair</button>
     </div>
@@ -36,9 +37,9 @@
       <form class="login-card" id="login-form">
         <div class="login-symbol">TI</div>
         <h2>Acesso administrativo</h2>
-        <p>Entre com a senha-frase configurada no Google Apps Script.</p>
+        <p>Entre com a senha definida para este painel.</p>
         <label for="admin-password">Senha do painel</label>
-        <input id="admin-password" type="password" autocomplete="current-password" minlength="24" required placeholder="Digite sua senha-frase">
+        <input id="admin-password" type="password" autocomplete="current-password" minlength="16" maxlength="128" required placeholder="Digite sua senha">
         <button class="button button-primary button-full" type="submit" id="login-button">Entrar no painel</button>
         <p class="form-message" id="login-message" role="alert"></p>
         <small>O acesso é protegido por autenticação e a sessão expira automaticamente.</small>
@@ -91,6 +92,18 @@
     </section>
   </div>
 
+  <div class="modal-backdrop password-backdrop" id="password-modal" hidden>
+    <section class="password-card" role="dialog" aria-modal="true" aria-labelledby="password-title">
+      <header class="detail-header"><div><span class="eyebrow">SEGURANÇA</span><h2 id="password-title">Alterar senha</h2></div><button class="icon-button" type="button" aria-label="Fechar" onclick="AdminPainel.fecharAlterarSenha()">×</button></header>
+      <form class="password-form" id="password-form">
+        <p>Escolha uma senha exclusiva para acessar o painel. Ela deve ter de 16 a 128 caracteres e conter pelo menos uma letra e um número.</p>
+        <label for="new-admin-password">Nova senha</label><input id="new-admin-password" type="password" minlength="16" maxlength="128" autocomplete="new-password" required>
+        <label for="confirm-admin-password">Confirme a nova senha</label><input id="confirm-admin-password" type="password" minlength="16" maxlength="128" autocomplete="new-password" required>
+        <p class="form-message" id="password-message" role="alert"></p>
+        <button class="button button-primary button-full" type="submit" id="password-save">Salvar nova senha</button>
+      </form>
+    </section>
+  </div>
   <div class="toast" id="admin-toast" role="status" aria-live="polite"></div>
 
   <script src="js/config/loja.js"></script>

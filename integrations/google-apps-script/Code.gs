@@ -364,6 +364,7 @@ function respostaTexto_(dados) {
 
 var GESTAO = {
   ADMIN_SECRET_PROPERTY: 'TEMPERODA_ILMA_ADMIN_SECRET',
+  ADMIN_SESSION_VERSION_PROPERTY: 'TEMPERODA_ILMA_ADMIN_SESSION_VERSION',
   SHEETS: {
     ORDERS: 'Pedidos',
     ITEMS: 'ItensPedidos',
@@ -505,9 +506,9 @@ function configurarAbasGestao_(planilha) {
 }
 
 /**
- * Defina uma senha-frase administrativa com pelo menos 24 caracteres.
- * Execute manualmente pelo editor do Apps Script, sem enviar a senha pelo chat.
- * Exemplo de chamada: definirSenhaPainelTempero('SUA FRASE LONGA E EXCLUSIVA');
+ * Defina uma senha administrativa manualmente pelo editor do Apps Script.
+ * Recomendado: senha única com pelo menos 16 caracteres, letras e números.
+ * Não compartilhe a senha em chats, logs ou arquivos do repositório.
  */
 /**
  * Gere a senha do painel executando esta função uma única vez no editor.
@@ -519,10 +520,28 @@ function gerarSenhaPainelTempero() {
   Logger.log('SENHA DO PAINEL (copie e guarde): '+senha);
   return senha;
 }
+function validarSenhaAdmin_(senha) {
+  var valor = String(senha || '');
+  if (valor.length < 16 || valor.length > 128) {
+    throw new Error('A senha deve ter entre 16 e 128 caracteres.');
+  }
+  if (!/[A-Za-z]/.test(valor) || !/[0-9]/.test(valor)) {
+    throw new Error('Use pelo menos uma letra e um número na senha.');
+  }
+  return valor;
+}
+
+function invalidarSessoesAdmin_() {
+  var props = PropertiesService.getScriptProperties();
+  var atual = Number(props.getProperty(GESTAO.ADMIN_SESSION_VERSION_PROPERTY) || '1');
+  if (!isFinite(atual) || atual < 1) atual = 1;
+  props.setProperty(GESTAO.ADMIN_SESSION_VERSION_PROPERTY, String(atual + 1));
+}
+
 function definirSenhaPainelTempero(senha) {
-  var valor = String(senha || '').trim();
-  if (valor.length < 24) throw new Error('Use uma senha-frase com pelo menos 24 caracteres.');
+  var valor = validarSenhaAdmin_(senha);
   PropertiesService.getScriptProperties().setProperty(GESTAO.ADMIN_SECRET_PROPERTY,valor);
+  invalidarSessoesAdmin_();
   return 'Senha administrativa configurada com sucesso.';
 }
 
@@ -540,9 +559,15 @@ function doGet(e) {
     return resposta_(params.callback,obterDadosPainelAdmin_());
   }
   if (action === 'adminOperation') {
-    if (!validarSessaoAdmin_(params.token)) return resposta_(params.callback,{ok:false,message:'Sessão inválida ou expirada.'});
-    var op = CacheService.getScriptCache().get('temp-admin-op:'+String(params.operationId || ''));
+    var opId = String(params.operationId || '');
+    var op = /^[A-Fa-f0-9-]{20,50}$/.test(opId)
+      ? CacheService.getScriptCache().get('temp-admin-op:'+opId) : null;
     var resultado = op ? JSON.parse(op) : {ok:false,pending:true,message:'Operação ainda não confirmada pelo servidor.'};
+    // A troca de senha revoga imediatamente o token que iniciou a ação.
+    // Nesse único caso, o identificador aleatório da operação permite confirmar o resultado.
+    if (!validarSessaoAdmin_(params.token) && !(resultado && resultado.passwordChanged === true)) {
+      return resposta_(params.callback,{ok:false,message:'Sessão inválida ou expirada.'});
+    }
     return resposta_(params.callback,resultado);
   }
   return doGetAvaliacoes_(e);
@@ -554,6 +579,7 @@ function doPost(e) {
   if (action === 'registerOrder') return registrarPedidoPublico_(params);
   if (action === 'adminUpdateStatus') return executarOperacaoAdmin_(params,'status');
   if (action === 'adminMarkNotification') return executarOperacaoAdmin_(params,'notification');
+  if (action === 'adminChangePassword') return executarOperacaoAdmin_(params,'password');
   return doPostAvaliacoes_(e);
 }
 
@@ -577,7 +603,8 @@ function autenticarAdmin_(params) {
   var esperado = Utilities.base64Encode(Utilities.computeHmacSha256Signature(nonce,secret));
   if (!compararSeguro_(esperado,proof)) return resposta_(params.callback,{ok:false,message:'Senha incorreta.'});
   var token = Utilities.getUuid().replace(/-/g,'') + Utilities.getUuid().replace(/-/g,'');
-  cache.put('temp-admin-session:'+token,'ok',21600);
+  var versaoSessao = String(PropertiesService.getScriptProperties().getProperty(GESTAO.ADMIN_SESSION_VERSION_PROPERTY) || '1');
+  cache.put('temp-admin-session:'+token,versaoSessao,21600);
   return resposta_(params.callback,{ok:true,token:token,expiresIn:21600});
 }
 
@@ -589,8 +616,9 @@ function compararSeguro_(a,b) {
 }
 
 function validarSessaoAdmin_(token) {
-  return /^[A-Fa-f0-9]{64}$/.test(String(token || '')) &&
-    CacheService.getScriptCache().get('temp-admin-session:'+String(token)) === 'ok';
+  if (!/^[A-Fa-f0-9]{64}$/.test(String(token || ''))) return false;
+  var versaoAtual = String(PropertiesService.getScriptProperties().getProperty(GESTAO.ADMIN_SESSION_VERSION_PROPERTY) || '1');
+  return CacheService.getScriptCache().get('temp-admin-session:'+String(token)) === versaoAtual;
 }
 
 function criarIdUnico_(prefixo) {
@@ -920,7 +948,8 @@ function executarOperacaoAdmin_(params,tipo) {
     var resultado;
     try {
       if(tipo==='status') resultado=atualizarStatusPedidoAdmin_(payload);
-      else resultado=marcarNotificacaoAdmin_(payload);
+      else if(tipo==='notification') resultado=marcarNotificacaoAdmin_(payload);
+      else if(tipo==='password') resultado=alterarSenhaAdmin_(payload);
     } finally {
       if(lock.hasLock()) lock.releaseLock();
     }
@@ -931,6 +960,13 @@ function executarOperacaoAdmin_(params,tipo) {
     try { cache.put(cacheKey,JSON.stringify(falha),300); } catch(ignorar) {}
     return respostaTexto_(falha);
   }
+}
+
+function alterarSenhaAdmin_(payload) {
+  var senha=validarSenhaAdmin_(payload && payload.newPassword);
+  // Trocar a senha também invalida sessões em outros navegadores e dispositivos.
+  definirSenhaPainelTempero(senha);
+  return {ok:true,passwordChanged:true,message:'Senha alterada com sucesso. Faça login novamente com sua nova senha.'};
 }
 
 function atualizarStatusPedidoAdmin_(payload) {
