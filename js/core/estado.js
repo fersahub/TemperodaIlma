@@ -5,6 +5,11 @@ const CONFIG_LOJA = window.TEMPERO_CONFIG.loja;
 const CONFIG = window.TEMPERO_CONFIG.pix;
 
 let currentShippingFee = null;
+let primeiroPedidoFreteGratis = false;
+let primeiroPedidoTelefoneVerificado = '';
+let primeiroPedidoTelefoneConsultado = '';
+let primeiroPedidoVerificacaoStatus = 'idle';
+let primeiroPedidoConsultaId = 0;
         let cartCombos = [];
         let cartAvulsas = [];
         let avulsasOcultasNestePedido = false;
