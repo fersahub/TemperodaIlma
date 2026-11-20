@@ -4,6 +4,7 @@
   let token = sessionStorage.getItem('tempero_admin_token') || '';
   let orders = [];
   let statuses = [];
+  let catalog = [];
   let currentOrder = null;
   let toastTimer = null;
   let carregandoPainel = false;
@@ -67,7 +68,7 @@
         }
         throw new Error(detail || 'O Apps Script não confirmou a disponibilidade do serviço.');
       }
-      if(health.apiVersion!=='2026.11.20.5') {
+      if(health.apiVersion!=='2026.11.20.6') {
         throw new Error('A implantação respondeu com uma versão diferente da esperada ('+String(health.apiVersion||'sem versão')+'). Publique uma nova versão do Code.gs na implantação cujo ID corresponde ao endereço do site.');
       }
       if(!health.adminConfigured) {
@@ -142,9 +143,11 @@
       if(!data || !data.ok) throw new Error(data && data.message || 'Sessão inválida.');
       orders=Array.isArray(data.orders)?data.orders:[];
       statuses=Array.isArray(data.statuses)?data.statuses:[];
+      catalog=Array.isArray(data.catalog)?data.catalog:[];
       $('login-view').hidden=true; $('dashboard-view').hidden=false; $('top-actions').hidden=false;
       $('spreadsheet-link').href=data.spreadsheetUrl || '#';
       renderStats(data.stats || {});
+      renderCatalog();
       renderFilterOptions();
       renderOrders();
       const atualizadoEm = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -159,6 +162,46 @@
       carregandoPainel = false;
     }
   }
+
+  function renderCatalog() {
+    const root=$('catalog-list');
+    if(!root)return;
+    if(!catalog.length){root.innerHTML='<div class="empty-state">O catálogo não foi carregado. Verifique a conexão com o Apps Script.</div>';return;}
+    const grupos=[{tipo:'COMBO',titulo:'Combos'},{tipo:'AVULSA',titulo:'Marmitas avulsas'}];
+    root.innerHTML=grupos.map(grupo=>{
+      const itens=catalog.filter(item=>item.tipo===grupo.tipo);
+      if(!itens.length)return '';
+      return '<section class="catalog-group"><h3>'+escapar(grupo.titulo)+'</h3>'+
+        itens.map(item=>{
+          const resumo=grupo.tipo==='COMBO'?escapar(item.quantidade+' unidades · '+item.categoria+' · '+item.tamanho):
+            escapar(item.categoria+' · '+item.tamanho+' · preço aplicado a todos os sabores desta opção');
+          const id=escapar(item.id),preco=Number(item.preco||0).toFixed(2);
+          return '<article class="catalog-row"><div class="catalog-description"><strong>'+escapar(item.nome)+'</strong><small>'+resumo+'</small></div>'+
+            '<div class="catalog-price"><label for="catalog-price-'+id+'">Preço (R$)</label><input id="catalog-price-'+id+'" type="number" min="0.01" max="9999.99" step="0.01" value="'+preco+'" inputmode="decimal"></div>'+
+            '<label class="catalog-active"><input id="catalog-active-'+id+'" type="checkbox" '+(item.ativo?'checked':'')+'> <span>Ativo</span></label>'+
+            '<button class="button button-primary catalog-save" type="button" data-catalog-id="'+id+'" onclick="AdminPainel.salvarCatalogo(\''+id+'\')">Salvar</button></article>';
+        }).join('')+'</section>';
+    }).join('');
+  }
+  async function salvarCatalogo(id) {
+    const item=catalog.find(entry=>entry.id===id);
+    if(!item)return;
+    const priceInput=$('catalog-price-'+id),activeInput=$('catalog-active-'+id);
+    const price=Number(priceInput&&priceInput.value);
+    if(!Number.isFinite(price)||price<0.01||price>9999.99){toast('Informe um preço entre R$ 0,01 e R$ 9.999,99.');if(priceInput)priceInput.focus();return;}
+    const button=Array.from(document.querySelectorAll('.catalog-save')).find(el=>el.dataset.catalogId===id);
+    if(button){button.disabled=true;button.textContent='Salvando…';}
+    try{
+      const active=Boolean(activeInput&&activeInput.checked);
+      const result=await postarAcao('adminSaveCatalog',{id,price,active});
+      item.preco=price;item.ativo=active;item.atualizadoEm='Agora';
+      renderCatalog();toast(result.message||'Catálogo atualizado.');
+    }catch(error){
+      toast(error.message||'Não foi possível atualizar o catálogo.');
+      if(button){button.disabled=false;button.textContent='Salvar';}
+    }
+  }
+
   function renderStats(stats) {
     $('stat-total').textContent=stats.total || 0;
     $('stat-awaiting').textContent=stats.awaiting || 0;
@@ -362,5 +405,5 @@
     iniciarAtualizacaoAutomatica();
     testarConexao();
   });
-  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp,abrirAlterarSenha,fecharAlterarSenha,testarConexao};
+  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp,abrirAlterarSenha,fecharAlterarSenha,testarConexao,salvarCatalogo};
 })();
