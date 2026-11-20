@@ -34,8 +34,8 @@
       };
       window[callback]=value=>finish(null,value);
       script.onerror=()=>finish(new Error('Não foi possível conectar ao Google Apps Script.'));
-      script.src=API+'?'+query.toString(); script.async=true; document.head.appendChild(script);
       const timer=setTimeout(()=>finish(new Error('O serviço não respondeu. Confira a implantação do Apps Script.')),12000);
+      script.src=API+'?'+query.toString(); script.async=true; document.head.appendChild(script);
     });
   }
   async function gerarProvaHmac(password, nonce) {
