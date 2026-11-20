@@ -535,6 +535,8 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
  assert.match(app,/iniciarCatalogoPublico\(\)/);
  assert.match(avulsas,/TEMPERO_PRECOS_AVULSAS/);
  assert.ok(backend.includes("var catalogoId='avulsa-'+id+'-'+tamanho;"));
+ const inserir=backend.slice(backend.indexOf('function inserirItensCatalogo_'),backend.indexOf('function garantirCatalogo_'));
+ assert.ok(inserir.indexOf('insertCheckboxes()')<inserir.indexOf('.setValues('));
  assert.ok(catalog.includes("prato.id+'|'+size"));
  assert.match(admin,/preços por sabor/);
  assert.match(adminHtml,/Cada sabor possui preço e disponibilidade próprios/);
