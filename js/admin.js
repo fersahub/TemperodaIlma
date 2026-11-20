@@ -68,7 +68,7 @@
         }
         throw new Error(detail || 'O Apps Script não confirmou a disponibilidade do serviço.');
       }
-      if(health.apiVersion!=='2026.11.20.6') {
+      if(health.apiVersion!=='2026.11.20.7') {
         throw new Error('A implantação respondeu com uma versão diferente da esperada ('+String(health.apiVersion||'sem versão')+'). Publique uma nova versão do Code.gs na implantação cujo ID corresponde ao endereço do site.');
       }
       if(!health.adminConfigured) {
@@ -167,21 +167,25 @@
     const root=$('catalog-list');
     if(!root)return;
     if(!catalog.length){root.innerHTML='<div class="empty-state">O catálogo não foi carregado. Verifique a conexão com o Apps Script.</div>';return;}
-    const grupos=[{tipo:'COMBO',titulo:'Combos'},{tipo:'AVULSA',titulo:'Marmitas avulsas'}];
-    root.innerHTML=grupos.map(grupo=>{
-      const itens=catalog.filter(item=>item.tipo===grupo.tipo);
-      if(!itens.length)return '';
-      return '<section class="catalog-group"><h3>'+escapar(grupo.titulo)+'</h3>'+
-        itens.map(item=>{
-          const resumo=grupo.tipo==='COMBO'?escapar(item.quantidade+' unidades · '+item.categoria+' · '+item.tamanho):
-            escapar(item.categoria+' · '+item.tamanho+' · preço aplicado a todos os sabores desta opção');
-          const id=escapar(item.id),preco=Number(item.preco||0).toFixed(2);
-          return '<article class="catalog-row"><div class="catalog-description"><strong>'+escapar(item.nome)+'</strong><small>'+resumo+'</small></div>'+
-            '<div class="catalog-price"><label for="catalog-price-'+id+'">Preço (R$)</label><input id="catalog-price-'+id+'" type="number" min="0.01" max="9999.99" step="0.01" value="'+preco+'" inputmode="decimal"></div>'+
-            '<label class="catalog-active"><input id="catalog-active-'+id+'" type="checkbox" '+(item.ativo?'checked':'')+'> <span>Ativo</span></label>'+
-            '<button class="button button-primary catalog-save" type="button" data-catalog-id="'+id+'" onclick="AdminPainel.salvarCatalogo(\''+id+'\')">Salvar</button></article>';
-        }).join('')+'</section>';
+    const combosCatalogo=catalog.filter(item=>item.tipo==='COMBO');
+    const avulsasCatalogo=catalog.filter(item=>item.tipo==='AVULSA');
+    const renderRows=items=>items.map(item=>{
+      const resumo=item.tipo==='COMBO'
+        ? escapar(item.quantidade+' unidades · '+item.categoria+' · '+item.tamanho)
+        : escapar('Preço exclusivo deste sabor · '+item.categoria+' · '+item.tamanho);
+      const id=escapar(item.id),preco=Number(item.preco||0).toFixed(2);
+      return '<article class="catalog-row"><div class="catalog-description"><strong>'+escapar(item.nome)+'</strong><small>'+resumo+'</small></div>'+
+        '<div class="catalog-price"><label for="catalog-price-'+id+'">Preço (R$)</label><input id="catalog-price-'+id+'" type="number" min="0.01" max="9999.99" step="0.01" value="'+preco+'" inputmode="decimal"></div>'+
+        '<label class="catalog-active"><input id="catalog-active-'+id+'" type="checkbox" '+(item.ativo?'checked':'')+'> <span>Ativo</span></label>'+
+        '<button class="button button-primary catalog-save" type="button" data-catalog-id="'+id+'" onclick="AdminPainel.salvarCatalogo(\''+id+'\')">Salvar</button></article>';
     }).join('');
+    const gruposAvulsas=[{categoria:'Tradicional',tamanho:'350g'},{categoria:'Tradicional',tamanho:'500g'},{categoria:'Linha Fit',tamanho:'300g'}];
+    root.innerHTML='<section class="catalog-group"><h3>Combos</h3>'+renderRows(combosCatalogo)+'</section>'+
+      '<section class="catalog-group"><h3>Marmitas avulsas · preços por sabor</h3>'+
+      gruposAvulsas.map(grupo=>{
+        const itens=avulsasCatalogo.filter(item=>item.categoria===grupo.categoria&&item.tamanho===grupo.tamanho);
+        return itens.length?'<div class="catalog-subgroup"><h4>'+escapar(grupo.categoria+' · '+grupo.tamanho)+'</h4>'+renderRows(itens)+'</div>':'';
+      }).join('')+'</section>';
   }
   async function salvarCatalogo(id) {
     const item=catalog.find(entry=>entry.id===id);
