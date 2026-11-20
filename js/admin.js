@@ -217,8 +217,9 @@
   }
   async function abrirWhatsApp() {
     if(!currentOrder||!currentOrder.lastNotification||!currentOrder.notificationsOptIn)return;
-    const phone=String(currentOrder.phone||'').replace(/\D/g,'');
-    if(phone.length<10){toast('Telefone inválido para abrir o WhatsApp.');return;}
+    let phone=String(currentOrder.phone||'').replace(/\D/g,'');
+    if(phone.length===10 || phone.length===11) phone='55'+phone;
+    if(phone.length<12 || phone.length>13){toast('Telefone inválido para abrir o WhatsApp.');return;}
     const url='https://wa.me/'+phone+'?text='+encodeURIComponent(currentOrder.lastNotification.message);
     window.open(url,'_blank','noopener');
     try {
