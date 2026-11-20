@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v24-first-order-free-shipping';
+const CACHE_NAME = 'tempero-v25-catalog-admin-prices';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
@@ -23,6 +23,7 @@ const CORE_ASSETS = [
   './js/modules/favoritos.js',
   './js/modules/detalhes-prato.js',
   './js/modules/cardapio.js',
+  './js/modules/catalogo.js',
   './js/modules/avulsas.js',
   './js/modules/avaliacoes.js',
   './js/modules/carrinho.js',
