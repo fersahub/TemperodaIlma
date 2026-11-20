@@ -12,5 +12,5 @@
 .api-status[data-state="error"]{color:var(--red)}
 .api-status[data-state="info"]{color:var(--muted)}
 .api-check-button:disabled{opacity:.65;cursor:wait}
-.top-actions[hidden]{display:none!important}
+
 @media(max-width:600px){.api-check{padding:10px}.api-check-heading{align-items:flex-start}}
