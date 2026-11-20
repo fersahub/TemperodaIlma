@@ -79,7 +79,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v19-painel-gestao/);
+ assert.match(read('sw.js'),/tempero-v20-senha-auto-refresh/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -256,7 +256,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v19-painel-gestao'));
+ assert.ok(read('sw.js').includes('tempero-v20-senha-auto-refresh'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -435,7 +435,7 @@ test('modal de avaliação participa da pilha de modais',()=>{
 });
 test('service worker não armazena painel administrativo no cache público',()=>{
  const sw=read('sw.js');
- assert.match(sw,/tempero-v19-painel-gestao/);
+ assert.match(sw,/tempero-v20-senha-auto-refresh/);
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
