@@ -362,6 +362,8 @@ function respostaTexto_(dados) {
  * Mantém a aba Avaliacoes existente e cria as novas abas na mesma planilha.
  * ------------------------------------------------------------------ */
 
+var TEMPERO_API_VERSION = '2026.11.20.4';
+
 var GESTAO = {
   ADMIN_SECRET_PROPERTY: 'TEMPERODA_ILMA_ADMIN_SECRET',
   ADMIN_SESSION_VERSION_PROPERTY: 'TEMPERODA_ILMA_ADMIN_SESSION_VERSION',
@@ -548,29 +550,84 @@ function definirSenhaPainelTempero(senha) {
 function doGet(e) {
   var params = e && e.parameter ? e.parameter : {};
   var action = String(params.action || 'list');
-  if (action === 'orderCheck') {
-    var reviewId = String(params.reviewOrderId || '');
-    return resposta_(params.callback,{ok:true,exists:pedidoExistePorCodigoAvaliacao_(reviewId)});
-  }
-  if (action === 'adminChallenge') return criarDesafioAdmin_(params.callback);
-  if (action === 'adminLogin') return autenticarAdmin_(params);
-  if (action === 'adminData') {
-    if (!validarSessaoAdmin_(params.token)) return resposta_(params.callback,{ok:false,message:'Sessão inválida ou expirada.'});
-    return resposta_(params.callback,obterDadosPainelAdmin_());
-  }
-  if (action === 'adminOperation') {
-    var opId = String(params.operationId || '');
-    var op = /^[A-Fa-f0-9-]{20,50}$/.test(opId)
-      ? CacheService.getScriptCache().get('temp-admin-op:'+opId) : null;
-    var resultado = op ? JSON.parse(op) : {ok:false,pending:true,message:'Operação ainda não confirmada pelo servidor.'};
-    // A troca de senha revoga imediatamente o token que iniciou a ação.
-    // Nesse único caso, o identificador aleatório da operação permite confirmar o resultado.
-    if (!validarSessaoAdmin_(params.token) && !(resultado && resultado.passwordChanged === true)) {
-      return resposta_(params.callback,{ok:false,message:'Sessão inválida ou expirada.'});
+  var callback = params.callback || '';
+  try {
+    if (action === 'health') return resposta_(callback, obterSaudeApi_());
+    if (action === 'orderCheck') {
+      var reviewId = String(params.reviewOrderId || '');
+      return resposta_(callback,{ok:true,exists:pedidoExistePorCodigoAvaliacao_(reviewId)});
     }
-    return resposta_(params.callback,resultado);
+    if (action === 'adminChallenge') return criarDesafioAdmin_(callback);
+    if (action === 'adminLogin') return autenticarAdmin_(params);
+    if (action === 'adminData') {
+      if (!validarSessaoAdmin_(params.token)) {
+        return resposta_(callback,{ok:false,code:'SESSION_INVALID',message:'Sessão inválida ou expirada.'});
+      }
+      return resposta_(callback,obterDadosPainelAdmin_());
+    }
+    if (action === 'adminOperation') {
+      var opId = String(params.operationId || '');
+      var op = /^[A-Fa-f0-9-]{20,50}$/.test(opId)
+        ? CacheService.getScriptCache().get('temp-admin-op:'+opId) : null;
+      var resultado = op ? JSON.parse(op) : {ok:false,pending:true,message:'Operação ainda não confirmada pelo servidor.'};
+      // A troca de senha revoga imediatamente o token que iniciou a ação.
+      // Nesse único caso, o identificador aleatório da operação permite confirmar o resultado.
+      if (!validarSessaoAdmin_(params.token) && !(resultado && resultado.passwordChanged === true)) {
+        return resposta_(callback,{ok:false,code:'SESSION_INVALID',message:'Sessão inválida ou expirada.'});
+      }
+      return resposta_(callback,resultado);
+    }
+    return doGetAvaliacoes_(e);
+  } catch (erro) {
+    return resposta_(callback,{
+      ok:false,
+      code:'BACKEND_ERROR',
+      message:mensagemPublicaBackend_(erro)
+    });
   }
-  return doGetAvaliacoes_(e);
+}
+
+function obterSaudeApi_() {
+  var props = PropertiesService.getScriptProperties();
+  var spreadsheetId = props.getProperty(CONFIG.SPREADSHEET_PROPERTY) || '';
+  var adminSecret = props.getProperty(GESTAO.ADMIN_SECRET_PROPERTY) || '';
+  var requiredSheets = Object.keys(GESTAO.SHEETS).map(function(key) {
+    return GESTAO.SHEETS[key];
+  });
+  var missingSheets = [];
+  var spreadsheetAccessible = false;
+  var spreadsheetError = '';
+
+  if (spreadsheetId) {
+    try {
+      var planilha = SpreadsheetApp.openById(spreadsheetId);
+      spreadsheetAccessible = true;
+      missingSheets = requiredSheets.filter(function(name) {
+        return !planilha.getSheetByName(name);
+      });
+    } catch (erro) {
+      spreadsheetError = 'O Apps Script não conseguiu abrir a planilha configurada. Confira a autorização da conta proprietária.';
+    }
+  }
+
+  return {
+    ok:true,
+    service:'Tempero da Ilma',
+    apiVersion:TEMPERO_API_VERSION,
+    adminConfigured:Boolean(adminSecret),
+    spreadsheetConfigured:Boolean(spreadsheetId),
+    spreadsheetAccessible:spreadsheetAccessible,
+    missingSheets:missingSheets,
+    spreadsheetError:spreadsheetError
+  };
+}
+
+function mensagemPublicaBackend_(erro) {
+  var mensagem = String(erro && erro.message || '').trim();
+  if (/permission|authorization|permissão|autorização|access denied/i.test(mensagem)) {
+    return 'O Apps Script não tem autorização para acessar um recurso necessário. Confira a conta proprietária e as permissões da planilha.';
+  }
+  return mensagem.slice(0,220) || 'O Apps Script encontrou um erro interno ao processar a solicitação.';
 }
 
 function doPost(e) {
@@ -584,9 +641,16 @@ function doPost(e) {
 }
 
 function criarDesafioAdmin_(callback) {
+  var secret = PropertiesService.getScriptProperties().getProperty(GESTAO.ADMIN_SECRET_PROPERTY);
+  if (!secret) {
+    return resposta_(callback,{
+      ok:false,code:'ADMIN_NOT_CONFIGURED',
+      message:'A senha administrativa ainda não foi configurada neste projeto do Apps Script.'
+    });
+  }
   var nonce = Utilities.getUuid().replace(/-/g,'') + Utilities.getUuid().replace(/-/g,'');
   CacheService.getScriptCache().put('temp-admin-nonce:'+nonce,'1',120);
-  return resposta_(callback,{ok:true,nonce:nonce});
+  return resposta_(callback,{ok:true,nonce:nonce,apiVersion:TEMPERO_API_VERSION});
 }
 
 function autenticarAdmin_(params) {
@@ -595,13 +659,13 @@ function autenticarAdmin_(params) {
   var cache = CacheService.getScriptCache();
   var challengeKey = 'temp-admin-nonce:'+nonce;
   if (!/^[A-Fa-f0-9]{64}$/.test(nonce) || cache.get(challengeKey) !== '1') {
-    return resposta_(params.callback,{ok:false,message:'Desafio de autenticação expirado. Tente novamente.'});
+    return resposta_(params.callback,{ok:false,code:'CHALLENGE_EXPIRED',message:'Desafio de autenticação expirado. Tente novamente.'});
   }
   cache.remove(challengeKey);
   var secret = PropertiesService.getScriptProperties().getProperty(GESTAO.ADMIN_SECRET_PROPERTY);
-  if (!secret) return resposta_(params.callback,{ok:false,message:'A senha do painel ainda não foi configurada no Apps Script.'});
+  if (!secret) return resposta_(params.callback,{ok:false,code:'ADMIN_NOT_CONFIGURED',message:'A senha do painel ainda não foi configurada no Apps Script.'});
   var esperado = Utilities.base64Encode(Utilities.computeHmacSha256Signature(nonce,secret));
-  if (!compararSeguro_(esperado,proof)) return resposta_(params.callback,{ok:false,message:'Senha incorreta.'});
+  if (!compararSeguro_(esperado,proof)) return resposta_(params.callback,{ok:false,code:'INVALID_CREDENTIALS',message:'Senha incorreta.'});
   var token = Utilities.getUuid().replace(/-/g,'') + Utilities.getUuid().replace(/-/g,'');
   var versaoSessao = String(PropertiesService.getScriptProperties().getProperty(GESTAO.ADMIN_SESSION_VERSION_PROPERTY) || '1');
   cache.put('temp-admin-session:'+token,versaoSessao,21600);
