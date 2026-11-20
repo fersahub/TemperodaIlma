@@ -187,7 +187,7 @@ function openCheckoutModal() {
             const troco = document.getElementById('cust-troco').value.trim();
             const obs = document.getElementById('cust-obs').value.trim();
 
-            const telefoneBeneficio = phone.replace(/\\D/g, '');
+            const telefoneBeneficio = phone.replace(/\D/g, '');
             if (telefoneBeneficio.length >= 10 && telefoneBeneficio.length <= 13) {
                 if (primeiroPedidoVerificacaoStatus === 'checking') {
                     mostrarToast('Aguarde a verificação do benefício de primeira compra e tente novamente.');
