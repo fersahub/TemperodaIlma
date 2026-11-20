@@ -187,6 +187,19 @@ function openCheckoutModal() {
             const troco = document.getElementById('cust-troco').value.trim();
             const obs = document.getElementById('cust-obs').value.trim();
 
+            const telefoneBeneficio = phone.replace(/\\D/g, '');
+            if (telefoneBeneficio.length >= 10 && telefoneBeneficio.length <= 13) {
+                if (primeiroPedidoVerificacaoStatus === 'checking') {
+                    mostrarToast('Aguarde a verificação do benefício de primeira compra e tente novamente.');
+                    return;
+                }
+                if (primeiroPedidoTelefoneVerificado !== telefoneBeneficio && primeiroPedidoVerificacaoStatus !== 'error') {
+                    verificarFreteGratisPrimeiroPedido();
+                    mostrarToast('Estamos verificando o frete grátis do primeiro pedido. Clique novamente em enviar após a confirmação.');
+                    return;
+                }
+            }
+
             verificarRuaComCep();
             limparTodosErros();
             const erros = [];
@@ -307,5 +320,5 @@ function openCheckoutModal() {
 
             const fullText = lines.join('\n');
             const whatsappUrl = `https://wa.me/${CONFIG_LOJA.whatsappNumero}?text=${encodeURIComponent(fullText)}`;
-            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice, fullText, reviewOrderId, reviewFlavors, orderId, deliveryDate: dataEntregaSabado(), notificationsOptIn, customerData: { name, phone, cep, bairro, rua, numero, comp } });
+            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice, fullText, reviewOrderId, reviewFlavors, orderId, deliveryDate: dataEntregaSabado(), notificationsOptIn, firstOrderFreeShipping: primeiroPedidoFreteGratisAtivo(), customerData: { name, phone, cep, bairro, rua, numero, comp } });
         }
