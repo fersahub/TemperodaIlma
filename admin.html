@@ -39,7 +39,7 @@
         <h2>Acesso administrativo</h2>
         <p>Entre com a senha definida para este painel.</p>
         <label for="admin-password">Senha do painel</label>
-        <input id="admin-password" type="password" autocomplete="current-password" minlength="16" maxlength="128" required placeholder="Digite sua senha">
+        <input id="admin-password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required placeholder="Digite sua senha">
         <button class="button button-primary button-full" type="submit" id="login-button">Entrar no painel</button>
         <p class="form-message" id="login-message" role="alert"></p>
         <small>O acesso é protegido por autenticação e a sessão expira automaticamente.</small>
@@ -51,7 +51,7 @@
         <div>
           <span class="eyebrow">VISÃO GERAL</span>
           <h1>Gestão de pedidos</h1>
-          <p>Os registros vêm da planilha central do Tempero da Ilma.</p>
+          <p>Os registros vêm da planilha central do Tempero da Ilma. Atualização automática a cada minuto · Última atualização: <strong id="last-updated">—</strong></p>
         </div>
         <a class="sheet-link" id="spreadsheet-link" href="#" target="_blank" rel="noopener">Abrir planilha ↗</a>
       </div>
@@ -96,9 +96,9 @@
     <section class="password-card" role="dialog" aria-modal="true" aria-labelledby="password-title">
       <header class="detail-header"><div><span class="eyebrow">SEGURANÇA</span><h2 id="password-title">Alterar senha</h2></div><button class="icon-button" type="button" aria-label="Fechar" onclick="AdminPainel.fecharAlterarSenha()">×</button></header>
       <form class="password-form" id="password-form">
-        <p>Escolha uma senha exclusiva para acessar o painel. Ela deve ter de 16 a 128 caracteres e conter pelo menos uma letra e um número.</p>
-        <label for="new-admin-password">Nova senha</label><input id="new-admin-password" type="password" minlength="16" maxlength="128" autocomplete="new-password" required>
-        <label for="confirm-admin-password">Confirme a nova senha</label><input id="confirm-admin-password" type="password" minlength="16" maxlength="128" autocomplete="new-password" required>
+        <p>Escolha uma senha exclusiva para acessar o painel. Ela deve ter de 8 a 128 caracteres e conter pelo menos uma letra e um número.</p>
+        <label for="new-admin-password">Nova senha</label><input id="new-admin-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required>
+        <label for="confirm-admin-password">Confirme a nova senha</label><input id="confirm-admin-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required>
         <p class="form-message" id="password-message" role="alert"></p>
         <button class="button button-primary button-full" type="submit" id="password-save">Salvar nova senha</button>
       </form>
