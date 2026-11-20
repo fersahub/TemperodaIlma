@@ -354,18 +354,18 @@ test('painel administrativo: arquivos, autenticação e sessão não expõem seg
  assert.match(html,/id="dashboard-view"/);
  assert.match(js,/adminChallenge/);
  assert.match(js,/adminLogin/);
- assert.match(js,/crypto\\.subtle/);
+ assert.match(js,/crypto\.subtle/);
  assert.match(js,/adminUpdateStatus/);
  assert.match(js,/mode:'no-cors'/);
  assert.doesNotMatch(js,/TEMPERODA_ILMA_ADMIN_SECRET|definirSenhaPainelTempero/);
- assert.match(backend,/function definirSenhaPainelTempero\\(senha\\)/);
- assert.match(backend,/Utilities\\.computeHmacSha256Signature/);
- assert.match(css,/\\.orders-panel/);
+ assert.match(backend,/function definirSenhaPainelTempero\(senha\)/);
+ assert.match(backend,/Utilities\.computeHmacSha256Signature/);
+ assert.match(css,/\.orders-panel/);
 });
 test('Apps Script centraliza pedidos sem substituir a planilha de avaliações',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
  for(const sheet of ['Pedidos','ItensPedidos','Clientes','HistoricoPedidos','Notificacoes','Configuracoes','Fretes','Produtos','Avaliacoes']) assert.ok(backend.includes(sheet));
- assert.match(backend,/function configurarSistemaAvaliacoes\\(\\)/);
+ assert.match(backend,/function configurarSistemaAvaliacoes\(\)/);
  assert.match(backend,/configurarSistemaAvaliacoesBase_/);
  assert.match(backend,/function registrarPedidoPublico_/);
  assert.match(backend,/function obterDadosPainelAdmin_/);
@@ -374,12 +374,12 @@ test('Apps Script centraliza pedidos sem substituir a planilha de avaliações',
 });
 test('pedido central: registro só começa após confirmação e valores são conferidos no servidor',()=>{
  const pedidos=read('js/modules/pedidos.js'),checkout=read('js/modules/checkout.js'),backend=read('integrations/google-apps-script/Code.gs');
- assert.match(pedidos,/function registrarPedidoCentralizado\\(pedido\\)/);
+ assert.match(pedidos,/function registrarPedidoCentralizado\(pedido\)/);
  assert.match(pedidos,/action: 'registerOrder'/);
  assert.match(pedidos,/orderCheck/);
  assert.match(checkout,/const orderId =/);
- assert.doesNotMatch(checkout,/salvarUltimoCliente\\(\\{ name, phone/);
- assert.match(pedidos,/salvarUltimoCliente\\(dp\\.customerData\\)/);
+ assert.doesNotMatch(checkout,/salvarUltimoCliente\(\{ name, phone/);
+ assert.match(pedidos,/salvarUltimoCliente\(dp\.customerData\)/);
  assert.match(backend,/taxaEntregaBairro_/);
  assert.match(backend,/COMBOS_PERMITIDOS_/);
  assert.match(backend,/Os valores do pedido não conferem/);
@@ -394,36 +394,36 @@ test('notificações de status são preparadas e envio manual não é apresentad
 });
 test('CEP: respostas antigas são descartadas e o frete espera confirmação do bairro',()=>{
  const horario=read('js/modules/horarios.js'),endereco=read('js/services/endereco.js'),estado=read('js/core/estado.js');
- assert.match(horario,/const consultaId = \\+\\+cepConsultaId/);
- assert.match(horario,/consultaId !== cepConsultaId \\|\\| cepAtual !== cep/);
+ assert.match(horario,/const consultaId = \+\+cepConsultaId/);
+ assert.match(horario,/consultaId !== cepConsultaId \|\| cepAtual !== cep/);
  assert.match(horario,/bairroPendenteConfirmacao = true/);
  assert.match(horario,/Confirme o bairro identificado pelo CEP antes de calcular o frete/);
- assert.match(endereco,/cepConsultaController\\.abort\\(\\)/);
- assert.match(estado,/else \\{\\s*calcularFreteEBuscarBairro\\(\\);/);
+ assert.match(endereco,/cepConsultaController\.abort\(\)/);
+ assert.match(estado,/else \{\s*calcularFreteEBuscarBairro\(\);/);
 });
 test('histórico local expira e só é persistido após confirmar a abertura da comanda',()=>{
  const checkout=read('js/modules/checkout.js'),pedidos=read('js/modules/pedidos.js'),experience=read('js/modules/experiencia.js');
- assert.match(checkout,/expiresAt: Date\\.now\\(\\) \\+/);
- assert.match(checkout,/Date\\.now\\(\\) - salvoEm > \\(CONFIG_LOJA\\.historyDays \\|\\| 60\\)/);
- assert.match(pedidos,/if \\(dp && dp\\.customerData\\) salvarUltimoCliente/);
- assert.match(experience,/Date\\.now\\(\\) - salvoEm > \\(CONFIG_LOJA\\.historyDays \\|\\| 60\\)/);
+ assert.match(checkout,/expiresAt: Date\.now\(\) \+/);
+ assert.match(checkout,/Date\.now\(\) - salvoEm > \(CONFIG_LOJA\.historyDays \|\| 60\)/);
+ assert.match(pedidos,/if \(dp && dp\.customerData\) salvarUltimoCliente/);
+ assert.match(experience,/Date\.now\(\) - salvoEm > \(CONFIG_LOJA\.historyDays \|\| 60\)/);
 });
 test('horários usam o fuso configurado da operação',()=>{
  const config=read('js/config/loja.js'),horario=read('js/modules/horarios.js'),operacao=read('js/modules/operacao.js');
- assert.match(config,/timeZone:'America\\/Bahia'/);
- assert.match(horario,/new Intl\\.DateTimeFormat\\('en-US',[\\s\\S]*timeZone/);
- assert.match(horario,/obterDataHoraLoja\\(\\)/);
- assert.match(operacao,/obterDataHoraLoja\\(\\)\\.weekday/);
+ assert.match(config,/timeZone:'America\/Bahia'/);
+ assert.match(horario,/new Intl\.DateTimeFormat\('en-US',[\s\S]*timeZone/);
+ assert.match(horario,/obterDataHoraLoja\(\)/);
+ assert.match(operacao,/obterDataHoraLoja\(\)\.weekday/);
 });
 test('modal de avaliação participa da pilha de modais',()=>{
  const interfaceJs=read('js/modules/interface.js');
- assert.match(interfaceJs,/MODAIS_ORDEM = \\['avaliacao-modal'/);
+ assert.match(interfaceJs,/MODAIS_ORDEM = \['avaliacao-modal'/);
  assert.match(interfaceJs,/id === 'avaliacao-modal'/);
 });
 test('service worker não armazena painel administrativo no cache público',()=>{
  const sw=read('sw.js');
  assert.match(sw,/tempero-v19-painel-gestao/);
- assert.match(sw,/const paginaAdmin = url\\.pathname\\.endsWith\\('\\/admin\\.html'\\)/);
- assert.match(sw,/response\\.ok && !paginaAdmin/);
- assert.match(sw,/if \\(paginaAdmin\\) return new Response/);
+ assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
+ assert.match(sw,/response\.ok && !paginaAdmin/);
+ assert.match(sw,/if \(paginaAdmin\) return new Response/);
 });
