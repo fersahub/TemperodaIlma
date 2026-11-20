@@ -186,7 +186,7 @@ A planilha existente é preservada e recebe estas abas adicionais:
 4. Na primeira ativação, execute gerarSenhaPainelTempero() uma vez. Copie a senha no Registro de execução e guarde-a em um gerenciador de senhas. Não execute essa função novamente quando desejar apenas atualizar o código: ela substitui a senha existente.
 5. Em **Implantar → Gerenciar implantações**, edite a implantação do App da Web e publique uma **nova versão**. Mantenha a execução como proprietário e o acesso público necessário ao cardápio.
 6. Abra https://fersahub.github.io/TemperodaIlma/admin.html e entre com a senha inicial gerada.
-7. Depois de entrar, use **Alterar senha** no topo do painel para cadastrar sua própria senha. Ela deve ter de 16 a 128 caracteres e conter letras e números. A operação encerra também as sessões existentes em outros navegadores e dispositivos.
+7. Depois de entrar, use **Alterar senha** no topo do painel para cadastrar sua própria senha. Ela deve ter de 8 a 128 caracteres e conter letras e números. A operação encerra também as sessões existentes em outros navegadores e dispositivos.
 8. Para futuras atualizações, substitua o Code.gs e publique uma nova versão do App da Web, mas não execute gerarSenhaPainelTempero() novamente, a menos que queira redefinir a senha.
 9. Faça um pedido de teste, confirme a abertura da comanda no WhatsApp, confira se entrou como Aguardando confirmação, altere o status no painel e teste a mensagem preparada.
 
@@ -198,6 +198,6 @@ As avaliações exigem consentimento explícito e um pedido registrado com statu
 
 ### Segurança e limites
 
-A senha administrativa fica nas Script Properties do Apps Script e não é enviada ao GitHub Pages. O login usa desafio HMAC e sessões temporárias. A alteração de senha é feita dentro do painel, após autenticação, e invalida todas as sessões anteriores. A planilha deve permanecer privada e a conta Google que administra o Apps Script deve ser protegida. A página do painel não é armazenada em cache offline. O serviço está sujeito às cotas de uso do Google.
+A senha administrativa fica nas Script Properties do Apps Script e não é enviada ao GitHub Pages. O login usa desafio HMAC e sessões temporárias. A alteração de senha é feita dentro do painel, após autenticação, com mínimo de 8 caracteres e invalida todas as sessões anteriores. A lista de pedidos é atualizada automaticamente a cada 60 segundos, sem recarregar a página. A planilha deve permanecer privada e a conta Google que administra o Apps Script deve ser protegida. A página do painel não é armazenada em cache offline. A atualização automática consulta os dados uma vez por minuto enquanto o painel está aberto e não há modais em uso. O serviço está sujeito às cotas de uso do Google.
 
 O painel inicial concentra os pedidos e as notificações manuais. A edição de preços, catálogo e taxas diretamente pelo painel fica para uma etapa futura; o backend mantém validações independentes para não aceitar valores enviados pelo navegador sem conferência.
