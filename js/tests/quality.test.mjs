@@ -362,6 +362,8 @@ test('painel administrativo: arquivos, autenticação e sessão não expõem seg
  assert.match(html,/js\/config\/loja\.js\?v=20261120-2/);
  assert.match(backend,/function obterSaudeApi_\(\)/);
  assert.match(backend,/action === 'health'/);
+ assert.match(backend,/function verificarConfiguracaoPainelTempero\(\)/);
+ assert.match(backend,/apiVersion:TEMPERO_API_VERSION/);
  assert.match(js,/não reconhece a autenticação administrativa/);
  assert.match(css,/\.top-actions\[hidden\]/);
  assert.match(js,/adminLogin/);
