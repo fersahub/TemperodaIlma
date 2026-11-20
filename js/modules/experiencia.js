@@ -185,7 +185,13 @@
             let dados = null;
             try {
                 const historico = JSON.parse(localStorage.getItem('tempero_ilma_historico_pedido') || 'null');
-                const salvoEm = Number(historico && historico.savedAt || 0);
+                let salvoEm = Number(historico && historico.savedAt || 0);
+                if (historico && !salvoEm) {
+                    salvoEm = Date.now();
+                    historico.savedAt = salvoEm;
+                    historico.expiresAt = salvoEm + (CONFIG_LOJA.historyDays || 60) * 86400000;
+                    localStorage.setItem('tempero_ilma_historico_pedido', JSON.stringify(historico));
+                }
                 if (salvoEm && Date.now() - salvoEm > (CONFIG_LOJA.historyDays || 60) * 86400000) {
                     localStorage.removeItem('tempero_ilma_historico_pedido');
                     mostrarToast('Os dados salvos expiraram por segurança.');
