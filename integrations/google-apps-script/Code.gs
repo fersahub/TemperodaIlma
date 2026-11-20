@@ -509,6 +509,16 @@ function configurarAbasGestao_(planilha) {
  * Execute manualmente pelo editor do Apps Script, sem enviar a senha pelo chat.
  * Exemplo de chamada: definirSenhaPainelTempero('SUA FRASE LONGA E EXCLUSIVA');
  */
+/**
+ * Gere a senha do painel executando esta função uma única vez no editor.
+ * Copie o valor exibido no Registro de execução e guarde-o em local seguro.
+ */
+function gerarSenhaPainelTempero() {
+  var senha=Utilities.getUuid().replace(/-/g,'')+Utilities.getUuid().replace(/-/g,'')+Utilities.getUuid().replace(/-/g,'');
+  definirSenhaPainelTempero(senha);
+  Logger.log('SENHA DO PAINEL (copie e guarde): '+senha);
+  return senha;
+}
 function definirSenhaPainelTempero(senha) {
   var valor = String(senha || '').trim();
   if (valor.length < 24) throw new Error('Use uma senha-frase com pelo menos 24 caracteres.');
