@@ -132,7 +132,7 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - O carrinho, resumo, comanda de WhatsApp e valor Pix somam combos e avulsas.
 - O frete é calculado conforme a taxa do bairro; combos de 10 não concedem frete grátis automaticamente.
 - O primeiro pedido pode receber frete grátis após validação do telefone na planilha central. A elegibilidade considera pedidos já registrados nas abas **Pedidos** e **Clientes**; cada telefone utiliza o benefício uma única vez. O benefício é consumido quando o pedido entra na planilha, mesmo que depois seja cancelado. Pedidos históricos que nunca foram importados para a planilha central não podem ser reconhecidos automaticamente.
-- Os preços unitários iniciais são derivados do valor por unidade dos combos de 5 correspondentes: Tradicional 350g, Tradicional 500g e Fit 300g. Esses valores devem ser revisados comercialmente antes de divulgar a venda avulsa.
+- Na migração, cada sabor recebe inicialmente o preço e a disponibilidade do antigo perfil correspondente (Tradicional 350g, Tradicional 500g ou Fit 300g). Esses valores são replicados como ponto de partida, mas cada registro passa a ser independente e pode ser alterado sem afetar os outros.
 - Carrinhos antigos salvos no navegador (formato de array, contendo apenas combos) continuam sendo restaurados.
 - O carrinho de montagem permanece no navegador; após a confirmação do cliente, o pedido é registrado na planilha central.
 
@@ -201,7 +201,7 @@ As avaliações exigem consentimento explícito e um pedido registrado com statu
 
 A senha administrativa fica nas Script Properties do Apps Script e não é enviada ao GitHub Pages. O login usa desafio HMAC e sessões temporárias. A alteração de senha é feita dentro do painel, após autenticação, com mínimo de 8 caracteres e invalida todas as sessões anteriores. A lista de pedidos é atualizada automaticamente a cada 60 segundos, sem recarregar a página. A planilha deve permanecer privada e a conta Google que administra o Apps Script deve ser protegida. A página do painel não é armazenada em cache offline. O login agora diferencia erros de conexão de uma implantação antiga do Apps Script. A atualização automática consulta os dados uma vez por minuto enquanto o painel está aberto e não há modais em uso. O serviço está sujeito às cotas de uso do Google.
 
-O painel administrativo agora também possui o módulo **Gestão do cardápio**, que permite alterar os preços dos seis combos e das três opções de marmita avulsa (Tradicional 350g, Tradicional 500g e Linha Fit 300g), além de ativar ou desativar cada opção. O backend valida os preços consultando a aba privada **Catalogo** antes de registrar um pedido. Os nomes, descrições, fotos, categorias, tamanhos e a criação de novas opções continuam definidos no código e exigem alteração técnica. A edição dos valores não altera pedidos que já foram gravados.
+O painel administrativo também possui o módulo **Gestão do cardápio**, que permite alterar os preços dos seis combos e de cada marmita avulsa por sabor e tamanho. Cada sabor Tradicional possui controles independentes para 350g e 500g; cada sabor Fit possui controle próprio para 300g. O backend valida o preço e a disponibilidade exatos do sabor escolhido antes de registrar um pedido. A edição dos valores não altera pedidos já gravados.
 
 
 ## Gestão do cardápio — preços e disponibilidade
@@ -211,7 +211,7 @@ A aba **Catalogo** é criada automaticamente na planilha central quando a nova v
 ### Itens controlados pelo painel
 
 - **Combos:** 5 e 10 marmitas Tradicionais de 350g; 5 e 10 marmitas Tradicionais de 500g; 5 e 10 marmitas Fit de 300g.
-- **Avulsas:** Tradicional 350g; Tradicional 500g; Fit 300g. Cada preço de avulsa é compartilhado por todos os sabores compatíveis com aquela linha e tamanho.
+- **Avulsas:** cada sabor possui registro próprio. Sabores Tradicionais têm registros separados de 350g e 500g; sabores Fit têm registro de 300g. Alterar o preço ou desativar um sabor/tamanho não altera os demais.
 - Cada item possui preço e situação Ativo/Inativo. É obrigatório manter pelo menos um combo ativo.
 
 ### Usar o módulo
@@ -236,7 +236,7 @@ A aba **Catalogo** é criada automaticamente na planilha central quando a nova v
 - O preço de cada pedido é gravado como fotografia histórica em `Pedidos` e `ItensPedidos`. Alterações posteriores no catálogo não recalculam pedidos antigos.
 - Quando uma opção é desativada, deixa de aparecer para novas compras; itens já registrados permanecem nos registros históricos.
 - Se a consulta ao catálogo falhar, o site pode exibir o último catálogo salvo por até 24 horas, mas bloqueia o envio de novos pedidos até conseguir confirmar os preços atuais.
-- Enquanto o Apps Script antigo responder apenas `Ação inválida` para o catálogo, o site mantém o comportamento estático anterior. O painel exige a versão `2026.11.20.6` para liberar a nova área.
+- Enquanto o Apps Script antigo responder apenas `Ação inválida` para o catálogo, o site mantém o comportamento estático anterior. O painel exige a versão `2026.11.20.7` para liberar a nova área.
 
 ### Limites desta etapa
 

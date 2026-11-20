@@ -11,7 +11,7 @@ function data(p){const window={TEMPERO_DADOS:{}};runInNewContext(read(p),{window
 
 test('Apps Script expõe a versão atualizada para o benefício de primeiro pedido',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
- assert.match(backend,/TEMPERO_API_VERSION = '2026.11.20.6'/);
+ assert.match(backend,/TEMPERO_API_VERSION = '2026.11.20.7'/);
 });
 test('combos: IDs, preços, quantidades e imagens',()=>{
  const xs=data('js/data/combos.js').combos;assert.ok(xs.length>0);assert.equal(new Set(xs.map(x=>x.id)).size,xs.length);
@@ -83,7 +83,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v25-catalog-admin-prices/);
+ assert.match(read('sw.js'),/tempero-v26-catalog-price-by-flavor/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -192,7 +192,7 @@ test('mini quiz apresenta quatro perguntas e montagem sequencial dos combos',()=
  assert.match(carrinho,/Montagem interrompida/);
 });
 
-test('marmitas avulsas exigem combo e usam o preço unitário de referência dos combos de 5',()=>{
+test('marmitas avulsas exigem combo e mantêm fallback de compatibilidade sem catálogo remoto',()=>{
  const combos=data('js/data/combos.js').combos;
  const availableFlavors=data('js/data/pratos.js').pratos;
  const sandbox={combos,availableFlavors,cartCombos:[],cartAvulsas:[]};
@@ -209,6 +209,21 @@ test('marmitas avulsas exigem combo e usam o preço unitário de referência dos
  assert.equal(sandbox.criarItemAvulso('f12','350g',1),null);
  assert.equal(sandbox.criarItemAvulso('f24','350g',1),null);
  assert.equal(sandbox.criarItemAvulso('f1','350g',0),null);
+});
+
+test('marmitas avulsas usam preço e disponibilidade independentes por sabor e tamanho',()=>{
+ const combos=data('js/data/combos.js').combos,availableFlavors=data('js/data/pratos.js').pratos;
+ const window={TEMPERO_CATALOGO_CARREGADO:true,TEMPERO_PRECOS_AVULSAS:{
+  'f1|350g':{price:21.5,active:true},'f2|350g':{price:23,active:true},
+  'f1|500g':{price:29,active:true},'f12|300g':{price:31,active:false}
+ }};
+ const sandbox={window,combos,availableFlavors,cartCombos:[{comboId:'combo-5-350g'}],cartAvulsas:[]};
+ runInNewContext(read('js/modules/avulsas.js'),sandbox);
+ assert.equal(sandbox.criarItemAvulso('f1','350g',1).unitPrice,21.5);
+ assert.equal(sandbox.criarItemAvulso('f2','350g',1).unitPrice,23);
+ assert.equal(sandbox.criarItemAvulso('f1','500g',1).unitPrice,29);
+ assert.equal(sandbox.criarItemAvulso('f12','300g',1),null);
+ assert.deepEqual(Array.from(sandbox.tamanhosDisponiveisAvulsa(availableFlavors.find(x=>x.id==='f1'))),['350g','500g']);
 });
 
 test('carrinho misto soma combos e avulsas e impede remover o último combo',()=>{
@@ -260,7 +275,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v25-catalog-admin-prices'));
+ assert.ok(read('sw.js').includes('tempero-v26-catalog-price-by-flavor'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -484,7 +499,7 @@ test('modal de avaliação participa da pilha de modais',()=>{
 });
 test('service worker não armazena painel administrativo no cache público',()=>{
  const sw=read('sw.js');
- assert.match(sw,/tempero-v25-catalog-admin-prices/);
+ assert.match(sw,/tempero-v26-catalog-price-by-flavor/);
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
@@ -519,5 +534,11 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
  assert.match(html,/js\/modules\/catalogo\.js/);
  assert.match(app,/iniciarCatalogoPublico\(\)/);
  assert.match(avulsas,/TEMPERO_PRECOS_AVULSAS/);
+ assert.ok(backend.includes("var catalogoId='avulsa-'+id+'-'+tamanho;"));
+ const inserir=backend.slice(backend.indexOf('function inserirItensCatalogo_'),backend.indexOf('function garantirCatalogo_'));
+ assert.ok(inserir.indexOf('insertCheckboxes()')<inserir.indexOf('.setValues('));
+ assert.ok(catalog.includes("prato.id+'|'+size"));
+ assert.match(admin,/preços por sabor/);
+ assert.match(adminHtml,/Cada sabor possui preço e disponibilidade próprios/);
  assert.match(read('js/modules/checkout.js'),/TEMPERO_CATALOGO_STATUS === 'cached'/);
 });

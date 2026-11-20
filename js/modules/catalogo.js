@@ -1,15 +1,16 @@
 /* Carrega os preços e a disponibilidade oficiais do catálogo central. */
 (function(){
   const API=window.TEMPERO_CONFIG&&window.TEMPERO_CONFIG.avaliacoes&&window.TEMPERO_CONFIG.avaliacoes.apiUrl;
-  const CACHE_KEY='tempero_catalogo_comercial_v1';
+  const CACHE_KEY='tempero_catalogo_comercial_v2';
   const REQUIRED_COMBOS=['combo-5-350g','combo-10-350g','combo-5-500g','combo-10-500g','combo-5-300g-fit','combo-10-300g-fit'];
-  const REQUIRED_AVULSAS=[
-    {id:'avulsa-tradicional-350g',key:'Tradicional|350g'},
-    {id:'avulsa-tradicional-500g',key:'Tradicional|500g'},
-    {id:'avulsa-fit-300g',key:'Linha Fit|300g'}
-  ];
+  const pratos=Array.isArray(window.TEMPERO_DADOS&&window.TEMPERO_DADOS.pratos)?window.TEMPERO_DADOS.pratos:[];
+  const REQUIRED_AVULSAS=pratos.filter(prato=>prato&&!prato.emBreve&&prato.disponivel!==false&&['Tradicional','Linha Fit'].includes(prato.tag))
+    .flatMap(prato=>(prato.tag==='Linha Fit'?['300g']:['350g','500g']).map(size=>({
+      id:'avulsa-'+prato.id+'-'+size,flavorId:prato.id,size,key:prato.id+'|'+size
+    })));
   window.TEMPERO_CATALOGO_STATUS='loading';
   window.TEMPERO_PRECOS_AVULSAS={};
+  window.TEMPERO_CATALOGO_CARREGADO=false;
   function aviso(status,message){
     window.TEMPERO_CATALOGO_STATUS=status;
     const el=document.getElementById('catalog-price-status');
@@ -40,7 +41,7 @@
   function validar(data){
     if(!data||data.ok!==true||!Array.isArray(data.combos)||!Array.isArray(data.avulsas))return false;
     return REQUIRED_COMBOS.every(id=>data.combos.some(x=>x&&x.id===id&&Number.isFinite(Number(x.price))&&Number(x.price)>0&&typeof x.active==='boolean')) &&
-      REQUIRED_AVULSAS.every(def=>data.avulsas.some(x=>x&&x.id===def.id&&Number.isFinite(Number(x.price))&&Number(x.price)>0&&typeof x.active==='boolean'));
+      REQUIRED_AVULSAS.length>0&&REQUIRED_AVULSAS.every(def=>data.avulsas.some(x=>x&&x.id===def.id&&x.flavorId===def.flavorId&&x.size===def.size&&Number.isFinite(Number(x.price))&&Number(x.price)>0&&typeof x.active==='boolean'));
   }
   function aplicar(data){
     if(!validar(data))throw new Error('O catálogo retornado está incompleto ou inválido.');
@@ -56,6 +57,7 @@
       const item=avulsasData.get(def.id);
       window.TEMPERO_PRECOS_AVULSAS[def.key]={price:Number(item.price),active:item.active===true};
     });
+    window.TEMPERO_CATALOGO_CARREGADO=true;
     atualizarCarrinho();
   }
   function atualizarCarrinho(){
