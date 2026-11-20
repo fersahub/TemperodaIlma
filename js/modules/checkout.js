@@ -171,6 +171,14 @@ function openCheckoutModal() {
         }
 
         function sendToWhatsApp() {
+            if (window.TEMPERO_CATALOGO_STATUS === 'loading') {
+                mostrarToast('Aguarde a confirmação dos preços atuais do cardápio.');
+                return;
+            }
+            if (window.TEMPERO_CATALOGO_STATUS === 'error' || window.TEMPERO_CATALOGO_STATUS === 'cached') {
+                mostrarToast('Não foi possível confirmar os preços atuais. Reconecte-se e atualize o cardápio antes de enviar o pedido.');
+                return;
+            }
             if (cartCombos.length === 0) {
                 mostrarToast('Adicione pelo menos um combo. A venda de marmitas avulsas é somente complementar.');
                 return;
