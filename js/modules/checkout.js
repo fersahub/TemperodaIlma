@@ -28,7 +28,9 @@ function openCheckoutModal() {
             const historicoCompleto = {
                 cliente: dados,
                 itensCarrinho: cartCombos,
-                itensAvulsas: cartAvulsas
+                itensAvulsas: cartAvulsas,
+                savedAt: Date.now(),
+                expiresAt: Date.now() + (CONFIG_LOJA.historyDays || 60) * 86400000
             };
             try {
                 localStorage.setItem('tempero_ilma_historico_pedido', JSON.stringify(historicoCompleto));
@@ -43,6 +45,17 @@ function openCheckoutModal() {
                 if (!salvo) return;
                 const historico = JSON.parse(salvo);
                 if (!historico || typeof historico !== 'object' || Array.isArray(historico)) throw new Error('Histórico inválido.');
+                let salvoEm = Number(historico.savedAt || 0);
+                if (!salvoEm) {
+                    salvoEm = Date.now();
+                    historico.savedAt = salvoEm;
+                    historico.expiresAt = salvoEm + (CONFIG_LOJA.historyDays || 60) * 86400000;
+                    localStorage.setItem('tempero_ilma_historico_pedido', JSON.stringify(historico));
+                }
+                if (Date.now() - salvoEm > (CONFIG_LOJA.historyDays || 60) * 86400000) {
+                    localStorage.removeItem('tempero_ilma_historico_pedido');
+                    return;
+                }
                 const banner = document.getElementById('quick-reorder-banner');
                 const btnEndereco = document.getElementById('btn-ultimo-endereco');
                 if (banner) banner.classList.remove('hidden');
@@ -63,6 +76,18 @@ function openCheckoutModal() {
             try {
                 historico = JSON.parse(salvo);
                 if (!historico || typeof historico !== 'object' || Array.isArray(historico)) throw new Error('Histórico inválido.');
+                let salvoEm = Number(historico.savedAt || 0);
+                if (!salvoEm) {
+                    salvoEm = Date.now();
+                    historico.savedAt = salvoEm;
+                    historico.expiresAt = salvoEm + (CONFIG_LOJA.historyDays || 60) * 86400000;
+                    localStorage.setItem('tempero_ilma_historico_pedido', JSON.stringify(historico));
+                }
+                if (Date.now() - salvoEm > (CONFIG_LOJA.historyDays || 60) * 86400000) {
+                    localStorage.removeItem('tempero_ilma_historico_pedido');
+                    mostrarToast('Os dados salvos expiraram por segurança. Preencha seus dados novamente.');
+                    return;
+                }
             } catch (erro) {
                 try { localStorage.removeItem('tempero_ilma_historico_pedido'); } catch (falha) {}
                 const banner = document.getElementById('quick-reorder-banner');
@@ -188,8 +213,6 @@ function openCheckoutModal() {
                 return;
             }
 
-            salvarUltimoCliente({ name, phone, cep, bairro, rua, numero, comp });
-
             let fullAddress = `${rua}, nº ${numero}`;
             if (comp) fullAddress += ` (${comp})`;
             fullAddress += ` - Bairro: ${bairro}, ${CONFIG_LOJA.cidade}`;
@@ -208,13 +231,16 @@ function openCheckoutModal() {
             const eNote = String.fromCodePoint(0x1F4D1);
             const eSparkles = String.fromCodePoint(0x2728);
 
-            const agora = new Date();
+            const agora = obterDataHoraLoja();
             const p2 = n => String(n).padStart(2, '0');
-            const numPedido = `${p2(agora.getDate())}${p2(agora.getMonth() + 1)}-${p2(agora.getHours())}${p2(agora.getMinutes())}${p2(agora.getSeconds())}`;
+            const numPedido = `${p2(agora.day)}${p2(agora.month)}-${p2(agora.hour)}${p2(agora.minute)}${p2(agora.second)}`;
             const reviewOrderId = gerarCodigoPedidoAvaliacao();
             const reviewFlavors = coletarSaboresPedidoAvaliacao();
+            const orderId = `TI-${p2(agora.year % 100)}${p2(agora.month)}${p2(agora.day)}-${reviewOrderId.slice(0, 10)}`;
+            const notificationsOptIn = Boolean(document.getElementById('cust-status-notifications') && document.getElementById('cust-status-notifications').checked);
             let lines = [];
             lines.push(`${ePlate} *NOVO PEDIDO #${numPedido} - TEMPERO DA ILMA* ${ePlate}`);
+            lines.push(`Pedido: ${orderId}`);
             lines.push(`Código de avaliação: ${reviewOrderId}`);
             lines.push(``);
             lines.push(`${eUser} *Cliente:* ${name}`);
@@ -281,5 +307,5 @@ function openCheckoutModal() {
 
             const fullText = lines.join('\n');
             const whatsappUrl = `https://wa.me/${CONFIG_LOJA.whatsappNumero}?text=${encodeURIComponent(fullText)}`;
-            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice, fullText, reviewOrderId, reviewFlavors });
+            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice, fullText, reviewOrderId, reviewFlavors, orderId, deliveryDate: dataEntregaSabado(), notificationsOptIn, customerData: { name, phone, cep, bairro, rua, numero, comp } });
         }

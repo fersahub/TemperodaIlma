@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v18-carrossel-reset';
+const CACHE_NAME = 'tempero-v19-painel-gestao';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
@@ -59,14 +59,16 @@ self.addEventListener('fetch', event => {
 
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
+      const paginaAdmin = url.pathname.endsWith('/admin.html');
       try {
         const response = await fetch(request);
-        if (response.ok) {
+        if (response.ok && !paginaAdmin) {
           const cache = await caches.open(CACHE_NAME);
           await cache.put('./index.html', response.clone());
         }
         return response;
       } catch (error) {
+        if (paginaAdmin) return new Response('O painel administrativo precisa de conexão com a internet.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
         return (await caches.match('./offline.html')) || (await caches.match('./index.html')) || Response.error();
       }
     })());

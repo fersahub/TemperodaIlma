@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#234b32">
+  <title>Painel administrativo | Tempero da Ilma</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Voltar ao cardápio">
+      <span class="brand-mark">TI</span>
+      <span><strong>Tempero da Ilma</strong><small>Painel administrativo</small></span>
+    </a>
+    <div class="top-actions" id="top-actions" hidden>
+      <span class="connection"><i></i> Conectado</span>
+      <button class="button button-ghost" type="button" onclick="AdminPainel.atualizar()">Atualizar</button>
+      <button class="button button-ghost" type="button" onclick="AdminPainel.sair()">Sair</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <section id="login-view" class="login-layout">
+      <div class="login-intro">
+        <span class="eyebrow">GESTÃO DA MARMITARIA</span>
+        <h1>Seus pedidos,<br><em>sob controle.</em></h1>
+        <p>Acompanhe os pedidos, atualize cada etapa e prepare mensagens para os clientes pelo WhatsApp.</p>
+        <div class="login-points">
+          <span>✓ Pedidos centralizados</span>
+          <span>✓ Histórico de atualizações</span>
+          <span>✓ Sem mensalidade de painel</span>
+        </div>
+      </div>
+      <form class="login-card" id="login-form">
+        <div class="login-symbol">TI</div>
+        <h2>Acesso administrativo</h2>
+        <p>Entre com a senha-frase configurada no Google Apps Script.</p>
+        <label for="admin-password">Senha do painel</label>
+        <input id="admin-password" type="password" autocomplete="current-password" minlength="24" required placeholder="Digite sua senha-frase">
+        <button class="button button-primary button-full" type="submit" id="login-button">Entrar no painel</button>
+        <p class="form-message" id="login-message" role="alert"></p>
+        <small>O acesso é protegido por autenticação e a sessão expira automaticamente.</small>
+      </form>
+    </section>
+
+    <section id="dashboard-view" hidden>
+      <div class="page-heading">
+        <div>
+          <span class="eyebrow">VISÃO GERAL</span>
+          <h1>Gestão de pedidos</h1>
+          <p>Os registros vêm da planilha central do Tempero da Ilma.</p>
+        </div>
+        <a class="sheet-link" id="spreadsheet-link" href="#" target="_blank" rel="noopener">Abrir planilha ↗</a>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <article class="stat-card"><span>Pedidos registrados</span><strong id="stat-total">—</strong><small>Últimos registros</small></article>
+        <article class="stat-card stat-pending"><span>Aguardando confirmação</span><strong id="stat-awaiting">—</strong><small>Precisam de conferência</small></article>
+        <article class="stat-card stat-progress"><span>Em andamento</span><strong id="stat-progress">—</strong><small>Confirmados ou em preparo</small></article>
+        <article class="stat-card stat-delivery"><span>Saiu para entrega</span><strong id="stat-delivery">—</strong><small>Em rota com o cliente</small></article>
+      </div>
+
+      <section class="orders-panel">
+        <div class="panel-heading">
+          <div><h2>Pedidos</h2><p id="orders-caption">Carregando pedidos…</p></div>
+          <div class="filters">
+            <input id="search-orders" type="search" placeholder="Buscar cliente ou pedido" aria-label="Buscar cliente ou pedido">
+            <select id="filter-status" aria-label="Filtrar pedidos">
+              <option value="">Todos os status</option>
+            </select>
+          </div>
+        </div>
+        <div class="orders-list" id="orders-list">
+          <div class="loading-state">Carregando informações da planilha…</div>
+        </div>
+        <div class="panel-footnote">O painel exibe os 200 pedidos mais recentes. Os registros completos permanecem na planilha.</div>
+      </section>
+      <p class="privacy-note">Dados de clientes são exibidos apenas após autenticação. Não compartilhe o acesso ao painel.</p>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="order-modal" hidden>
+    <section class="order-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+      <header class="detail-header">
+        <div><span class="eyebrow">DETALHES DO PEDIDO</span><h2 id="detail-title">Pedido</h2></div>
+        <button class="icon-button" type="button" aria-label="Fechar" onclick="AdminPainel.fecharPedido()">×</button>
+      </header>
+      <div class="detail-body" id="order-detail"></div>
+    </section>
+  </div>
+
+  <div class="toast" id="admin-toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config/loja.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

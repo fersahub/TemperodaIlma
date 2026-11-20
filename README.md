@@ -1,13 +1,14 @@
 # Tempero da Ilma — Cardápio Digital
 
-Aplicação web estática publicada pelo **GitHub Pages**, sem Backend e sem banco de dados. GitHub Actions e Node.js são usados somente para testes durante o desenvolvimento.
+Aplicação publicada pelo **GitHub Pages**, com cardápio estático e backend leve em **Google Apps Script + Google Sheets** para avaliações e gestão de pedidos. A planilha permanece privada; o painel administrativo é hospedado no GitHub Pages e exige autenticação.
 
 ## Estrutura
 
 ```text
 TemperodaIlma/
 ├── assets/                 # Fotografias, logotipo e ícones
-├── css/styles.css          # Aparência e tema
+├── css/styles.css          # Aparência do cardápio
+├── css/admin.css           # Aparência do painel administrativo
 ├── js/
 │   ├── config/loja.js      # Configurações públicas da loja e Pix
 │   ├── core/estado.js      # Estado compartilhado
@@ -17,9 +18,11 @@ TemperodaIlma/
 │   ├── services/           # Endereço e Pix
 │   ├── tests/              # Testes de integridade
 │   ├── vendor/             # Biblioteca QR Code
+│   ├── admin.js            # Autenticação e operações do painel
 │   └── app.js              # Inicialização
 ├── .github/workflows/      # Verificações automáticas
 ├── 404.html
+├── admin.html               # Painel administrativo (requer conexão)
 ├── index.html
 ├── offline.html
 ├── manifest.json
@@ -34,7 +37,7 @@ As três pastas principais continuam sendo **assets**, **css** e **js**. A pasta
 
 - Pratos: `js/data/pratos.js` (inclui as categorias Tradicional, Linha Fit e Especiais da Casa).
 - Combos e preços: `js/data/combos.js`.
-- Dados da loja e Pix: `js/config/loja.js`.
+- Dados da loja, Pix e horários da operação: `js/config/loja.js`.
 - Aparência: `css/styles.css` e classes Tailwind.
 - Cardápio: `js/modules/cardapio.js`.
 - Detalhes dos pratos: `js/modules/detalhes-prato.js` e modal em `index.html`.
@@ -55,7 +58,10 @@ Os arquivos JavaScript continuam como scripts clássicos carregados em ordem no 
 - JavaScript dividido por responsabilidade.
 - Carrinho preservado ao abrir o WhatsApp; só é limpo por ação manual após o cliente confirmar o envio.
 - Mensagem esclarece que o site não consegue confirmar o envio no WhatsApp.
-- Opção para apagar dados pessoais e carrinho salvos neste navegador.
+- Histórico de cliente salvo somente após a confirmação da abertura do pedido e com expiração local de 60 dias.
+- Consulta de CEP protegida contra respostas fora de ordem; frete de bairro identificado pelo CEP só é calculado após confirmação.
+- Horários, corte de pedidos e data de entrega usam o fuso `America/Bahia`.
+- Painel administrativo com autenticação, consulta de pedidos, atualização de status e preparação manual de mensagens para WhatsApp.
 - Tratamento de dados locais corrompidos.
 - Service Worker versionado, limpeza de caches antigos, armazenamento de respostas válidas e tela offline.
 - Dimensões nas imagens dinâmicas para reduzir deslocamento de layout.
@@ -63,7 +69,7 @@ Os arquivos JavaScript continuam como scripts clássicos carregados em ordem no 
 
 ## Dados locais e WhatsApp
 
-O carrinho e os dados do último atendimento ficam somente no navegador via `localStorage`. A opção **Apagar dados salvos neste navegador** remove o histórico local e o carrinho deste dispositivo; não apaga mensagens enviadas pelo WhatsApp.
+O carrinho e os dados do último atendimento ficam no navegador via `localStorage`. O histórico do cliente expira após 60 dias. A função de apagar dados locais continua disponível no código, sem ser exibida no rodapé.
 
 O navegador prepara a comanda e abre o WhatsApp, mas não consegue verificar se a mensagem foi enviada. Por isso, o carrinho permanece salvo até o cliente confirmar o envio e optar por limpá-lo.
 
@@ -114,7 +120,7 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - Apresenta o detalhamento dos combos existentes e o total estimado com base nos preços do catálogo.
 - Permite montar uma sequência de combos, escolhendo os sabores de cada um, antes de adicioná-los ao carrinho.
 - Se a sequência for cancelada, preserva no carrinho os combos que já foram concluídos.
-- Todos os cálculos acontecem localmente no navegador, sem backend ou banco de dados.
+- Os cálculos do planejador acontecem localmente no navegador.
 
 
 ## Carrinho misto: combos + marmitas avulsas
@@ -127,7 +133,7 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - O frete é sempre cobrado conforme a taxa do bairro; combos de 10 não concedem frete grátis.
 - Os preços unitários iniciais são derivados do valor por unidade dos combos de 5 correspondentes: Tradicional 350g, Tradicional 500g e Fit 300g. Esses valores devem ser revisados comercialmente antes de divulgar a venda avulsa.
 - Carrinhos antigos salvos no navegador (formato de array, contendo apenas combos) continuam sendo restaurados.
-- Sem Backend ou banco de dados; os dados permanecem no navegador.
+- O carrinho de montagem permanece no navegador; após a confirmação do cliente, o pedido é registrado na planilha central.
 
 ## Sistema de avaliações por sabor e geral
 
@@ -153,3 +159,43 @@ A interface de avaliações fica no próprio site e usa **Google Apps Script + G
 A URL do Apps Script é pública por necessidade de funcionamento, mas a planilha permanece privada. O endpoint valida notas e IDs de sabores, usa um campo antispam, bloqueio concorrente e uma avaliação por código de pedido. As avaliações são automáticas, portanto comentários inadequados podem aparecer; use a coluna **Status** para ocultá-los. Essa proteção é adequada para começar com baixo volume, mas não substitui autenticação robusta ou verificação de entrega contra fraude coordenada.
 
 Enquanto a URL não for configurada, o formulário e os indicadores ficam ocultos: o site não exibe notas fictícias nem simula avaliações.
+
+## Painel administrativo e planilha central
+
+O painel fica em admin.html e utiliza o mesmo Google Apps Script já conectado às avaliações. Não exige provedor pago nem API do WhatsApp.
+
+Ao confirmar a abertura da comanda no cardápio, o site tenta registrar o pedido na planilha. O status inicial é **Aguardando confirmação**: abrir o WhatsApp não comprova que a mensagem foi enviada nem que a venda foi confirmada.
+
+A planilha existente é preservada e recebe estas abas adicionais:
+
+- **Pedidos**: dados do pedido, cliente, endereço, valores e status.
+- **ItensPedidos**: combos e marmitas avulsas discriminados.
+- **Clientes**: histórico resumido por telefone.
+- **HistoricoPedidos**: mudanças de status e observações internas.
+- **Notificacoes**: mensagens preparadas e situação do link do WhatsApp.
+- **Fretes**: bairros e taxas usadas para validar pedidos.
+- **Produtos**: catálogo inicial de sabores.
+- **Configuracoes**: parâmetros operacionais iniciais.
+- **Avaliacoes**: aba existente preservada.
+
+### Ativação/atualização do Apps Script
+
+1. Abra o mesmo projeto do Google Apps Script que já atende às avaliações. Não crie uma planilha nova.
+2. Substitua o conteúdo de Code.gs pelo arquivo integrations/google-apps-script/Code.gs deste repositório.
+3. No editor do Apps Script, execute novamente configurarSistemaAvaliacoes(). A função reutiliza o ID de planilha existente, preserva a aba Avaliacoes e cria as demais abas. Ela não cria uma nova planilha se a propriedade existente continuar configurada.
+4. No editor do Apps Script, selecione e execute gerarSenhaPainelTempero() uma única vez. Abra o Registro de execução, copie a senha gerada e guarde-a em um gerenciador de senhas. A senha fica nas propriedades privadas do script e não deve ser publicada no GitHub ou enviada por mensagem. Executar essa função novamente troca a senha anterior.
+5. Em **Implantar → Gerenciar implantações**, edite a implantação do App da Web e publique uma **nova versão**. Mantenha a execução como proprietário e o acesso público necessário ao cardápio.
+6. Abra https://fersahub.github.io/TemperodaIlma/admin.html e entre com a senha-frase.
+7. Faça um pedido de teste, confirme a abertura da comanda no WhatsApp, confira se entrou como Aguardando confirmação, altere o status no painel e teste a mensagem preparada.
+
+### Como funcionam os avisos
+
+Ao mudar o status, o sistema grava o histórico e prepara uma mensagem. Para clientes que autorizaram atualizações pelo WhatsApp no checkout, o painel oferece um botão para abrir a conversa com o texto pronto. A equipe ainda precisa tocar em **Enviar** no WhatsApp. O painel registra apenas que o link foi aberto; não afirma que a mensagem foi enviada ou entregue. Para clientes sem autorização, a mensagem pode ser copiada para uso como resposta dentro de uma conversa iniciada pelo próprio cliente.
+
+As avaliações exigem consentimento explícito e um pedido registrado com status **Entregue**. O site não possui confirmação automática de pagamento ou entrega; a equipe atualiza o status no painel.
+
+### Segurança e limites
+
+A senha administrativa fica nas Script Properties do Apps Script e não é enviada ao GitHub Pages. O login usa desafio HMAC e sessões temporárias. A planilha deve permanecer privada e a conta Google que administra o Apps Script deve ser protegida. A página do painel não é armazenada em cache offline. O serviço está sujeito às cotas de uso do Google.
+
+O painel inicial concentra os pedidos e as notificações manuais. A edição de preços, catálogo e taxas diretamente pelo painel fica para uma etapa futura; o backend mantém validações independentes para não aceitar valores enviados pelo navegador sem conferência.

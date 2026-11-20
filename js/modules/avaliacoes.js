@@ -392,6 +392,7 @@ function enviarAvaliacao(evento) {
     const comentario = document.getElementById('avaliacao-comentario').value.trim().slice(0, 500);
     const payload = {
         orderId: pedidoAtualParaAvaliar.orderId,
+        consent: true,
         displayName: nome,
         overallRating: notaGeralAvaliacao,
         overallComment: comentario,

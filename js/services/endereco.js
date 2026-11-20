@@ -57,6 +57,25 @@
             rua.addEventListener('blur', verificarRuaComCep);
             rua.addEventListener('input', () => { ruaPendenteConfirmacao = false; esconderAvisoRua(); });
             document.getElementById('cust-cep').addEventListener('input', () => {
-                document.getElementById('cep-status').innerHTML = '';
+                if (cepConsultaController) cepConsultaController.abort();
+                cepConsultaController = null;
+                cepConsultaId++;
+                ultimoCepConsultado = '';
+                cepInfo = null;
+                bairroPendenteConfirmacao = false;
+                currentShippingFee = null;
+                const bairro = document.getElementById('cust-bairro');
+                if (bairro) bairro.selectedIndex = 0;
+                const busca = document.getElementById('bairro-busca');
+                if (busca) busca.value = '';
+                const statusCep = document.getElementById('cep-status');
+                const statusFrete = document.getElementById('shipping-calc-status');
+                if (statusCep) statusCep.textContent = '';
+                if (statusFrete) statusFrete.textContent = 'O CEP foi alterado. Consulte ou selecione novamente o bairro e recalcule o frete.';
+                ['bairro-confirma','bairro-fora-alerta'].forEach(id => {
+                    const box = document.getElementById(id);
+                    if (box) { box.classList.add('hidden'); box.innerHTML = ''; }
+                });
+                if (typeof updateCartUI === 'function') updateCartUI();
             });
         }
