@@ -356,6 +356,13 @@ test('painel administrativo: arquivos, autenticação e sessão não expõem seg
  assert.match(js,/adminLogin/);
  assert.match(js,/crypto\.subtle/);
  assert.match(js,/adminUpdateStatus/);
+ assert.match(js,/adminChangePassword/);
+ assert.match(js,/password.length<16/);
+ assert.match(js,/salvarNovaSenha/);
+ assert.match(backend,/function alterarSenhaAdmin_\(payload\)/);
+ assert.match(backend,/ADMIN_SESSION_VERSION_PROPERTY/);
+ assert.match(backend,/invalidarSessoesAdmin_\(\)/);
+ assert.match(backend,/passwordChanged === true/);
  assert.match(js,/mode:'no-cors'/);
  assert.doesNotMatch(js,/TEMPERODA_ILMA_ADMIN_SECRET|definirSenhaPainelTempero/);
  assert.match(backend,/function definirSenhaPainelTempero\(senha\)/);
