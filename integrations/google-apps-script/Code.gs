@@ -507,7 +507,7 @@ function configurarAbasGestao_(planilha) {
 
 /**
  * Defina uma senha administrativa manualmente pelo editor do Apps Script.
- * Recomendado: senha única com pelo menos 16 caracteres, letras e números.
+ * Recomendado: senha única com pelo menos 8 caracteres, letras e números.
  * Não compartilhe a senha em chats, logs ou arquivos do repositório.
  */
 /**
@@ -522,8 +522,8 @@ function gerarSenhaPainelTempero() {
 }
 function validarSenhaAdmin_(senha) {
   var valor = String(senha || '');
-  if (valor.length < 16 || valor.length > 128) {
-    throw new Error('A senha deve ter entre 16 e 128 caracteres.');
+  if (valor.length < 8 || valor.length > 128) {
+    throw new Error('A senha deve ter entre 8 e 128 caracteres.');
   }
   if (!/[A-Za-z]/.test(valor) || !/[0-9]/.test(valor)) {
     throw new Error('Use pelo menos uma letra e um número na senha.');
