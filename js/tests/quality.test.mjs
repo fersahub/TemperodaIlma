@@ -389,7 +389,7 @@ test('notificações de status são preparadas e envio manual não é apresentad
  assert.match(backend,/function criarMensagemStatus_/);
  assert.match(backend,/PRONTA_PARA_ABRIR_NO_WHATSAPP/);
  assert.match(backend,/LINK_ABERTO_NO_WHATSAPP/);
- assert.match(js,/o envio ainda depende de confirmação manual/i);
+ assert.match(js,/Confirme manualmente o envio da mensagem/i);
  assert.match(html,/Quero receber atualizações sobre o andamento deste pedido pelo WhatsApp/);
 });
 test('CEP: respostas antigas são descartadas e o frete espera confirmação do bairro',()=>{
