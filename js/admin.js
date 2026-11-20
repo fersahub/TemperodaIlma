@@ -52,7 +52,7 @@
     const button=$('login-button'), message=$('login-message');
     const password=$('admin-password').value;
     message.textContent='';
-    if(password.length<24){message.textContent='A senha-frase precisa ter pelo menos 24 caracteres.';return;}
+    if(password.length<16 || password.length>128 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)){message.textContent='Use uma senha de 16 a 128 caracteres, incluindo letras e números.';return;}
     button.disabled=true; button.textContent='Validando…';
     try {
       const challenge=await jsonp('adminChallenge',{});
@@ -253,8 +253,8 @@
     try {
       const result=await postarAcao('adminChangePassword',{newPassword:senha});
       $('password-form').reset();fecharAlterarSenha();
-      alert(result.message||'Senha alterada. Faça login novamente.');
       sair();
+      $('login-message').textContent=result.message||'Senha alterada. Entre novamente com sua nova senha.';
     } catch(error) {
       message.textContent=error.message||'Não foi possível alterar a senha.';
     } finally { button.disabled=false;button.textContent='Salvar nova senha'; }
