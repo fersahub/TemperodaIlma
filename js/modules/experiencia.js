@@ -183,7 +183,16 @@
 
         function preencherUltimoEndereco() {
             let dados = null;
-            try { dados = (JSON.parse(localStorage.getItem('tempero_ilma_historico_pedido') || 'null') || {}).cliente; } catch (e) {}
+            try {
+                const historico = JSON.parse(localStorage.getItem('tempero_ilma_historico_pedido') || 'null');
+                const salvoEm = Number(historico && historico.savedAt || 0);
+                if (salvoEm && Date.now() - salvoEm > (CONFIG_LOJA.historyDays || 60) * 86400000) {
+                    localStorage.removeItem('tempero_ilma_historico_pedido');
+                    mostrarToast('Os dados salvos expiraram por segurança.');
+                    return;
+                }
+                dados = historico && historico.cliente;
+            } catch (e) {}
             if (!dados) { mostrarToast('Nenhum endereço salvo neste aparelho.'); return; }
             const preencher = (id, valor) => { if (valor) { document.getElementById(id).value = valor; limparErro(id); } };
             preencher('cust-cep', dados.cep);
