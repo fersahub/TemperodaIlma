@@ -328,6 +328,38 @@ test('Combo 10 não concede frete grátis: todas as taxas de bairro são cobrada
  assert.doesNotMatch(read('js/modules/operacao.js'),/frete grátis garantido|Combo de 10 = frete grátis|ganhe frete grátis/i);
 });
 
+test('frete grátis de primeiro pedido só zera a taxa para o telefone validado',()=>{
+ const sandbox={
+  currentShippingFee:12,
+  primeiroPedidoFreteGratis:true,
+  primeiroPedidoTelefoneVerificado:'71999999999',
+  document:{getElementById:id=>id==='cust-phone'?{value:'(71) 99999-9999'}:null}
+ };
+ runInNewContext(read('js/modules/operacao.js'),sandbox);
+ assert.equal(sandbox.freteEfetivo(),0);
+ sandbox.document.getElementById=()=>({value:'71988888888'});
+ assert.equal(sandbox.freteEfetivo(),12);
+ sandbox.currentShippingFee=null;
+ assert.equal(sandbox.freteEfetivo(),null);
+});
+
+test('benefício de primeira compra é consultado no backend e revalidado no registro do pedido',()=>{
+ const html=read('index.html');
+ const operacao=read('js/modules/operacao.js');
+ const checkout=read('js/modules/checkout.js');
+ const pedidos=read('js/modules/pedidos.js');
+ const backend=read('integrations/google-apps-script/Code.gs');
+ assert.match(html,/onblur="verificarFreteGratisPrimeiroPedido\(\)"/);
+ assert.match(html,/id="first-order-shipping-status"/);
+ assert.match(operacao,/solicitarDadosAvaliacoes\('firstOrderCheck'/);
+ assert.match(checkout,/firstOrderFreeShipping: primeiroPedidoFreteGratisAtivo\(\)/);
+ assert.match(pedidos,/firstOrderFreeShipping: Boolean\(pedido\.firstOrderFreeShipping\)/);
+ assert.match(backend,/action === 'firstOrderCheck'/);
+ assert.match(backend,/function telefoneTemPedidoRegistrado_\(telefone\)/);
+ assert.match(backend,/payload\.firstOrderFreeShipping===true/);
+ assert.match(backend,/pedido\.firstOrderFreeShipping && telefoneTemPedidoRegistrado_/);
+});
+
 test('planejador informa que o frete é cobrado conforme o bairro',()=>{
  const experiencia=read('js/modules/experiencia.js');
  assert.match(experiencia,/frete será calculado no checkout conforme o bairro informado/i);
