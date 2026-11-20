@@ -1025,8 +1025,10 @@ function registrarPedidoPublico_(params) {
     var text=String(params.payload || '');
     if(!text || text.length>18000) throw new Error('Dados do pedido inválidos.');
     var payload=JSON.parse(text);
-    var pedido=validarPedidoPublico_(payload);
     lock.waitLock(10000);
+    // Revalidar dentro do mesmo bloqueio usado pela edição do catálogo evita
+    // aceitar preço antigo se o painel atualizar o item durante o checkout.
+    var pedido=validarPedidoPublico_(payload);
     if(pedidoExistePorCodigoAvaliacao_(pedido.reviewId)) {
       return respostaTexto_({ok:true,duplicate:true,orderId:pedido.orderId});
     }
