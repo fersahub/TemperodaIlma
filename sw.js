@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v25-catalog-admin-prices';
+const CACHE_NAME = 'tempero-v26-catalog-price-by-flavor';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
