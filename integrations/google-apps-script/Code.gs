@@ -386,7 +386,7 @@ var GESTAO = {
   ],
   CLIENT_HEADERS: [
     'Telefone','Nome','CEP','Rua','Número','Complemento','Bairro',
-    'Primeiro pedido','Último pedido','Quantidade de pedidos','Total registrado',
+    'Primeiro pedido','Último pedido','Quantidade de pedidos','Total em pedidos',
     'Aceita atualizações WhatsApp'
   ],
   HISTORY_HEADERS: [
@@ -678,9 +678,10 @@ function validarPedidoPublico_(payload) {
   var nome=limparCampo_(cliente.name,100);
   var telefone=String(cliente.phone || '').replace(/\D/g,'');
   var bairro=limparCampo_(cliente.bairro,100);
+  var cep=limparCampo_(cliente.cep,9);
   var rua=limparCampo_(cliente.rua,150);
   var numero=limparCampo_(cliente.numero,30);
-  if(!nome || telefone.length<10 || telefone.length>13 || !bairro || !rua || !numero) {
+  if(!nome || telefone.length<10 || telefone.length>13 || !bairro || !rua || !numero || (cep && !/^\\d{5}-?\\d{3}$/.test(cep))) {
     throw new Error('Dados do cliente ou endereço incompletos.');
   }
   var combos=Array.isArray(payload.combos)?payload.combos:[];
@@ -752,7 +753,7 @@ function validarPedidoPublico_(payload) {
   if(['Pix','Cartão de Débito','Cartão de Crédito','Dinheiro'].indexOf(pagamento)<0) throw new Error('Forma de pagamento inválida.');
   return {
     orderId:orderId,reviewId:reviewId,customer:{
-      name:nome,phone:telefone,cep:limparCampo_(cliente.cep,9),rua:rua,numero:numero,
+      name:nome,phone:telefone,cep:cep,rua:rua,numero:numero,
       comp:limparCampo_(cliente.comp,100),bairro:bairro,cidade:'Salvador - BA'
     },
     notificationsOptIn:payload.notificationsOptIn===true,
