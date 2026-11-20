@@ -353,7 +353,7 @@ test('avulsas: novo pedido reinicia e persiste preferência mesmo após escolha 
 test('painel administrativo: arquivos, autenticação e sessão não expõem segredo no frontend',()=>{
  const adminHtml=read('admin.html');
  assert.match(adminHtml,/js\/admin\.js\?v=20261120-5/);
- assert.match(adminHtml,/css\/admin\.css\?v=20261120-5/);
+ assert.match(adminHtml,/css\/admin\.css\?v=20261120-4/);
  const html=read('admin.html'),css=read('css/admin.css'),js=read('js/admin.js'),backend=read('integrations/google-apps-script/Code.gs');
  assert.ok(exists('admin.html')&&exists('css/admin.css')&&exists('js/admin.js'));
  assert.match(html,/noindex,nofollow/);
