@@ -232,6 +232,33 @@
       toast('WhatsApp aberto; não foi possível atualizar o histórico da notificação.');
     }
   }
+  function abrirAlterarSenha() {
+    $('password-message').textContent='';
+    $('password-form').reset();
+    $('password-modal').hidden=false;
+    $('new-admin-password').focus();
+  }
+  function fecharAlterarSenha() { $('password-modal').hidden=true; }
+  async function salvarNovaSenha(event) {
+    event.preventDefault();
+    const senha=$('new-admin-password').value;
+    const confirmacao=$('confirm-admin-password').value;
+    const message=$('password-message'),button=$('password-save');
+    message.textContent='';
+    if(senha.length<16 || senha.length>128 || !/[A-Za-z]/.test(senha) || !/[0-9]/.test(senha)) {
+      message.textContent='Use de 16 a 128 caracteres, incluindo pelo menos uma letra e um número.';return;
+    }
+    if(senha!==confirmacao) { message.textContent='As senhas não coincidem.';return; }
+    button.disabled=true;button.textContent='Salvando…';
+    try {
+      const result=await postarAcao('adminChangePassword',{newPassword:senha});
+      $('password-form').reset();fecharAlterarSenha();
+      alert(result.message||'Senha alterada. Faça login novamente.');
+      sair();
+    } catch(error) {
+      message.textContent=error.message||'Não foi possível alterar a senha.';
+    } finally { button.disabled=false;button.textContent='Salvar nova senha'; }
+  }
   function sair() {
     token='';sessionStorage.removeItem('tempero_admin_token');
     $('dashboard-view').hidden=true;$('top-actions').hidden=true;$('login-view').hidden=false;
@@ -243,7 +270,8 @@
     $('login-form').addEventListener('submit',entrar);
     $('search-orders').addEventListener('input',renderOrders);
     $('filter-status').addEventListener('change',renderOrders);
+    $('password-form').addEventListener('submit',salvarNovaSenha);
     if(token) await carregarPainel();
   });
-  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp};
+  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp,abrirAlterarSenha,fecharAlterarSenha};
 })();
