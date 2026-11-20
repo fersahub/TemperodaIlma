@@ -477,11 +477,13 @@ var CATALOGO_ITENS_FIXOS_ = CATALOGO_COMBOS_FIXOS_.concat(definirAvulsasFixas_()
 function inserirItensCatalogo_(aba,itens) {
   if(!itens.length)return;
   var inicio=aba.getLastRow()+1,agora=new Date();
+  /* Cria as caixas de seleção antes de gravar os valores; assim o estado
+     Ativo/Inativo dos registros é preservado como booleano. */
+  aba.getRange(inicio,8,itens.length,1).insertCheckboxes();
   aba.getRange(inicio,1,itens.length,GESTAO.CATALOG_HEADERS.length).setValues(
     itens.map(function(item){return [item.id,item.tipo,item.nome,item.categoria,item.tamanho,item.quantidade,item.preco,item.ativo,agora];})
   );
   aba.getRange(inicio,7,itens.length,1).setNumberFormat('"R$" #,##0.00');
-  aba.getRange(inicio,8,itens.length,1).insertCheckboxes();
 }
 function garantirCatalogo_(planilha) {
   var ss=planilha||planilhaGestao_();
