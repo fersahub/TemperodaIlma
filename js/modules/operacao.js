@@ -4,7 +4,7 @@
 
         function telefoneCheckoutParaBeneficio() {
             const campo = document.getElementById('cust-phone');
-            return String(campo && campo.value || '').replace(/\\D/g, '');
+            return String(campo && campo.value || '').replace(/\D/g, '');
         }
 
         function primeiroPedidoFreteGratisAtivo() {
