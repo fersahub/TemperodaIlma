@@ -129,6 +129,8 @@ let currentShippingFee = null;
                 document.getElementById('cust-bairro').value = '';
                 aoMudarBairroManualmente();
                 document.getElementById('bairro-busca').focus();
+            } else {
+                calcularFreteEBuscarBairro();
             }
         }
 
@@ -138,3 +140,6 @@ let currentShippingFee = null;
             box.innerHTML = `<div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3 text-xs"><i class="fa-solid fa-triangle-exclamation"></i> O CEP indica o bairro <b>${escapeHtml(nome)}</b>, que não está na nossa lista de entregas. Busque o bairro mais próximo acima ou <a href="${link}" target="_blank" rel="noopener" class="font-bold underline">confirme no WhatsApp</a>.</div>`;
             box.classList.remove('hidden');
         }
+
+let cepConsultaId = 0;
+let cepConsultaController = null;
