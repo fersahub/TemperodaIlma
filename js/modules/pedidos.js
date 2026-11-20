@@ -100,6 +100,8 @@ function confirmarEnvio() {
         sentPix.classList.remove('hidden');
     }
     window.open(pendingWhatsUrl, '_blank');
+    if (dp && dp.customerData) salvarUltimoCliente(dp.customerData);
+    if (dp && typeof registrarPedidoCentralizado === 'function') registrarPedidoCentralizado(dp);
     if (dp && typeof registrarPedidoPendenteAvaliacao === 'function') registrarPedidoPendenteAvaliacao(dp);
     document.getElementById('confirm-modal').classList.add('hidden');
     closeCheckoutModal();
@@ -122,4 +124,74 @@ function limparCarrinhoAposEnvio() {
         confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
     }
     mostrarToast('Carrinho limpo. Você já pode iniciar um novo pedido.');
+}
+
+
+/* Envia o pedido para a planilha central. A gravação é confirmada por uma consulta de leitura. */
+function consultarConfirmacaoPedido(reviewOrderId, callback) {
+    if (typeof solicitarDadosAvaliacoes !== 'function') {
+        callback(false);
+        return;
+    }
+    solicitarDadosAvaliacoes('orderCheck', { reviewOrderId }, resposta => {
+        callback(Boolean(resposta && resposta.ok && resposta.exists));
+    });
+}
+
+function registrarPedidoCentralizado(pedido) {
+    if (!pedido || !pedido.orderId || !pedido.reviewOrderId) return Promise.resolve(false);
+    const endpoint = window.TEMPERO_CONFIG && window.TEMPERO_CONFIG.avaliacoes && window.TEMPERO_CONFIG.avaliacoes.apiUrl;
+    if (!endpoint) {
+        mostrarToast('Pedido aberto no WhatsApp. A integração com o painel ainda não está configurada.');
+        return Promise.resolve(false);
+    }
+
+    const combos = cartCombos.map(item => ({
+        comboId: item.comboId,
+        flavors: item.flavors || flavorsDoResumo(item.flavorsSummary),
+        flavorsSummary: item.flavorsSummary || '',
+        obs: item.obs || ''
+    }));
+    const avulsas = cartAvulsas.map(item => ({
+        flavorId: item.flavorId,
+        size: item.size,
+        quantity: item.quantity
+    }));
+    const payload = {
+        orderId: pedido.orderId,
+        reviewOrderId: pedido.reviewOrderId,
+        customer: pedido.customerData,
+        notificationsOptIn: Boolean(pedido.notificationsOptIn),
+        payment: pedido.payment,
+        changeFor: pedido.troco,
+        observations: pedido.obs,
+        subtotal: pedido.subtotalPrice,
+        shippingFee: pedido.feFinal,
+        total: pedido.totalPrice,
+        deliveryDate: pedido.deliveryDate,
+        combos,
+        avulsas
+    };
+    const body = new URLSearchParams({ action: 'registerOrder', payload: JSON.stringify(payload) });
+
+    return fetch(endpoint, { method: 'POST', mode: 'no-cors', body })
+        .then(() => new Promise(resolve => {
+            let tentativa = 0;
+            const verificar = () => consultarConfirmacaoPedido(pedido.reviewOrderId, existe => {
+                if (existe) {
+                    mostrarToast('Pedido registrado no painel administrativo.');
+                    resolve(true);
+                } else if (tentativa++ < 5) {
+                    window.setTimeout(verificar, 1000);
+                } else {
+                    mostrarToast('Não conseguimos confirmar o registro no painel. Confira a integração antes de atualizar o status.');
+                    resolve(false);
+                }
+            });
+            window.setTimeout(verificar, 900);
+        }))
+        .catch(() => {
+            mostrarToast('Não foi possível registrar o pedido no painel. A comanda do WhatsApp continua disponível.');
+            return false;
+        });
 }
