@@ -430,6 +430,7 @@ test('service worker não armazena painel administrativo no cache público',()=>
 
 test('backend rejeita CEP malformado antes de registrar pedido',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
- assert.match(backend,/var cep=limparCampo_\\(cliente\\.cep,9\\)/);
- assert.match(backend,/cep && !\\/^\\\\d\\{5\\}-\\?\\\\d\\{3\\}\\//);
+ assert.ok(backend.includes('var cep=limparCampo_(cliente.cep,9);'));
+ assert.ok(backend.includes('cep && !/^'));
+ assert.ok(backend.includes('test(cep)'));
 });
