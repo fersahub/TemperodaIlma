@@ -357,8 +357,14 @@ test('painel administrativo: arquivos, autenticação e sessão não expõem seg
  assert.match(js,/crypto\.subtle/);
  assert.match(js,/adminUpdateStatus/);
  assert.match(js,/adminChangePassword/);
- assert.match(js,/password.length<16/);
+ assert.match(js,/password.length<8/);
+ assert.match(js,/senha.length<8/);
+ assert.match(html,/minlength="8"/);
+ assert.match(backend,/valor.length < 8/);
  assert.match(js,/salvarNovaSenha/);
+ assert.match(js,/},60000)/);
+ assert.match(js,/carregarPainel\(\{silencioso:true\}\)/);
+ assert.match(html,/id="last-updated"/);
  assert.match(backend,/function alterarSenhaAdmin_\(payload\)/);
  assert.match(backend,/ADMIN_SESSION_VERSION_PROPERTY/);
  assert.match(backend,/invalidarSessoesAdmin_\(\)/);
