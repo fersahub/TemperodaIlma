@@ -67,7 +67,7 @@ function renderFlavorsDisplay() {
                         <button type="button" data-prato-id="${idSeguro}" onclick="abrirDetalhesPrato(this.dataset.pratoId)" class="text-[10px] font-bold text-brand-secondary hover:underline inline-flex items-center gap-1">
                             Ver detalhes <i class="fa-solid fa-arrow-right text-[9px]"></i>
                         </button>
-                        ${!flavor.emBreve && flavor.disponivel !== false && ['Tradicional', 'Linha Fit'].includes(flavor.tag) ? `<button type="button" data-prato-id="${idSeguro}" onclick="abrirAvulsasNoCarrinho(this.dataset.pratoId)" class="text-[10px] font-bold text-emerald-700 hover:text-emerald-900 inline-flex items-center gap-1"><i class="fa-solid fa-cart-plus"></i> Adicionar avulsa</button>` : ''}
+                        ${!flavor.emBreve && flavor.disponivel !== false && tamanhosDisponiveisAvulsa(flavor).length > 0 ? `<button type="button" data-prato-id="${idSeguro}" onclick="abrirAvulsasNoCarrinho(this.dataset.pratoId)" class="text-[10px] font-bold text-emerald-700 hover:text-emerald-900 inline-flex items-center gap-1"><i class="fa-solid fa-cart-plus"></i> Adicionar avulsa</button>` : ''}
                     </div>
                 </div>
             </div>`;
@@ -79,7 +79,9 @@ function renderCombos() {
     const grid = document.getElementById('combos-grid');
     if (!grid) return;
     grid.innerHTML = '';
-    combos.forEach(combo => {
+    const combosAtivos=combos.filter(combo=>combo.ativo!==false);
+    if(!combosAtivos.length){grid.innerHTML='<p class="col-span-full text-center text-xs text-stone-500 py-6">Os combos estão temporariamente indisponíveis.</p>';return;}
+    combosAtivos.forEach(combo => {
         const card = document.createElement('div');
         card.className = "bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between relative";
         card.innerHTML = `

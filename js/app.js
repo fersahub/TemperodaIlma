@@ -1,5 +1,6 @@
 /* Inicialização da aplicação. */
 document.addEventListener('DOMContentLoaded', function() {
+            if (typeof iniciarCatalogoPublico === 'function') iniciarCatalogoPublico();
             checkBusinessStatus();
             iniciarContadorRegressivo();
             iniciarFavoritos();

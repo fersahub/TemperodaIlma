@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#234b32">
   <title>Painel administrativo | Tempero da Ilma</title>
-  <link rel="stylesheet" href="css/admin.css?v=20261120-4">
+  <link rel="stylesheet" href="css/admin.css?v=20261120-6">
 </head>
 <body>
   <header class="topbar">
@@ -70,6 +70,13 @@
         <article class="stat-card stat-delivery"><span>Saiu para entrega</span><strong id="stat-delivery">—</strong><small>Em rota com o cliente</small></article>
       </div>
 
+      <section class="orders-panel catalog-panel" aria-labelledby="catalog-heading">
+        <div class="panel-heading"><div><h2 id="catalog-heading">Gestão do cardápio</h2><p>Altere preços e disponibilidade dos combos e das marmitas avulsas.</p></div></div>
+        <div class="catalog-intro">Os preços das avulsas são compartilhados por linha e tamanho: uma alteração vale para todos os sabores daquela opção. Pedidos já registrados preservam seus valores originais.</div>
+        <div id="catalog-list" class="catalog-list"><div class="loading-state">Carregando catálogo…</div></div>
+        <div class="panel-footnote">Os valores são validados novamente pelo servidor antes do registro de cada pedido. Mantenha pelo menos um combo ativo.</div>
+      </section>
+
       <section class="orders-panel">
         <div class="panel-heading">
           <div><h2>Pedidos</h2><p id="orders-caption">Carregando pedidos…</p></div>
@@ -114,6 +121,6 @@
   <div class="toast" id="admin-toast" role="status" aria-live="polite"></div>
 
   <script src="js/config/loja.js?v=20261120-2"></script>
-  <script src="js/admin.js?v=20261120-5"></script>
+  <script src="js/admin.js?v=20261120-6"></script>
 </body>
 </html>

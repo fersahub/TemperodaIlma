@@ -68,8 +68,9 @@
             const escolha = opcoes[estilo];
             if (!escolha || !Number.isInteger(Number(quantidade)) || Number(quantidade) < 5 || Number(quantidade) % 5 !== 0) return null;
 
-            const combo5 = combos.find(c => c.type === escolha.tipo && c.qty === 5 && c.name.includes(escolha.peso));
-            const combo10 = combos.find(c => c.type === escolha.tipo && c.qty === 10 && c.name.includes(escolha.peso));
+            const combosAtivos = combos.filter(c => c.ativo !== false);
+            const combo5 = combosAtivos.find(c => c.type === escolha.tipo && c.qty === 5 && c.name.includes(escolha.peso));
+            const combo10 = combosAtivos.find(c => c.type === escolha.tipo && c.qty === 10 && c.name.includes(escolha.peso));
             if (!combo5 || !combo10) return null;
 
             let restante = Number(quantidade);
@@ -81,7 +82,7 @@
             if (restante === 5) { ids.push(combo5.id); restante -= 5; }
             if (restante !== 0) return null;
 
-            const itens = ids.map(id => combos.find(c => c.id === id));
+            const itens = ids.map(id => combosAtivos.find(c => c.id === id));
             return {
                 ids: ids,
                 itens: itens,
@@ -118,7 +119,7 @@
             const detalhamento = {};
             plano.itens.forEach(item => { detalhamento[item.id] = (detalhamento[item.id] || 0) + 1; });
             const linhas = Object.entries(detalhamento).map(([id, quantidade]) => {
-                const item = combos.find(c => c.id === id);
+                const item = combos.find(c => c.id === id && c.ativo !== false);
                 return '<li class="flex justify-between gap-3"><span>' + quantidade + ' × ' + escapeHtml(item.name) + '</span><strong class="whitespace-nowrap">R$ ' + (quantidade * item.price).toFixed(2).replace('.', ',') + '</strong></li>';
             }).join('');
 
@@ -162,7 +163,8 @@
                 return;
             }
             openFlavorsModal(id);
-            const combo = combos.find(c => c.id === id);
+            const combo = combos.find(c => c.id === id && c.ativo !== false);
+            if(!combo){mostrarToast('Este combo está temporariamente indisponível.');return;}
             document.getElementById('modal-combo-subtitle').innerText =
                 'Etapa ' + (quizIndiceCombo + 1) + ' de ' + quizCombosPendentes.length + ': escolha ' + combo.qty + ' marmitas (' + combo.type + ').';
         }

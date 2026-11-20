@@ -11,7 +11,7 @@ function data(p){const window={TEMPERO_DADOS:{}};runInNewContext(read(p),{window
 
 test('Apps Script expõe a versão atualizada para o benefício de primeiro pedido',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
- assert.match(backend,/TEMPERO_API_VERSION = '2026.11.20.5'/);
+ assert.match(backend,/TEMPERO_API_VERSION = '2026.11.20.6'/);
 });
 test('combos: IDs, preços, quantidades e imagens',()=>{
  const xs=data('js/data/combos.js').combos;assert.ok(xs.length>0);assert.equal(new Set(xs.map(x=>x.id)).size,xs.length);
@@ -83,7 +83,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v24-first-order-free-shipping/);
+ assert.match(read('sw.js'),/tempero-v25-catalog-admin-prices/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -260,7 +260,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v24-first-order-free-shipping'));
+ assert.ok(read('sw.js').includes('tempero-v25-catalog-admin-prices'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -384,8 +384,8 @@ test('avulsas: novo pedido reinicia e persiste preferência mesmo após escolha 
 
 test('painel administrativo: arquivos, autenticação e sessão não expõem segredo no frontend',()=>{
  const adminHtml=read('admin.html');
- assert.match(adminHtml,/js\/admin\.js\?v=20261120-5/);
- assert.match(adminHtml,/css\/admin\.css\?v=20261120-4/);
+ assert.match(adminHtml,/js\/admin\.js\?v=20261120-6/);
+ assert.match(adminHtml,/css\/admin\.css\?v=20261120-6/);
  const html=read('admin.html'),css=read('css/admin.css'),js=read('js/admin.js'),backend=read('integrations/google-apps-script/Code.gs');
  assert.ok(exists('admin.html')&&exists('css/admin.css')&&exists('js/admin.js'));
  assert.match(html,/noindex,nofollow/);
@@ -484,7 +484,7 @@ test('modal de avaliação participa da pilha de modais',()=>{
 });
 test('service worker não armazena painel administrativo no cache público',()=>{
  const sw=read('sw.js');
- assert.match(sw,/tempero-v24-first-order-free-shipping/);
+ assert.match(sw,/tempero-v25-catalog-admin-prices/);
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
@@ -495,4 +495,29 @@ test('backend rejeita CEP malformado antes de registrar pedido',()=>{
  assert.ok(backend.includes('var cep=limparCampo_(cliente.cep,9);'));
  assert.ok(backend.includes('cep && !/^'));
  assert.ok(backend.includes('test(cep)'));
+});
+
+test('catálogo comercial: API, planilha, validação no servidor e painel de edição',()=>{
+ const backend=read('integrations/google-apps-script/Code.gs');
+ const html=read('index.html'),app=read('js/app.js'),catalog=read('js/modules/catalogo.js');
+ const admin=read('js/admin.js'),adminHtml=read('admin.html'),avulsas=read('js/modules/avulsas.js');
+ assert.match(backend,/CATALOG: 'Catalogo'/);
+ assert.match(backend,/function garantirCatalogo_\(planilha\)/);
+ assert.match(backend,/function obterCatalogoPublico_\(\)/);
+ assert.match(backend,/action === 'catalog'/);
+ assert.match(backend,/action === 'adminSaveCatalog'/);
+ assert.match(backend,/comboCatalogo\.preco/);
+ assert.match(backend,/avulsaCatalogo\.preco/);
+ const registro=backend.slice(backend.indexOf('function registrarPedidoPublico_'));
+ assert.ok(registro.indexOf('lock.waitLock(10000)') < registro.indexOf('var pedido=validarPedidoPublico_(payload)'));
+ assert.doesNotMatch(backend,/var precosAvulsa=\{'350g':20/);
+ assert.match(admin,/function renderCatalog\(\)/);
+ assert.match(admin,/function salvarCatalogo\(id\)/);
+ assert.match(admin,/adminSaveCatalog/);
+ assert.match(adminHtml,/id="catalog-list"/);
+ assert.match(catalog,/TEMPERO_CATALOGO_STATUS/);
+ assert.match(html,/js\/modules\/catalogo\.js/);
+ assert.match(app,/iniciarCatalogoPublico\(\)/);
+ assert.match(avulsas,/TEMPERO_PRECOS_AVULSAS/);
+ assert.match(read('js/modules/checkout.js'),/TEMPERO_CATALOGO_STATUS === 'cached'/);
 });

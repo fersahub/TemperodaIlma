@@ -1,7 +1,8 @@
 /* Seleção de sabores e gerenciamento do carrinho. */
 function openFlavorsModal(comboId, editIdx) {
             editandoIndex = (typeof editIdx === 'number') ? editIdx : null;
-            currentEditingCombo = combos.find(c => c.id === comboId);
+            currentEditingCombo = combos.find(c => c.id === comboId && c.ativo !== false);
+            if(!currentEditingCombo){mostrarToast('Este combo está temporariamente indisponível.');return;}
             const item = editandoIndex !== null ? cartCombos[editandoIndex] : null;
             selectedFlavors = item ? { ...(item.flavors || {}) } : {};
             document.getElementById('combo-obs').value = item ? (item.obs || '') : '';

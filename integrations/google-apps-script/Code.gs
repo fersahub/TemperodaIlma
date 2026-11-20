@@ -362,7 +362,7 @@ function respostaTexto_(dados) {
  * Mantém a aba Avaliacoes existente e cria as novas abas na mesma planilha.
  * ------------------------------------------------------------------ */
 
-var TEMPERO_API_VERSION = '2026.11.20.5';
+var TEMPERO_API_VERSION = '2026.11.20.6';
 
 var GESTAO = {
   ADMIN_SECRET_PROPERTY: 'TEMPERODA_ILMA_ADMIN_SECRET',
@@ -375,7 +375,8 @@ var GESTAO = {
     NOTIFICATIONS: 'Notificacoes',
     SETTINGS: 'Configuracoes',
     SHIPPING: 'Fretes',
-    PRODUCTS: 'Produtos'
+    PRODUCTS: 'Produtos',
+    CATALOG: 'Catalogo'
   },
   ORDER_HEADERS: [
     'ID do pedido','Código de avaliação','Criado em','Atualizado em','Status',
@@ -403,6 +404,7 @@ var GESTAO = {
   SETTINGS_HEADERS: ['Chave','Valor','Atualizado em'],
   SHIPPING_HEADERS: ['Bairro','Taxa','Ativo'],
   PRODUCT_HEADERS: ['ID','Produto','Categoria','Disponível'],
+  CATALOG_HEADERS: ['ID','Tipo','Nome','Categoria','Tamanho','Quantidade','Preço','Ativo','Atualizado em'],
   STATUSES: [
     'Aguardando confirmação','Pedido confirmado','Em preparação',
     'Pronto para entrega','Saiu para entrega','Entregue','Cancelado'
@@ -441,6 +443,105 @@ var FRETES_INICIAIS_ = [
   ['Coutos',15],['Fazenda Coutos',15],['Paripe',15],['Valéria',15]
 ];
 
+
+/* Catálogo comercial: preços e disponibilidade editáveis pelo painel. */
+var CATALOGO_ITENS_FIXOS_ = [
+  {id:'combo-5-350g',tipo:'COMBO',nome:'Combo 5 Marmitas - 350g',categoria:'Tradicional',tamanho:'350g',quantidade:5,preco:100,ativo:true},
+  {id:'combo-10-350g',tipo:'COMBO',nome:'Combo 10 Marmitas - 350g',categoria:'Tradicional',tamanho:'350g',quantidade:10,preco:200,ativo:true},
+  {id:'combo-5-500g',tipo:'COMBO',nome:'Combo 5 Marmitas - 500g',categoria:'Tradicional',tamanho:'500g',quantidade:5,preco:125,ativo:true},
+  {id:'combo-10-500g',tipo:'COMBO',nome:'Combo 10 Marmitas - 500g',categoria:'Tradicional',tamanho:'500g',quantidade:10,preco:250,ativo:true},
+  {id:'combo-5-300g-fit',tipo:'COMBO',nome:'Combo 5 Marmitas FIT - 300g',categoria:'Linha Fit',tamanho:'300g',quantidade:5,preco:130,ativo:true},
+  {id:'combo-10-300g-fit',tipo:'COMBO',nome:'Combo 10 Marmitas FIT - 300g',categoria:'Linha Fit',tamanho:'300g',quantidade:10,preco:260,ativo:true},
+  {id:'avulsa-tradicional-350g',tipo:'AVULSA',nome:'Marmita avulsa Tradicional - 350g',categoria:'Tradicional',tamanho:'350g',quantidade:1,preco:20,ativo:true},
+  {id:'avulsa-tradicional-500g',tipo:'AVULSA',nome:'Marmita avulsa Tradicional - 500g',categoria:'Tradicional',tamanho:'500g',quantidade:1,preco:25,ativo:true},
+  {id:'avulsa-fit-300g',tipo:'AVULSA',nome:'Marmita avulsa Fit - 300g',categoria:'Linha Fit',tamanho:'300g',quantidade:1,preco:26,ativo:true}
+];
+
+function garantirCatalogo_(planilha) {
+  var ss=planilha || planilhaGestao_();
+  var aba=ss.getSheetByName(GESTAO.SHEETS.CATALOG) || ss.insertSheet(GESTAO.SHEETS.CATALOG);
+  if(aba.getLastRow()===0) {
+    aba.getRange(1,1,1,GESTAO.CATALOG_HEADERS.length).setValues([GESTAO.CATALOG_HEADERS]);
+    aba.setFrozenRows(1);
+    aba.getRange(1,1,1,GESTAO.CATALOG_HEADERS.length).setFontWeight('bold');
+    var agora=new Date();
+    aba.getRange(2,1,CATALOGO_ITENS_FIXOS_.length,GESTAO.CATALOG_HEADERS.length).setValues(
+      CATALOGO_ITENS_FIXOS_.map(function(item){return [item.id,item.tipo,item.nome,item.categoria,item.tamanho,item.quantidade,item.preco,item.ativo,agora];})
+    );
+    aba.getRange(2,7,CATALOGO_ITENS_FIXOS_.length,1).setNumberFormat('"R$" #,##0.00');
+    aba.getRange(2,8,CATALOGO_ITENS_FIXOS_.length,1).insertCheckboxes();
+    aba.autoResizeColumns(1,GESTAO.CATALOG_HEADERS.length);
+    return aba;
+  }
+  var cabecalhos=aba.getRange(1,1,1,GESTAO.CATALOG_HEADERS.length).getValues()[0];
+  if(cabecalhos.join('|')!==GESTAO.CATALOG_HEADERS.join('|')) {
+    throw new Error('A aba Catalogo existe, mas seus cabeçalhos não correspondem ao formato esperado. Os dados existentes foram preservados.');
+  }
+  if(aba.getLastRow()===1) {
+    var agoraVazio=new Date();
+    aba.getRange(2,1,CATALOGO_ITENS_FIXOS_.length,GESTAO.CATALOG_HEADERS.length).setValues(
+      CATALOGO_ITENS_FIXOS_.map(function(item){return [item.id,item.tipo,item.nome,item.categoria,item.tamanho,item.quantidade,item.preco,item.ativo,agoraVazio];})
+    );
+    aba.getRange(2,7,CATALOGO_ITENS_FIXOS_.length,1).setNumberFormat('"R$" #,##0.00');
+    aba.getRange(2,8,CATALOGO_ITENS_FIXOS_.length,1).insertCheckboxes();
+  }
+  return aba;
+}
+
+function lerCatalogo_() {
+  var aba=garantirCatalogo_(),ultima=aba.getLastRow();
+  if(ultima<2) throw new Error('O catálogo ainda não possui produtos cadastrados.');
+  var linhas=aba.getRange(2,1,ultima-1,GESTAO.CATALOG_HEADERS.length).getValues(),porId={};
+  linhas.forEach(function(linha) {
+    var id=String(linha[0]||'');
+    if(!id) return;
+    if(porId[id]) throw new Error('Há um identificador duplicado na aba Catalogo: '+id);
+    var preco=numeroSeguro_(linha[6]);
+    if(!isFinite(preco)||preco<=0||preco>9999.99) throw new Error('O preço cadastrado para '+id+' é inválido.');
+    porId[id]={id:id,tipo:String(linha[1]||''),nome:String(linha[2]||''),categoria:String(linha[3]||''),
+      tamanho:String(linha[4]||''),quantidade:Number(linha[5]||0),preco:preco,ativo:linha[7]===true,
+      atualizadoEm:formatarDataPainel_(linha[8])};
+  });
+  return CATALOGO_ITENS_FIXOS_.map(function(definicao) {
+    var item=porId[definicao.id];
+    if(!item) throw new Error('O item '+definicao.id+' não foi encontrado na aba Catalogo.');
+    if(item.tipo!==definicao.tipo||item.categoria!==definicao.categoria||item.tamanho!==definicao.tamanho||item.quantidade!==definicao.quantidade) {
+      throw new Error('A estrutura do item '+definicao.id+' foi alterada indevidamente na aba Catalogo.');
+    }
+    return item;
+  });
+}
+
+function obterItemCatalogo_(id) {
+  var item=lerCatalogo_().filter(function(x){return x.id===String(id||'');})[0];
+  return item||null;
+}
+function obterCatalogoAdmin_() { return lerCatalogo_(); }
+function obterCatalogoPublico_() {
+  var itens=lerCatalogo_();
+  return {ok:true,apiVersion:TEMPERO_API_VERSION,catalogVersion:1,
+    combos:itens.filter(function(item){return item.tipo==='COMBO';}).map(function(item){return {id:item.id,price:item.preco,active:item.ativo};}),
+    avulsas:itens.filter(function(item){return item.tipo==='AVULSA';}).map(function(item){return {id:item.id,category:item.categoria,size:item.tamanho,price:item.preco,active:item.ativo};})};
+}
+function atualizarCatalogoAdmin_(payload) {
+  var id=String(payload&&payload.id||'');
+  var definicao=CATALOGO_ITENS_FIXOS_.filter(function(item){return item.id===id;})[0];
+  if(!definicao) throw new Error('Produto não encontrado no catálogo permitido.');
+  var preco=numeroSeguro_(payload.price);
+  if(!isFinite(preco)||preco<0.01||preco>9999.99) throw new Error('Informe um preço entre R$ 0,01 e R$ 9.999,99.');
+  if(typeof payload.active!=='boolean') throw new Error('Informe se o item ficará ativo ou inativo.');
+  var catalogo=lerCatalogo_();
+  if(definicao.tipo==='COMBO'&&payload.active===false) {
+    var ativos=catalogo.filter(function(item){return item.tipo==='COMBO'&&item.ativo&&item.id!==id;});
+    if(!ativos.length) throw new Error('Mantenha pelo menos um combo ativo para que os clientes possam montar pedidos.');
+  }
+  var aba=garantirCatalogo_(),ultima=aba.getLastRow(),ids=aba.getRange(2,1,ultima-1,1).getValues(),linha=-1;
+  for(var i=0;i<ids.length;i++) if(String(ids[i][0])===id){linha=i+2;break;}
+  if(linha<2) throw new Error('A linha do produto não foi encontrada na aba Catalogo.');
+  aba.getRange(linha,7,1,3).setValues([[preco,payload.active,new Date()]]);
+  return {ok:true,item:{id:id,price:preco,active:payload.active},message:'Preço e disponibilidade de '+definicao.nome+' atualizados com sucesso.'};
+}
+
 function configurarSistemaAvaliacoes() {
   var base = configurarSistemaAvaliacoesBase_();
   var planilha = SpreadsheetApp.openById(
@@ -466,7 +567,8 @@ function configurarAbasGestao_(planilha) {
     [GESTAO.SHEETS.NOTIFICATIONS,GESTAO.NOTIFICATION_HEADERS],
     [GESTAO.SHEETS.SETTINGS,GESTAO.SETTINGS_HEADERS],
     [GESTAO.SHEETS.SHIPPING,GESTAO.SHIPPING_HEADERS],
-    [GESTAO.SHEETS.PRODUCTS,GESTAO.PRODUCT_HEADERS]
+    [GESTAO.SHEETS.PRODUCTS,GESTAO.PRODUCT_HEADERS],
+    [GESTAO.SHEETS.CATALOG,GESTAO.CATALOG_HEADERS]
   ];
   definicoes.forEach(function(item) {
     var aba = planilha.getSheetByName(item[0]) || planilha.insertSheet(item[0]);
@@ -505,6 +607,7 @@ function configurarAbasGestao_(planilha) {
       return [id,SABORES_PERMITIDOS[id],fitIds[id] ? 'Linha Fit' : 'Tradicional',true];
     }));
   }
+  garantirCatalogo_(planilha);
 }
 
 /**
@@ -553,6 +656,7 @@ function doGet(e) {
   var callback = params.callback || '';
   try {
     if (action === 'health') return resposta_(callback, obterSaudeApi_());
+    if (action === 'catalog') return resposta_(callback, obterCatalogoPublico_());
     if (action === 'orderCheck') {
       var reviewId = String(params.reviewOrderId || '');
       return resposta_(callback,{ok:true,exists:pedidoExistePorCodigoAvaliacao_(reviewId)});
@@ -610,6 +714,7 @@ function obterSaudeApi_() {
     try {
       var planilha = SpreadsheetApp.openById(spreadsheetId);
       spreadsheetAccessible = true;
+      garantirCatalogo_(planilha);
       missingSheets = requiredSheets.filter(function(name) {
         return !planilha.getSheetByName(name);
       });
@@ -651,6 +756,7 @@ function doPost(e) {
   if (action === 'adminUpdateStatus') return executarOperacaoAdmin_(params,'status');
   if (action === 'adminMarkNotification') return executarOperacaoAdmin_(params,'notification');
   if (action === 'adminChangePassword') return executarOperacaoAdmin_(params,'password');
+  if (action === 'adminSaveCatalog') return executarOperacaoAdmin_(params,'catalog');
   return doPostAvaliacoes_(e);
 }
 
@@ -832,8 +938,11 @@ function validarPedidoPublico_(payload) {
   var subtotal=0;
   var itens=[];
   combos.forEach(function(item) {
-    var combo=COMBOS_PERMITIDOS_[String(item && item.comboId || '')];
-    if(!combo) throw new Error('Um dos combos não está cadastrado.');
+    var comboId=String(item && item.comboId || '');
+    var comboBase=COMBOS_PERMITIDOS_[comboId];
+    var comboCatalogo=obterItemCatalogo_(comboId);
+    if(!comboBase||!comboCatalogo||comboCatalogo.ativo!==true) throw new Error('Um dos combos não está cadastrado ou está indisponível.');
+    var combo={name:comboBase.name,qty:comboBase.qty,type:comboBase.type,price:comboCatalogo.preco};
     var flavors=item.flavors && typeof item.flavors==='object'?item.flavors:{};
     var quantidade=0;
     Object.keys(flavors).forEach(function(id) {
@@ -859,18 +968,20 @@ function validarPedidoPublico_(payload) {
     subtotal+=combo.price;
   });
 
-  var precosAvulsa={'350g':20,'500g':25,'300g':26};
   avulsas.forEach(function(item) {
     var id=String(item && item.flavorId || '');
     var sabor=SABORES_PERMITIDOS[id];
     var tamanho=String(item && item.size || '');
     var qtd=Number(item && item.quantity);
-    if(!sabor || !precosAvulsa[tamanho] || !Number.isInteger(qtd) || qtd<1 || qtd>99) {
-      throw new Error('Uma das marmitas avulsas é inválida.');
-    }
+    var categoriaAvulsa=SABORES_FIT_IDS_[id]?'Linha Fit':'Tradicional';
     if(SABORES_FIT_IDS_[id] && tamanho!=='300g') throw new Error('O tamanho da marmita Fit é inválido.');
     if(!SABORES_FIT_IDS_[id] && tamanho==='300g') throw new Error('O tamanho da marmita tradicional é inválido.');
-    var unit=precosAvulsa[tamanho],line=arredondarDinheiro_(unit*qtd);
+    var catalogoId=categoriaAvulsa==='Linha Fit'?'avulsa-fit-300g':(tamanho==='500g'?'avulsa-tradicional-500g':'avulsa-tradicional-350g');
+    var avulsaCatalogo=obterItemCatalogo_(catalogoId);
+    if(!sabor||!avulsaCatalogo||avulsaCatalogo.tipo!=='AVULSA'||avulsaCatalogo.ativo!==true||avulsaCatalogo.tamanho!==tamanho||!Number.isInteger(qtd)||qtd<1||qtd>99) {
+      throw new Error('Uma das marmitas avulsas é inválida ou está indisponível.');
+    }
+    var unit=avulsaCatalogo.preco,line=arredondarDinheiro_(unit*qtd);
     itens.push({kind:'Avulsa',reference:id,name:sabor,flavorSummary:sabor,size:tamanho,
       quantity:qtd,unitPrice:unit,total:line,obs:''});
     subtotal+=line;
@@ -914,8 +1025,10 @@ function registrarPedidoPublico_(params) {
     var text=String(params.payload || '');
     if(!text || text.length>18000) throw new Error('Dados do pedido inválidos.');
     var payload=JSON.parse(text);
-    var pedido=validarPedidoPublico_(payload);
     lock.waitLock(10000);
+    // Revalidar dentro do mesmo bloqueio usado pela edição do catálogo evita
+    // aceitar preço antigo se o painel atualizar o item durante o checkout.
+    var pedido=validarPedidoPublico_(payload);
     if(pedidoExistePorCodigoAvaliacao_(pedido.reviewId)) {
       return respostaTexto_({ok:true,duplicate:true,orderId:pedido.orderId});
     }
@@ -1031,7 +1144,7 @@ function obterDadosPainelAdmin_() {
     inProgress:(statusCounts['Pedido confirmado']||0)+(statusCounts['Em preparação']||0),
     outForDelivery:statusCounts['Saiu para entrega']||0,
     delivered:statusCounts['Entregue']||0
-  },spreadsheetUrl:planilhaGestao_().getUrl()};
+  },catalog:obterCatalogoAdmin_(),spreadsheetUrl:planilhaGestao_().getUrl()};
 }
 
 function formatarDataPainel_(valor) {
@@ -1069,6 +1182,7 @@ function executarOperacaoAdmin_(params,tipo) {
       if(tipo==='status') resultado=atualizarStatusPedidoAdmin_(payload);
       else if(tipo==='notification') resultado=marcarNotificacaoAdmin_(payload);
       else if(tipo==='password') resultado=alterarSenhaAdmin_(payload);
+      else if(tipo==='catalog') resultado=atualizarCatalogoAdmin_(payload);
     } finally {
       if(lock.hasLock()) lock.releaseLock();
     }

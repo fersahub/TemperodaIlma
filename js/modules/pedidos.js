@@ -18,7 +18,7 @@ function restaurarCarrinho() {
         const avulsasSalvas = !Array.isArray(salvo) && salvo && Array.isArray(salvo.avulsas) ? salvo.avulsas : [];
         avulsasOcultasNestePedido = !Array.isArray(salvo) && Boolean(salvo && salvo.avulsasOcultas);
         avulsasOpcoesExpandidas = !avulsasOcultasNestePedido && !Array.isArray(salvo) && Boolean(salvo && salvo.avulsasOpcoesExpandidas);
-        cartCombos = combosSalvos.filter(i => i && typeof i === 'object' && combos.some(c => c.id === i.comboId))
+        cartCombos = combosSalvos.filter(i => i && typeof i === 'object' && combos.some(c => c.id === i.comboId && c.ativo !== false))
             .map(i => {
                 const c = combos.find(x => x.id === i.comboId);
                 return { ...i, name: c.name, price: c.price, qty: c.qty };

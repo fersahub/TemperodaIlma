@@ -5,14 +5,18 @@ function temComboNoCarrinho() {
 
 function tamanhosDisponiveisAvulsa(prato) {
     if (!prato || prato.emBreve || prato.disponivel === false) return [];
-    if (prato.tag === 'Tradicional') return ['350g', '500g'];
-    if (prato.tag === 'Linha Fit') return ['300g'];
-    return [];
+    let tamanhos=[];
+    if (prato.tag === 'Tradicional') tamanhos=['350g','500g'];
+    if (prato.tag === 'Linha Fit') tamanhos=['300g'];
+    return tamanhos.filter(tamanho=>precoUnitarioAvulsa(prato.tag,tamanho)!==null);
 }
 
 /* Referência inicial: preço unitário médio do combo de 5 correspondente.
    Assim, os valores ficam derivados do catálogo existente e não duplicados no código. */
 function precoUnitarioAvulsa(tag, tamanho) {
+    const dinamicos=typeof window!=='undefined'&&window.TEMPERO_PRECOS_AVULSAS?window.TEMPERO_PRECOS_AVULSAS:{};
+    const dinamico=dinamicos[tag+'|'+tamanho];
+    if(dinamico) return dinamico.active===true?Number(dinamico.price):null;
     const referencias = {
         'Tradicional|350g': 'combo-5-350g',
         'Tradicional|500g': 'combo-5-500g',
@@ -131,6 +135,7 @@ function renderAvulsasDisplay() {
 
     const pratos = availableFlavors.filter(prato => tamanhosDisponiveisAvulsa(prato).length > 0);
     grid.innerHTML = '';
+    if(!pratos.length){grid.innerHTML='<p class="col-span-full text-center text-xs text-stone-500 py-4">Não há marmitas avulsas disponíveis no momento.</p>';atualizarPreferenciaVisualAvulsas();return;}
     pratos.forEach(prato => {
         const tamanhos = tamanhosDisponiveisAvulsa(prato);
         const opcoes = tamanhos.map(tamanho => '<option value="' + tamanho + '">' + tamanho + '</option>').join('');

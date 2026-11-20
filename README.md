@@ -184,11 +184,11 @@ A planilha existente é preservada e recebe estas abas adicionais:
 1. Abra o mesmo projeto do Google Apps Script que já atende às avaliações. Não crie uma planilha nova.
 2. Substitua o conteúdo do arquivo `Code.gs` pelo arquivo integrations/google-apps-script/Code.gs deste repositório. Se houver outros arquivos `.gs`, confira se não existe outra função `doGet(e)` ou `doPost(e)` duplicada; mantenha somente um ponto de entrada de cada tipo.
 3. Execute `verificarConfiguracaoPainelTempero()` no editor do Apps Script. No Registro de execução, confira `adminConfigured`, `spreadsheetConfigured`, `spreadsheetAccessible` e `missingSheets`. Esta função é apenas diagnóstica e não altera nada. Só execute `configurarSistemaAvaliacoes()` se a planilha existente estiver configurada e o diagnóstico mostrar abas faltando; a função reutiliza o ID registrado, mas, sem esse ID, a rotina de configuração base pode criar outra planilha.
-4. Na primeira ativação, execute gerarSenhaPainelTempero() uma vez. Copie a senha no Registro de execução e guarde-a em um gerenciador de senhas. Não execute essa função novamente quando desejar apenas atualizar o código: ela substitui a senha existente.
-5. Em **Implantar → Gerenciar implantações**, não exclua as entradas sem descrição. Abra cada uma e confira a URL do App da Web. A implantação correta é a que possui o mesmo ID que aparece entre `/s/` e `/exec` no valor `apiUrl` de `js/config/loja.js`. Edite essa implantação, selecione **Nova versão** e mantenha execução como proprietário e acesso **Qualquer pessoa**. Dê a ela a descrição `Produção - Tempero da Ilma` para identificá-la no futuro. Se nenhuma URL tiver esse ID, não crie outra implantação às cegas: será necessário atualizar `apiUrl` com a URL real da implantação escolhida.
-6. Antes do login, abra a mesma URL acrescida de `?action=health`. A resposta esperada traz `ok: true`, `apiVersion: 2026.11.20.5`, `adminConfigured: true`, `spreadsheetAccessible: true` e `missingSheets: []`. Se aparecer `Ação inválida` ou uma versão diferente, o ID do endereço pode apontar para outra implantação ou uma versão antiga. O painel também tem o botão **Testar conexão** e apresenta a causa encontrada. O endereço do site é https://fersahub.github.io/TemperodaIlma/admin.html.
+4. Somente na primeira configuração do painel, se ainda não existir senha administrativa, execute gerarSenhaPainelTempero() uma vez. Como o painel já está configurado, não execute essa função nesta atualização: ela substitui a senha existente.
+5. Em **Implantar → Gerenciar implantações**, localize a implantação existente **Atualização do Painel - 20/11/2026**. Confirme pelo identificador completo `AKfycby4mn8UBBcPENUq_UVml-y7HFlFiLtjOOZB6NUZBPS5Nii1tX2lqZqvy0jMIlEN1vj65A`, que deve corresponder ao ID entre `/s/` e `/exec` no `apiUrl` de `js/config/loja.js`. Edite essa implantação, selecione **Nova versão** e mantenha **Executar como: Eu** e **Quem pode acessar: Qualquer pessoa**. Não crie outra implantação e não exclua a implantação chamada `Sem título`.
+6. Antes do login, abra a mesma URL acrescida de `?action=health`. A resposta esperada traz `ok: true`, `apiVersion: 2026.11.20.6`, `adminConfigured: true`, `spreadsheetConfigured: true`, `spreadsheetAccessible: true` e `missingSheets: []`. A primeira chamada cria automaticamente a aba `Catalogo` na planilha existente e preenche os nove registros iniciais. Confira também que `spreadsheetError` está vazio. O painel possui o botão **Testar conexão**. O endereço é https://fersahub.github.io/TemperodaIlma/admin.html.
 7. Depois de entrar, use **Alterar senha** no topo do painel para cadastrar sua própria senha. Ela deve ter de 8 a 128 caracteres e conter letras e números. A operação encerra também as sessões existentes em outros navegadores e dispositivos.
-8. Para futuras atualizações, substitua o conteúdo do único arquivo principal `Code.gs` e publique uma nova versão da mesma implantação de produção. O projeto deve ter apenas uma função `doGet(e)` e uma função `doPost(e)` globais; arquivos auxiliares podem existir, mas não mantenha versões antigas desses pontos de entrada duplicadas. Não execute `gerarSenhaPainelTempero()` novamente, a menos que queira redefinir a senha.
+8. Para futuras atualizações, substitua o conteúdo do arquivo principal `Code.gs` e publique uma nova versão da mesma implantação **Atualização do Painel - 20/11/2026**, preservando seu ID. O projeto deve ter apenas uma função `doGet(e)` e uma função `doPost(e)` globais; arquivos auxiliares podem existir, mas não mantenha versões antigas desses pontos de entrada duplicadas. Não execute `gerarSenhaPainelTempero()` novamente, a menos que queira redefinir a senha.
 9. Faça um pedido de teste, confirme a abertura da comanda no WhatsApp, confira se entrou como Aguardando confirmação, altere o status no painel e teste a mensagem preparada.
 
 ### Como funcionam os avisos
@@ -201,4 +201,43 @@ As avaliações exigem consentimento explícito e um pedido registrado com statu
 
 A senha administrativa fica nas Script Properties do Apps Script e não é enviada ao GitHub Pages. O login usa desafio HMAC e sessões temporárias. A alteração de senha é feita dentro do painel, após autenticação, com mínimo de 8 caracteres e invalida todas as sessões anteriores. A lista de pedidos é atualizada automaticamente a cada 60 segundos, sem recarregar a página. A planilha deve permanecer privada e a conta Google que administra o Apps Script deve ser protegida. A página do painel não é armazenada em cache offline. O login agora diferencia erros de conexão de uma implantação antiga do Apps Script. A atualização automática consulta os dados uma vez por minuto enquanto o painel está aberto e não há modais em uso. O serviço está sujeito às cotas de uso do Google.
 
-O painel inicial concentra os pedidos e as notificações manuais. A edição de preços, catálogo e taxas diretamente pelo painel fica para uma etapa futura; o backend mantém validações independentes para não aceitar valores enviados pelo navegador sem conferência.
+O painel administrativo agora também possui o módulo **Gestão do cardápio**, que permite alterar os preços dos seis combos e das três opções de marmita avulsa (Tradicional 350g, Tradicional 500g e Linha Fit 300g), além de ativar ou desativar cada opção. O backend valida os preços consultando a aba privada **Catalogo** antes de registrar um pedido. Os nomes, descrições, fotos, categorias, tamanhos e a criação de novas opções continuam definidos no código e exigem alteração técnica. A edição dos valores não altera pedidos que já foram gravados.
+
+
+## Gestão do cardápio — preços e disponibilidade
+
+A aba **Catalogo** é criada automaticamente na planilha central quando a nova versão do Apps Script recebe a primeira consulta de saúde ou de catálogo. Ela é separada da aba **Produtos**: Produtos mantém o cadastro técnico dos sabores; Catalogo guarda os preços e a disponibilidade comercial.
+
+### Itens controlados pelo painel
+
+- **Combos:** 5 e 10 marmitas Tradicionais de 350g; 5 e 10 marmitas Tradicionais de 500g; 5 e 10 marmitas Fit de 300g.
+- **Avulsas:** Tradicional 350g; Tradicional 500g; Fit 300g. Cada preço de avulsa é compartilhado por todos os sabores compatíveis com aquela linha e tamanho.
+- Cada item possui preço e situação Ativo/Inativo. É obrigatório manter pelo menos um combo ativo.
+
+### Usar o módulo
+
+1. Atualize e publique a nova versão do arquivo `Code.gs` no Apps Script, usando a implantação já associada ao endpoint do site.
+2. Acesse `https://fersahub.github.io/TemperodaIlma/admin.html` e entre com a senha administrativa existente.
+3. Role até **Gestão do cardápio**.
+4. Altere o preço no campo do item. Use o ponto como separador decimal se o navegador exigir (por exemplo, `22.50`).
+5. Marque ou desmarque **Ativo** para disponibilizar ou ocultar aquele combo/opção de avulsa.
+6. Clique em **Salvar** na mesma linha. Aguarde a confirmação antes de editar outro item.
+7. Atualize o site do cardápio. Ele consulta os preços atualizados ao iniciar. Os preços também são validados no servidor quando um pedido é registrado.
+
+### Colunas da aba Catalogo
+
+`ID`, `Tipo`, `Nome`, `Categoria`, `Tamanho`, `Quantidade`, `Preço`, `Ativo`, `Atualizado em`. Altere preços e disponibilidade pelo painel; não mude IDs, nomes estruturais, categorias, tamanhos ou quantidades diretamente na planilha. A API verifica os identificadores estruturais antes de aceitar os valores.
+
+### Regras de preço e histórico
+
+- Valores permitidos: R$ 0,01 até R$ 9.999,99.
+- O servidor consulta a mesma aba Catalogo usada pelo painel e pelo site; não confia no valor enviado pelo navegador.
+- Se o preço do carrinho ficar diferente do preço atual porque houve alteração simultânea no painel, a validação do servidor rejeitará a divergência. Atualize a página e monte o pedido novamente.
+- O preço de cada pedido é gravado como fotografia histórica em `Pedidos` e `ItensPedidos`. Alterações posteriores no catálogo não recalculam pedidos antigos.
+- Quando uma opção é desativada, deixa de aparecer para novas compras; itens já registrados permanecem nos registros históricos.
+- Se a consulta ao catálogo falhar, o site pode exibir o último catálogo salvo por até 24 horas, mas bloqueia o envio de novos pedidos até conseguir confirmar os preços atuais.
+- Enquanto o Apps Script antigo responder apenas `Ação inválida` para o catálogo, o site mantém o comportamento estático anterior. O painel exige a versão `2026.11.20.6` para liberar a nova área.
+
+### Limites desta etapa
+
+O painel edita preços e ativa/desativa as opções comerciais já existentes. Cadastro de novos combos, novos tamanhos, novos sabores, alteração de nomes/descrições/fotos e mudança das quantidades dos combos continuam exigindo ajuste técnico porque esses elementos estão ligados às regras de montagem, avaliações e validações de pedidos. O módulo não altera taxas de entrega, cupons ou horário da loja.
