@@ -591,9 +591,9 @@ function obterSaudeApi_() {
   var props = PropertiesService.getScriptProperties();
   var spreadsheetId = props.getProperty(CONFIG.SPREADSHEET_PROPERTY) || '';
   var adminSecret = props.getProperty(GESTAO.ADMIN_SECRET_PROPERTY) || '';
-  var requiredSheets = Object.keys(GESTAO.SHEETS).map(function(key) {
+  var requiredSheets = [CONFIG.SHEET_NAME].concat(Object.keys(GESTAO.SHEETS).map(function(key) {
     return GESTAO.SHEETS[key];
-  });
+  }));
   var missingSheets = [];
   var spreadsheetAccessible = false;
   var spreadsheetError = '';
@@ -620,6 +620,12 @@ function obterSaudeApi_() {
     missingSheets:missingSheets,
     spreadsheetError:spreadsheetError
   };
+}
+
+function verificarConfiguracaoPainelTempero() {
+  var diagnostico = obterSaudeApi_();
+  Logger.log(JSON.stringify(diagnostico));
+  return diagnostico;
 }
 
 function mensagemPublicaBackend_(erro) {
