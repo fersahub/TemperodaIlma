@@ -8,24 +8,25 @@ function tamanhosDisponiveisAvulsa(prato) {
     let tamanhos=[];
     if (prato.tag === 'Tradicional') tamanhos=['350g','500g'];
     if (prato.tag === 'Linha Fit') tamanhos=['300g'];
-    return tamanhos.filter(tamanho=>precoUnitarioAvulsa(prato.tag,tamanho)!==null);
+    return tamanhos.filter(tamanho=>precoUnitarioAvulsa(prato,tamanho)!==null);
 }
 
-/* Referência inicial: preço unitário médio do combo de 5 correspondente.
-   Assim, os valores ficam derivados do catálogo existente e não duplicados no código. */
-function precoUnitarioAvulsa(tag, tamanho) {
+/* O preço é individual por sabor e tamanho. O fallback mantém compatibilidade
+   com ambientes antigos sem catálogo remoto confirmado. Depois do carregamento da API,
+   item ausente ou inativo nunca recebe o preço de outro sabor. */
+function precoUnitarioAvulsa(prato, tamanho) {
+    const flavorId=prato&&typeof prato==='object'?String(prato.id||''):'';
+    const tag=prato&&typeof prato==='object'?String(prato.tag||''):String(prato||'');
     const dinamicos=typeof window!=='undefined'&&window.TEMPERO_PRECOS_AVULSAS?window.TEMPERO_PRECOS_AVULSAS:{};
-    const dinamico=dinamicos[tag+'|'+tamanho];
-    if(dinamico) return dinamico.active===true?Number(dinamico.price):null;
-    const referencias = {
-        'Tradicional|350g': 'combo-5-350g',
-        'Tradicional|500g': 'combo-5-500g',
-        'Linha Fit|300g': 'combo-5-300g-fit'
-    };
-    const comboId = referencias[tag + '|' + tamanho];
-    const combo = combos.find(item => item.id === comboId);
-    if (!combo || !combo.qty) return null;
-    return Number((combo.price / combo.qty).toFixed(2));
+    const chave=flavorId+'|'+tamanho;
+    if(flavorId&&Object.prototype.hasOwnProperty.call(dinamicos,chave)) {
+        const item=dinamicos[chave];
+        return item&&item.active===true?Number(item.price):null;
+    }
+    if(typeof window!=='undefined'&&window.TEMPERO_CATALOGO_CARREGADO===true)return null;
+    const referencias={'Tradicional|350g':'combo-5-350g','Tradicional|500g':'combo-5-500g','Linha Fit|300g':'combo-5-300g-fit'};
+    const combo=combos.find(item=>item.id===referencias[tag+'|'+tamanho]);
+    return combo&&combo.qty?Number((combo.price/combo.qty).toFixed(2)):null;
 }
 
 function criarItemAvulso(pratoId, tamanho, quantidade) {
@@ -33,7 +34,7 @@ function criarItemAvulso(pratoId, tamanho, quantidade) {
     const prato = availableFlavors.find(item => item.id === String(pratoId));
     const tamanhos = tamanhosDisponiveisAvulsa(prato);
     const qtd = Number(quantidade);
-    const unitPrice = tamanhos.includes(String(tamanho)) ? precoUnitarioAvulsa(prato.tag, String(tamanho)) : null;
+    const unitPrice = tamanhos.includes(String(tamanho)) ? precoUnitarioAvulsa(prato, String(tamanho)) : null;
     if (!prato || !unitPrice || !Number.isInteger(qtd) || qtd < 1 || qtd > 99) return null;
     return {
         cartId: 'avulsa-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
@@ -53,7 +54,7 @@ function normalizarItemAvulso(item) {
     const tamanhos = tamanhosDisponiveisAvulsa(prato);
     const tamanho = String(item.size || '');
     const quantidade = Number(item.quantity);
-    const unitPrice = prato && tamanhos.includes(tamanho) ? precoUnitarioAvulsa(prato.tag, tamanho) : null;
+    const unitPrice = prato && tamanhos.includes(tamanho) ? precoUnitarioAvulsa(prato, tamanho) : null;
     if (!prato || !unitPrice || !Number.isInteger(quantidade) || quantidade < 1 || quantidade > 99) return null;
     return {
         cartId: typeof item.cartId === 'string' && item.cartId ? item.cartId : 'avulsa-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
@@ -77,7 +78,7 @@ function atualizarPrecoAvulsaCard(pratoId) {
     const select = document.getElementById('avulsa-tamanho-' + pratoId);
     const preco = document.getElementById('avulsa-preco-' + pratoId);
     if (!prato || !select || !preco) return;
-    const unitPrice = precoUnitarioAvulsa(prato.tag, select.value);
+    const unitPrice = precoUnitarioAvulsa(prato, select.value);
     preco.textContent = unitPrice === null ? 'Preço indisponível' : 'R$ ' + unitPrice.toFixed(2).replace('.', ',') + ' / unidade';
 }
 
@@ -165,7 +166,7 @@ function renderAvulsasDisplay() {
                 </label>
             </div>
             <div class="flex items-center justify-between gap-2">
-                <span id="avulsa-preco-${id}" class="text-xs font-extrabold text-stone-800">${'R$ ' + precoUnitarioAvulsa(prato.tag, tamanhos[0]).toFixed(2).replace('.', ',') + ' / unidade'}</span>
+                <span id="avulsa-preco-${id}" class="text-xs font-extrabold text-stone-800">${'R$ ' + precoUnitarioAvulsa(prato, tamanhos[0]).toFixed(2).replace('.', ',') + ' / unidade'}</span>
                 <button type="button" onclick="adicionarAvulsa('${id}')" ${podeAdicionar ? '' : 'disabled'} class="rounded-lg px-3 py-2 text-xs font-bold ${podeAdicionar ? 'bg-brand-secondary text-white hover:bg-brand-accent' : 'bg-stone-200 text-stone-500 cursor-not-allowed'}">
                     <i class="fa-solid fa-plus"></i> Adicionar
                 </button>
