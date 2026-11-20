@@ -554,6 +554,7 @@ function doPost(e) {
   if (action === 'registerOrder') return registrarPedidoPublico_(params);
   if (action === 'adminUpdateStatus') return executarOperacaoAdmin_(params,'status');
   if (action === 'adminMarkNotification') return executarOperacaoAdmin_(params,'notification');
+  if (action === 'adminChangePassword') return executarOperacaoAdmin_(params,'password');
   return doPostAvaliacoes_(e);
 }
 
@@ -920,7 +921,8 @@ function executarOperacaoAdmin_(params,tipo) {
     var resultado;
     try {
       if(tipo==='status') resultado=atualizarStatusPedidoAdmin_(payload);
-      else resultado=marcarNotificacaoAdmin_(payload);
+      else if(tipo==='notification') resultado=marcarNotificacaoAdmin_(payload);
+      else if(tipo==='password') resultado=alterarSenhaAdmin_(payload);
     } finally {
       if(lock.hasLock()) lock.releaseLock();
     }
@@ -931,6 +933,14 @@ function executarOperacaoAdmin_(params,tipo) {
     try { cache.put(cacheKey,JSON.stringify(falha),300); } catch(ignorar) {}
     return respostaTexto_(falha);
   }
+}
+
+function alterarSenhaAdmin_(payload) {
+  var senha=String(payload && payload.newPassword || '');
+  if(senha.length<16 || senha.length>128) throw new Error('A nova senha deve ter entre 16 e 128 caracteres.');
+  if(!/[A-Za-z]/.test(senha) || !/[0-9]/.test(senha)) throw new Error('Use ao menos uma letra e um número na nova senha.');
+  PropertiesService.getScriptProperties().setProperty(GESTAO.ADMIN_SECRET_PROPERTY,senha);
+  return {ok:true,message:'Senha alterada com sucesso. Entre novamente usando sua nova senha.'};
 }
 
 function atualizarStatusPedidoAdmin_(payload) {
