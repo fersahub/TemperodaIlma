@@ -365,7 +365,7 @@ test('painel administrativo: arquivos, autenticação e sessão não expõem seg
  assert.match(html,/minlength="8"/);
  assert.match(backend,/valor.length < 8/);
  assert.match(js,/salvarNovaSenha/);
- assert.match(js,/},60000)/);
+ assert.ok(js.includes('},60000);'));
  assert.match(js,/carregarPainel\(\{silencioso:true\}\)/);
  assert.match(html,/id="last-updated"/);
  assert.match(backend,/function alterarSenhaAdmin_\(payload\)/);
