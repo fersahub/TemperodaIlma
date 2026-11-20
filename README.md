@@ -120,7 +120,7 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - Apresenta o detalhamento dos combos existentes e o total estimado com base nos preços do catálogo.
 - Permite montar uma sequência de combos, escolhendo os sabores de cada um, antes de adicioná-los ao carrinho.
 - Se a sequência for cancelada, preserva no carrinho os combos que já foram concluídos.
-- Todos os cálculos acontecem localmente no navegador, sem backend ou banco de dados.
+- Os cálculos do planejador acontecem localmente no navegador.
 
 
 ## Carrinho misto: combos + marmitas avulsas
@@ -133,7 +133,7 @@ Não coloque senhas, tokens privados ou credenciais de gateway no frontend: arqu
 - O frete é sempre cobrado conforme a taxa do bairro; combos de 10 não concedem frete grátis.
 - Os preços unitários iniciais são derivados do valor por unidade dos combos de 5 correspondentes: Tradicional 350g, Tradicional 500g e Fit 300g. Esses valores devem ser revisados comercialmente antes de divulgar a venda avulsa.
 - Carrinhos antigos salvos no navegador (formato de array, contendo apenas combos) continuam sendo restaurados.
-- Sem Backend ou banco de dados; os dados permanecem no navegador.
+- O carrinho de montagem permanece no navegador; após a confirmação do cliente, o pedido é registrado na planilha central.
 
 ## Sistema de avaliações por sabor e geral
 
@@ -182,7 +182,7 @@ A planilha existente é preservada e recebe estas abas adicionais:
 
 1. Abra o mesmo projeto do Google Apps Script que já atende às avaliações. Não crie uma planilha nova.
 2. Substitua o conteúdo de Code.gs pelo arquivo integrations/google-apps-script/Code.gs deste repositório.
-3. No editor do Apps Script, execute novamente configurarSistemaAvaliacoes(). A função reutiliza o ID de planilha existente, preserva a aba Avaliacoes e cria as demais abas.
+3. No editor do Apps Script, execute novamente configurarSistemaAvaliacoes(). A função reutiliza o ID de planilha existente, preserva a aba Avaliacoes e cria as demais abas. Ela não cria uma nova planilha se a propriedade existente continuar configurada.
 4. Configure uma senha-frase administrativa com pelo menos 24 caracteres executando definirSenhaPainelTempero('SUA FRASE LONGA E EXCLUSIVA') no editor. Use uma frase exclusiva e não a coloque no GitHub nem a envie por mensagem.
 5. Em **Implantar → Gerenciar implantações**, edite a implantação do App da Web e publique uma **nova versão**. Mantenha a execução como proprietário e o acesso público necessário ao cardápio.
 6. Abra https://fersahub.github.io/TemperodaIlma/admin.html e entre com a senha-frase.
