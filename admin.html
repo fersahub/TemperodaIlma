@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#234b32">
   <title>Painel administrativo | Tempero da Ilma</title>
-  <link rel="stylesheet" href="css/admin.css?v=20261120-3">
+  <link rel="stylesheet" href="css/admin.css?v=20261120-4">
 </head>
 <body>
   <header class="topbar">
@@ -42,7 +42,14 @@
         <input id="admin-password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required placeholder="Digite sua senha">
         <button class="button button-primary button-full" type="submit" id="login-button">Entrar no painel</button>
         <p class="form-message" id="login-message" role="alert"></p>
-        <small>O acesso é protegido por autenticação e a sessão expira automaticamente.</small>
+        <div class="api-check">
+          <div class="api-check-heading">
+            <span class="api-check-label">Conexão do painel</span>
+            <button class="button button-ghost api-check-button" id="api-test-button" type="button">Testar conexão</button>
+          </div>
+          <p id="api-status" class="api-status" data-state="info" role="status" aria-live="polite">Verificando comunicação com o Apps Script…</p>
+        </div>
+        <small>Após entrar, você verá os pedidos, filtros, detalhes, atualização de status e mensagens. A sessão expira automaticamente.</small>
       </form>
     </section>
 
@@ -106,7 +113,7 @@
   </div>
   <div class="toast" id="admin-toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config/loja.js"></script>
-  <script src="js/admin.js?v=20261120-3"></script>
+  <script src="js/config/loja.js?v=20261120-2"></script>
+  <script src="js/admin.js?v=20261120-4"></script>
 </body>
 </html>
