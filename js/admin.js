@@ -67,7 +67,7 @@
         }
         throw new Error(detail || 'O Apps Script não confirmou a disponibilidade do serviço.');
       }
-      if(health.apiVersion!=='2026.11.20.4') {
+      if(health.apiVersion!=='2026.11.20.5') {
         throw new Error('A implantação respondeu com uma versão diferente da esperada ('+String(health.apiVersion||'sem versão')+'). Publique uma nova versão do Code.gs na implantação cujo ID corresponde ao endereço do site.');
       }
       if(!health.adminConfigured) {

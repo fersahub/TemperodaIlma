@@ -362,7 +362,7 @@ function respostaTexto_(dados) {
  * Mantém a aba Avaliacoes existente e cria as novas abas na mesma planilha.
  * ------------------------------------------------------------------ */
 
-var TEMPERO_API_VERSION = '2026.11.20.4';
+var TEMPERO_API_VERSION = '2026.11.20.5';
 
 var GESTAO = {
   ADMIN_SECRET_PROPERTY: 'TEMPERODA_ILMA_ADMIN_SECRET',
@@ -556,6 +556,14 @@ function doGet(e) {
     if (action === 'orderCheck') {
       var reviewId = String(params.reviewOrderId || '');
       return resposta_(callback,{ok:true,exists:pedidoExistePorCodigoAvaliacao_(reviewId)});
+    }
+    if (action === 'firstOrderCheck') {
+      var telefone = String(params.phone || '').replace(/\D/g,'');
+      if (telefone.length < 10 || telefone.length > 13) {
+        return resposta_(callback,{ok:false,message:'Informe um telefone válido com DDD.'});
+      }
+      limitarConsultaFretePrimeiroPedido_(telefone);
+      return resposta_(callback,{ok:true,eligible:!telefoneTemPedidoRegistrado_(telefone)});
     }
     if (action === 'adminChallenge') return criarDesafioAdmin_(callback);
     if (action === 'adminLogin') return autenticarAdmin_(params);
@@ -765,6 +773,39 @@ function taxaEntregaBairro_(bairro) {
   return null;
 }
 
+function telefoneTemPedidoRegistrado_(telefone) {
+  var normalizado=String(telefone||'').replace(/\D/g,'');
+  if(normalizado.length<10 || normalizado.length>13) return true;
+
+  var pedidos=abaGestao_(GESTAO.SHEETS.ORDERS),ultimaPedido=pedidos.getLastRow();
+  if(ultimaPedido>=2) {
+    var telefones=pedidos.getRange(2,7,ultimaPedido-1,1).getValues();
+    for(var i=0;i<telefones.length;i++) {
+      if(String(telefones[i][0]||'').replace(/\D/g,'')===normalizado) return true;
+    }
+  }
+
+  // A aba Clientes também protege registros anteriores já consolidados.
+  var clientes=abaGestao_(GESTAO.SHEETS.CLIENTS),ultimaCliente=clientes.getLastRow();
+  if(ultimaCliente>=2) {
+    var registros=clientes.getRange(2,1,ultimaCliente-1,10).getValues();
+    for(var j=0;j<registros.length;j++) {
+      if(String(registros[j][0]||'').replace(/\D/g,'')===normalizado) return true;
+    }
+  }
+  return false;
+}
+
+function limitarConsultaFretePrimeiroPedido_(telefone) {
+  var bytes=Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,String(telefone),Utilities.Charset.UTF_8);
+  var hash=bytes.map(function(b){return ('0'+((b+256)%256).toString(16)).slice(-2);}).join('').slice(0,24);
+  var chave='temp-first-order-check:'+hash;
+  var cache=CacheService.getScriptCache();
+  var atual=Number(cache.get(chave)||0);
+  if(atual>=12) throw new Error('Muitas consultas para este telefone. Aguarde alguns minutos e tente novamente.');
+  cache.put(chave,String(atual+1),900);
+}
+
 function validarPedidoPublico_(payload) {
   if(!payload || typeof payload!=='object') throw new Error('Pedido inválido.');
   var orderId=limparCampo_(payload.orderId,60);
@@ -836,10 +877,14 @@ function validarPedidoPublico_(payload) {
   });
 
   subtotal=arredondarDinheiro_(subtotal);
-  var frete=taxaEntregaBairro_(bairro);
+  var freteNormal=taxaEntregaBairro_(bairro);
+  var solicitouFreteGratis=payload.firstOrderFreeShipping===true;
+  var freteGratisPrimeiroPedido=solicitouFreteGratis && !telefoneTemPedidoRegistrado_(telefone);
+  var frete=freteGratisPrimeiroPedido ? 0 : freteNormal;
   var freteInformado=numeroSeguro_(payload.shippingFee);
-  if(frete===null || !isFinite(freteInformado) || Math.abs(frete-freteInformado)>0.01) {
-    throw new Error('O frete precisa ser recalculado para o bairro selecionado.');
+  if(freteNormal===null || (solicitouFreteGratis && !freteGratisPrimeiroPedido) ||
+     !isFinite(freteInformado) || Math.abs(frete-freteInformado)>0.01) {
+    throw new Error('O frete informado não confere ou o benefício de primeiro pedido não está disponível para este telefone.');
   }
   var subtotalInformado=numeroSeguro_(payload.subtotal);
   var totalInformado=numeroSeguro_(payload.total);
@@ -858,6 +903,7 @@ function validarPedidoPublico_(payload) {
     payment:pagamento,troco:limparCampo_(payload.changeFor,40),
     observations:limparCampo_(payload.observations,500),
     subtotal:subtotal,shipping:frete,total:arredondarDinheiro_(subtotal+frete),
+    firstOrderFreeShipping:freteGratisPrimeiroPedido,
     deliveryDate:dataEntregaSabadoServidor_(),items:itens
   };
 }
@@ -874,6 +920,9 @@ function registrarPedidoPublico_(params) {
       return respostaTexto_({ok:true,duplicate:true,orderId:pedido.orderId});
     }
     if(pedidoExistePorId_(pedido.orderId)) throw new Error('Este número de pedido já foi utilizado. Atualize a página e tente novamente.');
+    if(pedido.firstOrderFreeShipping && telefoneTemPedidoRegistrado_(pedido.customer.phone)) {
+      throw new Error('Este telefone já possui pedido registrado. O frete grátis de primeira compra não está mais disponível.');
+    }
     validarLimiteRegistroPedido_(pedido.customer.phone);
 
     var agora=new Date();

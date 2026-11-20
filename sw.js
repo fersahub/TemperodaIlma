@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v23-panel-health-check';
+const CACHE_NAME = 'tempero-v24-first-order-free-shipping';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
