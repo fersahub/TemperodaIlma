@@ -558,7 +558,7 @@ function doGet(e) {
       return resposta_(callback,{ok:true,exists:pedidoExistePorCodigoAvaliacao_(reviewId)});
     }
     if (action === 'firstOrderCheck') {
-      var telefone = String(params.phone || '').replace(/\\D/g,'');
+      var telefone = String(params.phone || '').replace(/\D/g,'');
       if (telefone.length < 10 || telefone.length > 13) {
         return resposta_(callback,{ok:false,message:'Informe um telefone válido com DDD.'});
       }
@@ -773,16 +773,15 @@ function taxaEntregaBairro_(bairro) {
   return null;
 }
 
-function validarPedidoPublico_(payload) {
 function telefoneTemPedidoRegistrado_(telefone) {
-  var normalizado=String(telefone||'').replace(/\\D/g,'');
+  var normalizado=String(telefone||'').replace(/\D/g,'');
   if(normalizado.length<10 || normalizado.length>13) return true;
 
   var pedidos=abaGestao_(GESTAO.SHEETS.ORDERS),ultimaPedido=pedidos.getLastRow();
   if(ultimaPedido>=2) {
     var telefones=pedidos.getRange(2,7,ultimaPedido-1,1).getValues();
     for(var i=0;i<telefones.length;i++) {
-      if(String(telefones[i][0]||'').replace(/\\D/g,'')===normalizado) return true;
+      if(String(telefones[i][0]||'').replace(/\D/g,'')===normalizado) return true;
     }
   }
 
@@ -791,7 +790,7 @@ function telefoneTemPedidoRegistrado_(telefone) {
   if(ultimaCliente>=2) {
     var registros=clientes.getRange(2,1,ultimaCliente-1,10).getValues();
     for(var j=0;j<registros.length;j++) {
-      if(String(registros[j][0]||'').replace(/\\D/g,'')===normalizado) return true;
+      if(String(registros[j][0]||'').replace(/\D/g,'')===normalizado) return true;
     }
   }
   return false;
@@ -807,7 +806,7 @@ function limitarConsultaFretePrimeiroPedido_(telefone) {
   cache.put(chave,String(atual+1),900);
 }
 
-
+function validarPedidoPublico_(payload) {
   if(!payload || typeof payload!=='object') throw new Error('Pedido inválido.');
   var orderId=limparCampo_(payload.orderId,60);
   var reviewId=String(payload.reviewOrderId || '');
