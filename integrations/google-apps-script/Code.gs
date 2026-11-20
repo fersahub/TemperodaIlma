@@ -661,7 +661,7 @@ function validarPedidoPublico_(payload) {
   if(!payload || typeof payload!=='object') throw new Error('Pedido inválido.');
   var orderId=limparCampo_(payload.orderId,60);
   var reviewId=String(payload.reviewOrderId || '');
-  if(!/^TI-[0-9]{6}-[A-F0-9]{6}$/.test(orderId) || !/^[A-F0-9]{24}$/.test(reviewId)) {
+  if(!/^TI-[0-9]{6}-[A-F0-9]{10}$/.test(orderId) || !/^[A-F0-9]{24}$/.test(reviewId)) {
     throw new Error('Identificação do pedido inválida.');
   }
   var cliente=payload.customer || {};
