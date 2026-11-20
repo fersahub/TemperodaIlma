@@ -6,6 +6,8 @@
   let statuses = [];
   let currentOrder = null;
   let toastTimer = null;
+  let carregandoPainel = false;
+  let refreshIntervalId = null;
 
   function escapar(value) {
     return String(value === null || value === undefined ? '' : value).replace(/[&<>"']/g, c => ({
@@ -52,7 +54,7 @@
     const button=$('login-button'), message=$('login-message');
     const password=$('admin-password').value;
     message.textContent='';
-    if(password.length<16 || password.length>128 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)){message.textContent='Use uma senha de 16 a 128 caracteres, incluindo letras e números.';return;}
+    if(password.length<8 || password.length>128 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)){message.textContent='Use uma senha de 8 a 128 caracteres, incluindo letras e números.';return;}
     button.disabled=true; button.textContent='Validando…';
     try {
       const challenge=await jsonp('adminChallenge',{});
@@ -69,7 +71,9 @@
       button.disabled=false; button.textContent='Entrar no painel';
     }
   }
-  async function carregarPainel() {
+  async function carregarPainel(opcoes = {}) {
+    if (carregandoPainel || !token) return false;
+    carregandoPainel = true;
     try {
       const data=await jsonp('adminData',{token});
       if(!data || !data.ok) throw new Error(data && data.message || 'Sessão inválida.');
@@ -80,9 +84,16 @@
       renderStats(data.stats || {});
       renderFilterOptions();
       renderOrders();
+      const atualizadoEm = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      const indicador = $('last-updated');
+      if(indicador) indicador.textContent=atualizadoEm;
+      return true;
     } catch(error) {
       if(/sessão|expirada|inválida/i.test(error.message)) sair();
-      else toast(error.message || 'Não foi possível carregar os pedidos.');
+      else if(!opcoes.silencioso) toast(error.message || 'Não foi possível carregar os pedidos.');
+      return false;
+    } finally {
+      carregandoPainel = false;
     }
   }
   function renderStats(stats) {
@@ -245,8 +256,8 @@
     const confirmacao=$('confirm-admin-password').value;
     const message=$('password-message'),button=$('password-save');
     message.textContent='';
-    if(senha.length<16 || senha.length>128 || !/[A-Za-z]/.test(senha) || !/[0-9]/.test(senha)) {
-      message.textContent='Use de 16 a 128 caracteres, incluindo pelo menos uma letra e um número.';return;
+    if(senha.length<8 || senha.length>128 || !/[A-Za-z]/.test(senha) || !/[0-9]/.test(senha)) {
+      message.textContent='Use de 8 a 128 caracteres, incluindo pelo menos uma letra e um número.';return;
     }
     if(senha!==confirmacao) { message.textContent='As senhas não coincidem.';return; }
     button.disabled=true;button.textContent='Salvando…';
@@ -264,7 +275,19 @@
     $('dashboard-view').hidden=true;$('top-actions').hidden=true;$('login-view').hidden=false;
     fecharPedido();
   }
-  async function atualizar(){await carregarPainel();toast('Painel atualizado.');}
+  async function atualizar(){
+    const ok=await carregarPainel();
+    if(ok) toast('Painel atualizado.');
+  }
+  function iniciarAtualizacaoAutomatica() {
+    if(refreshIntervalId) return;
+    refreshIntervalId=window.setInterval(()=>{
+      if(!token || $('dashboard-view').hidden) return;
+      // Não substituir o conteúdo de um pedido ou formulário enquanto estiver em uso.
+      if(!$('order-modal').hidden || !$('password-modal').hidden) return;
+      carregarPainel({silencioso:true});
+    },60000);
+  }
 
   document.addEventListener('DOMContentLoaded',async()=>{
     $('login-form').addEventListener('submit',entrar);
@@ -272,6 +295,7 @@
     $('filter-status').addEventListener('change',renderOrders);
     $('password-form').addEventListener('submit',salvarNovaSenha);
     if(token) await carregarPainel();
+    iniciarAtualizacaoAutomatica();
   });
   window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp,abrirAlterarSenha,fecharAlterarSenha};
 })();
