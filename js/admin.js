@@ -58,7 +58,14 @@
     button.disabled=true; button.textContent='Validando…';
     try {
       const challenge=await jsonp('adminChallenge',{});
-      if(!challenge || !challenge.ok || !challenge.nonce) throw new Error('Não foi possível iniciar a autenticação.');
+      if(!challenge || challenge.ok !== true || !/^[A-Fa-f0-9]{64}$/.test(String(challenge.nonce || ''))) {
+        const motivo=String(challenge && challenge.message || '').trim();
+        if(/ação inválida|invalid action/i.test(motivo)) {
+          throw new Error('O Google Apps Script está respondendo, mas a implantação conectada ainda não reconhece a autenticação administrativa. Atualize o Code.gs no mesmo projeto e publique uma nova versão do App da Web.');
+        }
+        if(motivo) throw new Error('O Google Apps Script recusou o início da autenticação: '+motivo);
+        throw new Error('O Google Apps Script respondeu sem fornecer o desafio de autenticação. Confira se o Code.gs atualizado foi publicado no mesmo endereço configurado no site.');
+      }
       const proof=await gerarProvaHmac(password,challenge.nonce);
       const auth=await jsonp('adminLogin',{nonce:challenge.nonce,proof});
       if(!auth || !auth.ok || !auth.token) throw new Error(auth && auth.message || 'Acesso não autorizado.');
