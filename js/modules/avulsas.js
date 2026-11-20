@@ -14,7 +14,8 @@ function tamanhosDisponiveisAvulsa(prato) {
 /* Referência inicial: preço unitário médio do combo de 5 correspondente.
    Assim, os valores ficam derivados do catálogo existente e não duplicados no código. */
 function precoUnitarioAvulsa(tag, tamanho) {
-    const dinamico=window.TEMPERO_PRECOS_AVULSAS&&window.TEMPERO_PRECOS_AVULSAS[tag+'|'+tamanho];
+    const dinamicos=typeof window!=='undefined'&&window.TEMPERO_PRECOS_AVULSAS?window.TEMPERO_PRECOS_AVULSAS:{};
+    const dinamico=dinamicos[tag+'|'+tamanho];
     if(dinamico) return dinamico.active===true?Number(dinamico.price):null;
     const referencias = {
         'Tradicional|350g': 'combo-5-350g',
