@@ -23,22 +23,77 @@
   }
   function jsonp(action, params) {
     return new Promise((resolve,reject)=>{
-      if(!API) return reject(new Error('Endpoint do Apps Script não configurado.'));
+      if(!API) return reject(new Error('Endpoint do Apps Script não configurado em js/config/loja.js.'));
       const callback='adminJsonp_'+Date.now()+'_'+Math.floor(Math.random()*1000000);
       const script=document.createElement('script');
       const query=new URLSearchParams(Object.assign({action,callback},params||{}));
-      let finished=false;
+      let finished=false,callbackExecutado=false;
       const finish=(error,value)=>{
         if(finished)return; finished=true;
         try{delete window[callback];}catch(e){window[callback]=undefined;}
         script.remove(); clearTimeout(timer);
         if(error)reject(error);else resolve(value);
       };
-      window[callback]=value=>finish(null,value);
-      script.onerror=()=>finish(new Error('Não foi possível conectar ao Google Apps Script.'));
-      const timer=setTimeout(()=>finish(new Error('O serviço não respondeu. Confira a implantação do Apps Script.')),12000);
-      script.src=API+'?'+query.toString(); script.async=true; document.head.appendChild(script);
+      window[callback]=value=>{callbackExecutado=true;finish(null,value);};
+      script.onerror=()=>finish(new Error('O navegador não conseguiu carregar o Apps Script. Confira se a implantação é um App da Web, executa como proprietário e permite acesso a qualquer pessoa.'));
+      script.onload=()=>{
+        if(!callbackExecutado) finish(new Error('O endereço do Apps Script respondeu, mas não executou a resposta JSONP. A URL pode apontar para uma implantação antiga ou para outro projeto.'));
+      };
+      const timer=setTimeout(()=>finish(new Error('O Apps Script não respondeu em 15 segundos. Verifique a URL /exec, o acesso público e a implantação ativa.')),15000);
+      const separator=API.indexOf('?')>=0?'&':'?';
+      script.src=API+separator+query.toString();
+      script.async=true;
+      document.head.appendChild(script);
     });
+  }
+
+  function mostrarEstadoConexao(message, tipo) {
+    const status=$('api-status');
+    if(!status)return;
+    status.textContent=message;
+    status.dataset.state=tipo||'info';
+  }
+
+  async function testarConexao() {
+    const button=$('api-test-button');
+    if(button){button.disabled=true;button.textContent='Verificando…';}
+    mostrarEstadoConexao('Verificando comunicação com o Apps Script…','info');
+    try {
+      const health=await jsonp('health',{});
+      if(!health || health.ok!==true) {
+        const detail=String(health && health.message || '').trim();
+        if(/ação inválida|invalid action/i.test(detail)) {
+          throw new Error('A URL configurada aponta para uma implantação antiga ou para outro projeto. Na aba Implantações, confira a URL /exec e compare o ID com o endereço em js/config/loja.js.');
+        }
+        throw new Error(detail || 'O Apps Script não confirmou a disponibilidade do serviço.');
+      }
+      if(health.apiVersion!=='2026.11.20.4') {
+        throw new Error('A implantação respondeu com uma versão diferente da esperada ('+String(health.apiVersion||'sem versão')+'). Publique uma nova versão do Code.gs na implantação cujo ID corresponde ao endereço do site.');
+      }
+      if(!health.adminConfigured) {
+        throw new Error('O Apps Script está atualizado, mas a senha administrativa não está configurada neste projeto. Não gere outra senha ainda; primeiro confira se esta é a implantação correta.');
+      }
+      if(!health.spreadsheetConfigured) {
+        throw new Error('O Apps Script está atualizado, mas não tem uma planilha vinculada. Confira a propriedade da planilha antes de executar a configuração para evitar criar uma planilha duplicada.');
+      }
+      if(!health.spreadsheetAccessible) {
+        throw new Error(health.spreadsheetError || 'O Apps Script não consegue acessar a planilha configurada. Verifique as autorizações da conta proprietária.');
+      }
+      if(Array.isArray(health.missingSheets) && health.missingSheets.length) {
+        throw new Error('A planilha existe, mas faltam estas abas: '+health.missingSheets.join(', ')+'. Execute configurarSistemaAvaliacoes() no projeto correto para completar a estrutura.');
+      }
+      const challenge=await jsonp('adminChallenge',{});
+      if(!challenge || challenge.ok!==true || !/^[A-Fa-f0-9]{64}$/.test(String(challenge.nonce||''))) {
+        throw new Error(String(challenge && challenge.message || 'O Apps Script não conseguiu iniciar o desafio de autenticação.'));
+      }
+      mostrarEstadoConexao('Conexão confirmada · Apps Script '+health.apiVersion+'.','ok');
+      return true;
+    } catch(error) {
+      mostrarEstadoConexao(error.message || 'Não foi possível verificar o Apps Script.','error');
+      return false;
+    } finally {
+      if(button){button.disabled=false;button.textContent='Testar conexão';}
+    }
   }
   async function gerarProvaHmac(password, nonce) {
     if(!window.crypto || !window.crypto.subtle) throw new Error('Este navegador não oferece criptografia segura. Abra o painel pelo endereço HTTPS.');
@@ -74,6 +129,7 @@
       await carregarPainel();
     } catch(error) {
       message.textContent=error.message || 'Não foi possível entrar.';
+      mostrarEstadoConexao(error.message || 'Falha ao autenticar.','error');
     } finally {
       button.disabled=false; button.textContent='Entrar no painel';
     }
@@ -301,8 +357,10 @@
     $('search-orders').addEventListener('input',renderOrders);
     $('filter-status').addEventListener('change',renderOrders);
     $('password-form').addEventListener('submit',salvarNovaSenha);
+    $('api-test-button').addEventListener('click',testarConexao);
     if(token) await carregarPainel();
     iniciarAtualizacaoAutomatica();
+    testarConexao();
   });
-  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp,abrirAlterarSenha,fecharAlterarSenha};
+  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp,abrirAlterarSenha,fecharAlterarSenha,testarConexao};
 })();
