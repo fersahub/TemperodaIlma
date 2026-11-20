@@ -79,7 +79,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v20-senha-auto-refresh/);
+ assert.match(read('sw.js'),/tempero-v21-admin-assets-v2/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -256,7 +256,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v20-senha-auto-refresh'));
+ assert.ok(read('sw.js').includes('tempero-v21-admin-assets-v2'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -347,6 +347,9 @@ test('avulsas: novo pedido reinicia e persiste preferência mesmo após escolha 
 });
 
 test('painel administrativo: arquivos, autenticação e sessão não expõem segredo no frontend',()=>{
+ const adminHtml=read('admin.html');
+ assert.match(adminHtml,/js\/admin\.js\?v=20261120-2/);
+ assert.match(adminHtml,/css\/admin\.css\?v=20261120-2/);
  const html=read('admin.html'),css=read('css/admin.css'),js=read('js/admin.js'),backend=read('integrations/google-apps-script/Code.gs');
  assert.ok(exists('admin.html')&&exists('css/admin.css')&&exists('js/admin.js'));
  assert.match(html,/noindex,nofollow/);
@@ -435,7 +438,7 @@ test('modal de avaliação participa da pilha de modais',()=>{
 });
 test('service worker não armazena painel administrativo no cache público',()=>{
  const sw=read('sw.js');
- assert.match(sw,/tempero-v20-senha-auto-refresh/);
+ assert.match(sw,/tempero-v21-admin-assets-v2/);
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);

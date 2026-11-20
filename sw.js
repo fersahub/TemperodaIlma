@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v20-senha-auto-refresh';
+const CACHE_NAME = 'tempero-v21-admin-assets-v2';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
