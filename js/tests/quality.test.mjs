@@ -9,6 +9,10 @@ const read=p=>readFileSync(resolve(ROOT,p),'utf8');
 const exists=p=>existsSync(resolve(ROOT,p));
 function data(p){const window={TEMPERO_DADOS:{}};runInNewContext(read(p),{window});return window.TEMPERO_DADOS;}
 
+test('Apps Script expõe a versão atualizada para o benefício de primeiro pedido',()=>{
+ const backend=read('integrations/google-apps-script/Code.gs');
+ assert.match(backend,/TEMPERO_API_VERSION = '2026.11.20.5'/);
+});
 test('combos: IDs, preços, quantidades e imagens',()=>{
  const xs=data('js/data/combos.js').combos;assert.ok(xs.length>0);assert.equal(new Set(xs.map(x=>x.id)).size,xs.length);
  for(const x of xs){assert.ok(x.name&&x.description);assert.ok([5,10].includes(x.qty));assert.ok(Number.isFinite(x.price)&&x.price>0);assert.ok(['Tradicional','Linha Fit'].includes(x.type));assert.ok(exists(x.image),x.image);assert.equal(Object.hasOwn(x,'freteGratis'),false);}
@@ -79,7 +83,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v23-panel-health-check/);
+ assert.match(read('sw.js'),/tempero-v24-first-order-free-shipping/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -256,7 +260,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v23-panel-health-check'));
+ assert.ok(read('sw.js').includes('tempero-v24-first-order-free-shipping'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -348,8 +352,8 @@ test('avulsas: novo pedido reinicia e persiste preferência mesmo após escolha 
 
 test('painel administrativo: arquivos, autenticação e sessão não expõem segredo no frontend',()=>{
  const adminHtml=read('admin.html');
- assert.match(adminHtml,/js\/admin\.js\?v=20261120-4/);
- assert.match(adminHtml,/css\/admin\.css\?v=20261120-4/);
+ assert.match(adminHtml,/js\/admin\.js\?v=20261120-5/);
+ assert.match(adminHtml,/css\/admin\.css\?v=20261120-5/);
  const html=read('admin.html'),css=read('css/admin.css'),js=read('js/admin.js'),backend=read('integrations/google-apps-script/Code.gs');
  assert.ok(exists('admin.html')&&exists('css/admin.css')&&exists('js/admin.js'));
  assert.match(html,/noindex,nofollow/);
@@ -448,7 +452,7 @@ test('modal de avaliação participa da pilha de modais',()=>{
 });
 test('service worker não armazena painel administrativo no cache público',()=>{
  const sw=read('sw.js');
- assert.match(sw,/tempero-v23-panel-health-check/);
+ assert.match(sw,/tempero-v24-first-order-free-shipping/);
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
