@@ -508,6 +508,8 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
  assert.match(backend,/action === 'adminSaveCatalog'/);
  assert.match(backend,/comboCatalogo\.preco/);
  assert.match(backend,/avulsaCatalogo\.preco/);
+ const registro=backend.slice(backend.indexOf('function registrarPedidoPublico_'));
+ assert.ok(registro.indexOf('lock.waitLock(10000)') < registro.indexOf('var pedido=validarPedidoPublico_(payload)'));
  assert.doesNotMatch(backend,/var precosAvulsa=\{'350g':20/);
  assert.match(admin,/function renderCatalog\(\)/);
  assert.match(admin,/function salvarCatalogo\(id\)/);
