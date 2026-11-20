@@ -183,7 +183,7 @@ A planilha existente é preservada e recebe estas abas adicionais:
 1. Abra o mesmo projeto do Google Apps Script que já atende às avaliações. Não crie uma planilha nova.
 2. Substitua o conteúdo de Code.gs pelo arquivo integrations/google-apps-script/Code.gs deste repositório.
 3. No editor do Apps Script, execute novamente configurarSistemaAvaliacoes(). A função reutiliza o ID de planilha existente, preserva a aba Avaliacoes e cria as demais abas. Ela não cria uma nova planilha se a propriedade existente continuar configurada.
-4. Configure uma senha-frase administrativa com pelo menos 24 caracteres executando definirSenhaPainelTempero('SUA FRASE LONGA E EXCLUSIVA') no editor. Use uma frase exclusiva e não a coloque no GitHub nem a envie por mensagem.
+4. No editor do Apps Script, selecione e execute gerarSenhaPainelTempero() uma única vez. Abra o Registro de execução, copie a senha gerada e guarde-a em um gerenciador de senhas. A senha fica nas propriedades privadas do script e não deve ser publicada no GitHub ou enviada por mensagem. Executar essa função novamente troca a senha anterior.
 5. Em **Implantar → Gerenciar implantações**, edite a implantação do App da Web e publique uma **nova versão**. Mantenha a execução como proprietário e o acesso público necessário ao cardápio.
 6. Abra https://fersahub.github.io/TemperodaIlma/admin.html e entre com a senha-frase.
 7. Faça um pedido de teste, confirme a abertura da comanda no WhatsApp, confira se entrou como Aguardando confirmação, altere o status no painel e teste a mensagem preparada.
