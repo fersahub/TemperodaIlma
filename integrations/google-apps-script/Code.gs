@@ -362,7 +362,7 @@ function respostaTexto_(dados) {
  * Mantém a aba Avaliacoes existente e cria as novas abas na mesma planilha.
  * ------------------------------------------------------------------ */
 
-var TEMPERO_API_VERSION = '2026.11.20.6';
+var TEMPERO_API_VERSION = '2026.11.20.7';
 
 var GESTAO = {
   ADMIN_SECRET_PROPERTY: 'TEMPERODA_ILMA_ADMIN_SECRET',
@@ -445,31 +445,52 @@ var FRETES_INICIAIS_ = [
 
 
 /* Catálogo comercial: preços e disponibilidade editáveis pelo painel. */
-var CATALOGO_ITENS_FIXOS_ = [
+var CATALOGO_COMBOS_FIXOS_ = [
   {id:'combo-5-350g',tipo:'COMBO',nome:'Combo 5 Marmitas - 350g',categoria:'Tradicional',tamanho:'350g',quantidade:5,preco:100,ativo:true},
   {id:'combo-10-350g',tipo:'COMBO',nome:'Combo 10 Marmitas - 350g',categoria:'Tradicional',tamanho:'350g',quantidade:10,preco:200,ativo:true},
   {id:'combo-5-500g',tipo:'COMBO',nome:'Combo 5 Marmitas - 500g',categoria:'Tradicional',tamanho:'500g',quantidade:5,preco:125,ativo:true},
   {id:'combo-10-500g',tipo:'COMBO',nome:'Combo 10 Marmitas - 500g',categoria:'Tradicional',tamanho:'500g',quantidade:10,preco:250,ativo:true},
   {id:'combo-5-300g-fit',tipo:'COMBO',nome:'Combo 5 Marmitas FIT - 300g',categoria:'Linha Fit',tamanho:'300g',quantidade:5,preco:130,ativo:true},
-  {id:'combo-10-300g-fit',tipo:'COMBO',nome:'Combo 10 Marmitas FIT - 300g',categoria:'Linha Fit',tamanho:'300g',quantidade:10,preco:260,ativo:true},
-  {id:'avulsa-tradicional-350g',tipo:'AVULSA',nome:'Marmita avulsa Tradicional - 350g',categoria:'Tradicional',tamanho:'350g',quantidade:1,preco:20,ativo:true},
-  {id:'avulsa-tradicional-500g',tipo:'AVULSA',nome:'Marmita avulsa Tradicional - 500g',categoria:'Tradicional',tamanho:'500g',quantidade:1,preco:25,ativo:true},
-  {id:'avulsa-fit-300g',tipo:'AVULSA',nome:'Marmita avulsa Fit - 300g',categoria:'Linha Fit',tamanho:'300g',quantidade:1,preco:26,ativo:true}
+  {id:'combo-10-300g-fit',tipo:'COMBO',nome:'Combo 10 Marmitas FIT - 300g',categoria:'Linha Fit',tamanho:'300g',quantidade:10,preco:260,ativo:true}
 ];
+var CATALOGO_LEGADO_AVULSAS_ = {
+  'Tradicional|350g':{id:'avulsa-tradicional-350g'},
+  'Tradicional|500g':{id:'avulsa-tradicional-500g'},
+  'Linha Fit|300g':{id:'avulsa-fit-300g'}
+};
+function definirAvulsasFixas_() {
+  var itens=[];
+  Object.keys(SABORES_PERMITIDOS).forEach(function(flavorId) {
+    var categoria=SABORES_FIT_IDS_[flavorId]?'Linha Fit':'Tradicional';
+    var tamanhos=categoria==='Linha Fit'?['300g']:['350g','500g'];
+    tamanhos.forEach(function(tamanho) {
+      var precoBase=categoria==='Linha Fit'?26:(tamanho==='500g'?25:20);
+      itens.push({id:'avulsa-'+flavorId+'-'+tamanho,tipo:'AVULSA',
+        nome:SABORES_PERMITIDOS[flavorId],categoria:categoria,tamanho:tamanho,
+        quantidade:1,preco:precoBase,ativo:true,flavorId:flavorId});
+    });
+  });
+  return itens;
+}
+var CATALOGO_ITENS_FIXOS_ = CATALOGO_COMBOS_FIXOS_.concat(definirAvulsasFixas_());
 
+function inserirItensCatalogo_(aba,itens) {
+  if(!itens.length)return;
+  var inicio=aba.getLastRow()+1,agora=new Date();
+  aba.getRange(inicio,1,itens.length,GESTAO.CATALOG_HEADERS.length).setValues(
+    itens.map(function(item){return [item.id,item.tipo,item.nome,item.categoria,item.tamanho,item.quantidade,item.preco,item.ativo,agora];})
+  );
+  aba.getRange(inicio,7,itens.length,1).setNumberFormat('"R$" #,##0.00');
+  aba.getRange(inicio,8,itens.length,1).insertCheckboxes();
+}
 function garantirCatalogo_(planilha) {
-  var ss=planilha || planilhaGestao_();
-  var aba=ss.getSheetByName(GESTAO.SHEETS.CATALOG) || ss.insertSheet(GESTAO.SHEETS.CATALOG);
+  var ss=planilha||planilhaGestao_();
+  var aba=ss.getSheetByName(GESTAO.SHEETS.CATALOG)||ss.insertSheet(GESTAO.SHEETS.CATALOG);
   if(aba.getLastRow()===0) {
     aba.getRange(1,1,1,GESTAO.CATALOG_HEADERS.length).setValues([GESTAO.CATALOG_HEADERS]);
     aba.setFrozenRows(1);
     aba.getRange(1,1,1,GESTAO.CATALOG_HEADERS.length).setFontWeight('bold');
-    var agora=new Date();
-    aba.getRange(2,1,CATALOGO_ITENS_FIXOS_.length,GESTAO.CATALOG_HEADERS.length).setValues(
-      CATALOGO_ITENS_FIXOS_.map(function(item){return [item.id,item.tipo,item.nome,item.categoria,item.tamanho,item.quantidade,item.preco,item.ativo,agora];})
-    );
-    aba.getRange(2,7,CATALOGO_ITENS_FIXOS_.length,1).setNumberFormat('"R$" #,##0.00');
-    aba.getRange(2,8,CATALOGO_ITENS_FIXOS_.length,1).insertCheckboxes();
+    inserirItensCatalogo_(aba,CATALOGO_ITENS_FIXOS_);
     aba.autoResizeColumns(1,GESTAO.CATALOG_HEADERS.length);
     return aba;
   }
@@ -478,66 +499,88 @@ function garantirCatalogo_(planilha) {
     throw new Error('A aba Catalogo existe, mas seus cabeçalhos não correspondem ao formato esperado. Os dados existentes foram preservados.');
   }
   if(aba.getLastRow()===1) {
-    var agoraVazio=new Date();
-    aba.getRange(2,1,CATALOGO_ITENS_FIXOS_.length,GESTAO.CATALOG_HEADERS.length).setValues(
-      CATALOGO_ITENS_FIXOS_.map(function(item){return [item.id,item.tipo,item.nome,item.categoria,item.tamanho,item.quantidade,item.preco,item.ativo,agoraVazio];})
-    );
-    aba.getRange(2,7,CATALOGO_ITENS_FIXOS_.length,1).setNumberFormat('"R$" #,##0.00');
-    aba.getRange(2,8,CATALOGO_ITENS_FIXOS_.length,1).insertCheckboxes();
+    inserirItensCatalogo_(aba,CATALOGO_ITENS_FIXOS_);
+    aba.autoResizeColumns(1,GESTAO.CATALOG_HEADERS.length);
+    return aba;
   }
+  /* Migração segura: cada novo registro herda o preço e disponibilidade do
+     perfil antigo correspondente, sem sobrescrever linhas já existentes. */
+  var ultima=aba.getLastRow();
+  var linhas=aba.getRange(2,1,ultima-1,GESTAO.CATALOG_HEADERS.length).getValues();
+  var existentes={},porId={};
+  linhas.forEach(function(linha) {
+    var id=String(linha[0]||'');
+    if(id){existentes[id]=true;porId[id]=linha;}
+  });
+  var novos=CATALOGO_ITENS_FIXOS_.filter(function(item){return !existentes[item.id];}).map(function(item) {
+    var copia=Object.assign({},item);
+    if(copia.tipo==='AVULSA') {
+      var legado=CATALOGO_LEGADO_AVULSAS_[copia.categoria+'|'+copia.tamanho];
+      var linhaLegada=legado&&porId[legado.id];
+      if(linhaLegada) {
+        var precoLegado=numeroSeguro_(linhaLegada[6]);
+        if(isFinite(precoLegado)&&precoLegado>0&&precoLegado<=9999.99)copia.preco=precoLegado;
+        copia.ativo=linhaLegada[7]===true;
+      }
+    }
+    return copia;
+  });
+  inserirItensCatalogo_(aba,novos);
   return aba;
 }
-
 function lerCatalogo_() {
   var aba=garantirCatalogo_(),ultima=aba.getLastRow();
-  if(ultima<2) throw new Error('O catálogo ainda não possui produtos cadastrados.');
+  if(ultima<2)throw new Error('O catálogo ainda não possui produtos cadastrados.');
   var linhas=aba.getRange(2,1,ultima-1,GESTAO.CATALOG_HEADERS.length).getValues(),porId={};
   linhas.forEach(function(linha) {
     var id=String(linha[0]||'');
-    if(!id) return;
-    if(porId[id]) throw new Error('Há um identificador duplicado na aba Catalogo: '+id);
+    if(!id)return;
+    if(porId[id])throw new Error('Há um identificador duplicado na aba Catalogo: '+id);
     var preco=numeroSeguro_(linha[6]);
-    if(!isFinite(preco)||preco<=0||preco>9999.99) throw new Error('O preço cadastrado para '+id+' é inválido.');
+    if(!isFinite(preco)||preco<=0||preco>9999.99)throw new Error('O preço cadastrado para '+id+' é inválido.');
     porId[id]={id:id,tipo:String(linha[1]||''),nome:String(linha[2]||''),categoria:String(linha[3]||''),
       tamanho:String(linha[4]||''),quantidade:Number(linha[5]||0),preco:preco,ativo:linha[7]===true,
       atualizadoEm:formatarDataPainel_(linha[8])};
   });
   return CATALOGO_ITENS_FIXOS_.map(function(definicao) {
     var item=porId[definicao.id];
-    if(!item) throw new Error('O item '+definicao.id+' não foi encontrado na aba Catalogo.');
+    if(!item)throw new Error('O item '+definicao.id+' não foi encontrado na aba Catalogo.');
     if(item.tipo!==definicao.tipo||item.categoria!==definicao.categoria||item.tamanho!==definicao.tamanho||item.quantidade!==definicao.quantidade) {
       throw new Error('A estrutura do item '+definicao.id+' foi alterada indevidamente na aba Catalogo.');
     }
     return item;
   });
 }
-
 function obterItemCatalogo_(id) {
   var item=lerCatalogo_().filter(function(x){return x.id===String(id||'');})[0];
   return item||null;
 }
-function obterCatalogoAdmin_() { return lerCatalogo_(); }
+function obterCatalogoAdmin_(){return lerCatalogo_();}
 function obterCatalogoPublico_() {
   var itens=lerCatalogo_();
-  return {ok:true,apiVersion:TEMPERO_API_VERSION,catalogVersion:1,
+  return {ok:true,apiVersion:TEMPERO_API_VERSION,catalogVersion:2,
     combos:itens.filter(function(item){return item.tipo==='COMBO';}).map(function(item){return {id:item.id,price:item.preco,active:item.ativo};}),
-    avulsas:itens.filter(function(item){return item.tipo==='AVULSA';}).map(function(item){return {id:item.id,category:item.categoria,size:item.tamanho,price:item.preco,active:item.ativo};})};
+    avulsas:itens.filter(function(item){return item.tipo==='AVULSA';}).map(function(item) {
+      var match=item.id.match(/^avulsa-(f[0-9]+)-(350g|500g|300g)$/);
+      return {id:item.id,flavorId:match?match[1]:'',category:item.categoria,size:item.tamanho,price:item.preco,active:item.ativo};
+    })
+  };
 }
 function atualizarCatalogoAdmin_(payload) {
   var id=String(payload&&payload.id||'');
   var definicao=CATALOGO_ITENS_FIXOS_.filter(function(item){return item.id===id;})[0];
-  if(!definicao) throw new Error('Produto não encontrado no catálogo permitido.');
+  if(!definicao)throw new Error('Produto não encontrado no catálogo permitido.');
   var preco=numeroSeguro_(payload.price);
-  if(!isFinite(preco)||preco<0.01||preco>9999.99) throw new Error('Informe um preço entre R$ 0,01 e R$ 9.999,99.');
-  if(typeof payload.active!=='boolean') throw new Error('Informe se o item ficará ativo ou inativo.');
+  if(!isFinite(preco)||preco<0.01||preco>9999.99)throw new Error('Informe um preço entre R$ 0,01 e R$ 9.999,99.');
+  if(typeof payload.active!=='boolean')throw new Error('Informe se o item ficará ativo ou inativo.');
   var catalogo=lerCatalogo_();
   if(definicao.tipo==='COMBO'&&payload.active===false) {
     var ativos=catalogo.filter(function(item){return item.tipo==='COMBO'&&item.ativo&&item.id!==id;});
-    if(!ativos.length) throw new Error('Mantenha pelo menos um combo ativo para que os clientes possam montar pedidos.');
+    if(!ativos.length)throw new Error('Mantenha pelo menos um combo ativo para que os clientes possam montar pedidos.');
   }
   var aba=garantirCatalogo_(),ultima=aba.getLastRow(),ids=aba.getRange(2,1,ultima-1,1).getValues(),linha=-1;
-  for(var i=0;i<ids.length;i++) if(String(ids[i][0])===id){linha=i+2;break;}
-  if(linha<2) throw new Error('A linha do produto não foi encontrada na aba Catalogo.');
+  for(var i=0;i<ids.length;i++)if(String(ids[i][0])===id){linha=i+2;break;}
+  if(linha<2)throw new Error('A linha do produto não foi encontrada na aba Catalogo.');
   aba.getRange(linha,7,1,3).setValues([[preco,payload.active,new Date()]]);
   return {ok:true,item:{id:id,price:preco,active:payload.active},message:'Preço e disponibilidade de '+definicao.nome+' atualizados com sucesso.'};
 }
@@ -976,9 +1019,9 @@ function validarPedidoPublico_(payload) {
     var categoriaAvulsa=SABORES_FIT_IDS_[id]?'Linha Fit':'Tradicional';
     if(SABORES_FIT_IDS_[id] && tamanho!=='300g') throw new Error('O tamanho da marmita Fit é inválido.');
     if(!SABORES_FIT_IDS_[id] && tamanho==='300g') throw new Error('O tamanho da marmita tradicional é inválido.');
-    var catalogoId=categoriaAvulsa==='Linha Fit'?'avulsa-fit-300g':(tamanho==='500g'?'avulsa-tradicional-500g':'avulsa-tradicional-350g');
+    var catalogoId='avulsa-'+id+'-'+tamanho;
     var avulsaCatalogo=obterItemCatalogo_(catalogoId);
-    if(!sabor||!avulsaCatalogo||avulsaCatalogo.tipo!=='AVULSA'||avulsaCatalogo.ativo!==true||avulsaCatalogo.tamanho!==tamanho||!Number.isInteger(qtd)||qtd<1||qtd>99) {
+    if(!sabor||!avulsaCatalogo||avulsaCatalogo.id!==catalogoId||avulsaCatalogo.tipo!=='AVULSA'||avulsaCatalogo.ativo!==true||avulsaCatalogo.tamanho!==tamanho||!Number.isInteger(qtd)||qtd<1||qtd>99) {
       throw new Error('Uma das marmitas avulsas é inválida ou está indisponível.');
     }
     var unit=avulsaCatalogo.preco,line=arredondarDinheiro_(unit*qtd);
