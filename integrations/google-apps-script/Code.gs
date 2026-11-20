@@ -697,9 +697,11 @@ function validarPedidoPublico_(payload) {
     });
     if(quantidade!==combo.qty) throw new Error('A quantidade de sabores do combo não confere.');
     var obs=limparCampo_(item.obs,120);
+    var resumoSabores=[];
+    Object.keys(flavors).forEach(function(id) { resumoSabores.push(Number(flavors[id])+'x '+SABORES_PERMITIDOS[id]); });
     itens.push({
       kind:'Combo',reference:String(item.comboId),name:combo.name,
-      flavorSummary:limparCampo_(item.flavorsSummary,1000),
+      flavorSummary:resumoSabores.join(', '),
       size:combo.type==='Linha Fit'?'300g':(String(item.comboId).indexOf('500g')>=0?'500g':'350g'),
       quantity:combo.qty,unitPrice:arredondarDinheiro_(combo.price/combo.qty),
       total:combo.price,obs:obs
@@ -747,7 +749,7 @@ function validarPedidoPublico_(payload) {
     payment:pagamento,troco:limparCampo_(payload.changeFor,40),
     observations:limparCampo_(payload.observations,500),
     subtotal:subtotal,shipping:frete,total:arredondarDinheiro_(subtotal+frete),
-    deliveryDate:limparCampo_(payload.deliveryDate,30),items:itens
+    deliveryDate:dataEntregaSabadoServidor_(),items:itens
   };
 }
 
@@ -762,16 +764,18 @@ function registrarPedidoPublico_(params) {
     if(pedidoExistePorCodigoAvaliacao_(pedido.reviewId)) {
       return respostaTexto_({ok:true,duplicate:true,orderId:pedido.orderId});
     }
+    if(pedidoExistePorId_(pedido.orderId)) throw new Error('Este número de pedido já foi utilizado. Atualize a página e tente novamente.');
+    validarLimiteRegistroPedido_(pedido.customer.phone);
 
     var agora=new Date();
     var status=STATUS_INICIAL_PEDIDO_;
     var orders=abaGestao_(GESTAO.SHEETS.ORDERS);
     orders.appendRow([
-      pedido.orderId,pedido.reviewId,agora,agora,status,pedido.customer.name,
+      pedido.orderId,pedido.reviewId,agora,agora,status,protegerTextoPlanilha_(pedido.customer.name),
       pedido.customer.phone,pedido.notificationsOptIn,pedido.customer.cep,
       protegerTextoPlanilha_(pedido.customer.rua),protegerTextoPlanilha_(pedido.customer.numero),
-      protegerTextoPlanilha_(pedido.customer.comp),pedido.customer.bairro,pedido.payment,
-      pedido.troco,pedido.observations,pedido.subtotal,pedido.shipping,pedido.total,
+      protegerTextoPlanilha_(pedido.customer.comp),protegerTextoPlanilha_(pedido.customer.bairro),pedido.payment,
+      protegerTextoPlanilha_(pedido.troco),protegerTextoPlanilha_(pedido.observations),pedido.subtotal,pedido.shipping,pedido.total,
       pedido.deliveryDate,pedido.customer.cidade
     ]);
 
@@ -808,16 +812,16 @@ function registrarOuAtualizarCliente_(pedido,agora) {
   if(row) {
     var atual=aba.getRange(row,1,12).getValues()[0];
     aba.getRange(row,2,1,11).setValues([[
-      pedido.customer.name,pedido.customer.cep,pedido.customer.rua,pedido.customer.numero,
-      pedido.customer.comp,pedido.customer.bairro,atual[7] || agora,agora,
+      protegerTextoPlanilha_(pedido.customer.name),pedido.customer.cep,protegerTextoPlanilha_(pedido.customer.rua),protegerTextoPlanilha_(pedido.customer.numero),
+      protegerTextoPlanilha_(pedido.customer.comp),protegerTextoPlanilha_(pedido.customer.bairro),atual[7] || agora,agora,
       Number(atual[9]||0)+1,arredondarDinheiro_(Number(atual[10]||0)+pedido.total),
-      pedido.notificationsOptIn || atual[11]===true
+      pedido.notificationsOptIn===true
     ]]);
   } else {
     aba.appendRow([
-      telefone,pedido.customer.name,pedido.customer.cep,pedido.customer.rua,
-      pedido.customer.numero,pedido.customer.comp,pedido.customer.bairro,
-      agora,agora,1,pedido.total,pedido.notificationsOptIn
+      telefone,protegerTextoPlanilha_(pedido.customer.name),pedido.customer.cep,protegerTextoPlanilha_(pedido.customer.rua),
+      protegerTextoPlanilha_(pedido.customer.numero),protegerTextoPlanilha_(pedido.customer.comp),protegerTextoPlanilha_(pedido.customer.bairro),
+      agora,agora,1,pedido.total,pedido.notificationsOptIn===true
     ]);
   }
 }
@@ -962,7 +966,27 @@ function marcarNotificacaoAdmin_(payload) {
   throw new Error('Notificação não encontrada.');
 }
 
-function respostaTexto_(dados) {
-  return ContentService.createTextOutput(JSON.stringify(dados))
-    .setMimeType(ContentService.MimeType.JSON);
+
+
+function pedidoExistePorId_(orderId) {
+  var aba=abaGestao_(GESTAO.SHEETS.ORDERS),ultima=aba.getLastRow();
+  if(ultima<2) return false;
+  return aba.getRange(2,1,ultima-1,1).getValues().some(function(linha){return String(linha[0])===String(orderId);});
+}
+
+function validarLimiteRegistroPedido_(telefone) {
+  var cache=CacheService.getScriptCache();
+  var bytes=Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,String(telefone),Utilities.Charset.UTF_8);
+  var chave='temp-order-rate:'+bytes.map(function(b){return ('0'+((b+256)%256).toString(16)).slice(-2);}).join('').slice(0,24);
+  var atual=Number(cache.get(chave)||0);
+  if(atual>=8) throw new Error('Muitos pedidos foram registrados deste telefone em pouco tempo. Aguarde alguns minutos e tente novamente.');
+  cache.put(chave,String(atual+1),900);
+}
+
+function dataEntregaSabadoServidor_() {
+  var agora=new Date(),fuso='America/Bahia';
+  var dia=Number(Utilities.formatDate(agora,fuso,'u'))%7;
+  var dias=(6-dia+7)%7;
+  if(dias===0) dias=7;
+  return Utilities.formatDate(new Date(agora.getTime()+dias*86400000),fuso,'dd/MM');
 }
