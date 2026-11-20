@@ -9,23 +9,21 @@
 
         // Data do sábado de entrega (dd/mm): de seg a sex é o sábado da semana; no fim de semana é o sábado seguinte
         function dataEntregaSabado() {
-            const hoje = new Date();
-            let dias = (6 - hoje.getDay() + 7) % 7;
+            const agora = obterDataHoraLoja();
+            let dias = (6 - agora.weekday + 7) % 7;
             if (dias === 0) dias = 7;
-            const d = new Date(hoje);
-            d.setDate(hoje.getDate() + dias);
+            const data = new Date(Date.UTC(agora.year, agora.month - 1, agora.day + dias));
             const p2 = n => String(n).padStart(2, '0');
-            return `${p2(d.getDate())}/${p2(d.getMonth() + 1)}`;
+            return p2(data.getUTCDate()) + '/' + p2(data.getUTCMonth() + 1);
         }
 
         function mostrarAvisoFimDeSemana() {
-            const dia = new Date().getDay();
+            const dia = obterDataHoraLoja().weekday;
             if (dia !== 6 && dia !== 0) return;
             const el = document.getElementById('weekend-banner');
-            el.innerHTML = `<i class="fa-solid fa-calendar-check"></i> Pedidos feitos agora serão entregues no sábado, dia ${dataEntregaSabado()}`;
+            el.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Pedidos feitos agora serão entregues no sábado, dia ' + dataEntregaSabado();
             el.classList.remove('hidden');
         }
-
         function renderFreteBanner() {
             const hint = document.getElementById('cart-ship-hint');
             const el = document.getElementById('free-ship-banner');
