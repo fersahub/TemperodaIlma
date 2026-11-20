@@ -175,7 +175,10 @@ function openFlavorsModal(comboId, editIdx) {
             if (subtotalEl) subtotalEl.innerText = 'R$ ' + subtotalPrice.toFixed(2).replace('.', ',');
 
             if (shippingEl) {
-                if (currentShippingFee !== null) {
+                if (currentShippingFee !== null && primeiroPedidoFreteGratisAtivo()) {
+                    shippingEl.innerText = 'GRÁTIS · 1º pedido';
+                    shippingEl.className = 'font-bold text-emerald-700';
+                } else if (currentShippingFee !== null) {
                     shippingEl.innerText = 'R$ ' + currentShippingFee.toFixed(2).replace('.', ',');
                     shippingEl.className = 'font-bold text-stone-800';
                 } else {
