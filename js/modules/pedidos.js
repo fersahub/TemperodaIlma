@@ -101,7 +101,13 @@ function confirmarEnvio() {
     }
     window.open(pendingWhatsUrl, '_blank');
     if (dp && dp.customerData) salvarUltimoCliente(dp.customerData);
-    if (dp && typeof registrarPedidoCentralizado === 'function') registrarPedidoCentralizado(dp);
+    if (dp && typeof registrarPedidoCentralizado === 'function') {
+        registrarPedidoCentralizado(dp).then(registrado => {
+            if (registrado && dp.firstOrderFreeShipping && typeof revalidarBeneficioAposPrimeiroPedido === 'function') {
+                revalidarBeneficioAposPrimeiroPedido(dp);
+            }
+        });
+    }
     if (dp && typeof registrarPedidoPendenteAvaliacao === 'function') registrarPedidoPendenteAvaliacao(dp);
     document.getElementById('confirm-modal').classList.add('hidden');
     closeCheckoutModal();
@@ -167,6 +173,7 @@ function registrarPedidoCentralizado(pedido) {
         observations: pedido.obs,
         subtotal: pedido.subtotalPrice,
         shippingFee: pedido.feFinal,
+        firstOrderFreeShipping: Boolean(pedido.firstOrderFreeShipping),
         total: pedido.totalPrice,
         deliveryDate: pedido.deliveryDate,
         combos,
