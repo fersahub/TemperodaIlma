@@ -542,3 +542,15 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
  assert.match(adminHtml,/Cada sabor possui preço e disponibilidade próprios/);
  assert.match(read('js/modules/checkout.js'),/TEMPERO_CATALOGO_STATUS === 'cached'/);
 });
+
+
+test('catálogo público atualiza preços e disponibilidade automaticamente a cada minuto sem interferir no carrinho',()=>{
+ const catalog=read('js/modules/catalogo.js'),app=read('js/app.js');
+ assert.match(catalog,/window\.setInterval\(\(\) =>/);
+ assert.match(catalog,/},60000\)/);
+ assert.match(catalog,/document\.visibilityState!=='visible'/);
+ assert.match(catalog,/cartCombos\.length>0/);
+ assert.match(catalog,/cartAvulsas\.length>0/);
+ assert.match(catalog,/if\(catalogoEmAtualizacao\)return/);
+ assert.match(app,/iniciarAtualizacaoAutomaticaCatalogo\(\)/);
+});
