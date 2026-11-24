@@ -11,6 +11,7 @@
   window.TEMPERO_CATALOGO_STATUS='loading';
   window.TEMPERO_PRECOS_AVULSAS={};
   window.TEMPERO_CATALOGO_CARREGADO=false;
+  let catalogoEmAtualizacao=false;
   function aviso(status,message){
     window.TEMPERO_CATALOGO_STATUS=status;
     const el=document.getElementById('catalog-price-status');
@@ -88,6 +89,8 @@
     }catch(error){return false;}
   }
   async function iniciarCatalogoPublico(){
+    if(catalogoEmAtualizacao)return;
+    catalogoEmAtualizacao=true;
     aviso('loading','Atualizando preços e disponibilidade do cardápio…');
     try{
       const data=await jsonp();
@@ -99,8 +102,22 @@
     }catch(error){
       if(aplicarCacheComAviso())return;
       aviso('error','Não foi possível confirmar os preços atuais. Atualize a página quando a conexão retornar. Por segurança, o envio de novos pedidos ficará temporariamente bloqueado.');
+    }finally{
+      catalogoEmAtualizacao=false;
     }
   }
+  function iniciarAtualizacaoAutomaticaCatalogo(){
+    if(window.TEMPERO_CATALOGO_TIMER)return;
+    window.TEMPERO_CATALOGO_TIMER=window.setInterval(()=>{
+      if(document.visibilityState!=='visible')return;
+      const temItensNoCarrinho=(typeof cartCombos!=='undefined'&&Array.isArray(cartCombos)&&cartCombos.length>0)||
+        (typeof cartAvulsas!=='undefined'&&Array.isArray(cartAvulsas)&&cartAvulsas.length>0);
+      // Não alterar preços ou disponibilidade enquanto o cliente estiver montando um pedido.
+      if(temItensNoCarrinho)return;
+      iniciarCatalogoPublico();
+    },60000);
+  }
   window.iniciarCatalogoPublico=iniciarCatalogoPublico;
+  window.iniciarAtualizacaoAutomaticaCatalogo=iniciarAtualizacaoAutomaticaCatalogo;
   window.TEMPERO_CATALOGO_ATUALIZAR=atualizarCarrinho;
 })();
