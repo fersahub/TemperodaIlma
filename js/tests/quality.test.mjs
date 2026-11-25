@@ -575,6 +575,12 @@ test('contingência: permite pré-pedido pelo WhatsApp sem confirmar preços ou 
  assert.match(pedidos,/!dp\.manualCatalogConfirmation && typeof registrarPedidoPendenteAvaliacao/);
  assert.match(html,/id="confirm-send-button"/);
  assert.match(html,/id="sent-modal-description"/);
+ assert.match(html,/id="pix-heading"/);
+ assert.match(html,/id="pix-key-row"/);
+ assert.match(html,/id="pix-copy-button"/);
+ assert.match(read('js/services/pix.js'),/if \(emContingencia\)/);
+ assert.match(read('js/services/pix.js'),/Aguardando confirmação dos valores pela equipe/);
+ assert.match(html,/js\/services\/pix\.js\?v=20261125-4/);
  assert.match(html,/js\/modules\/pedidos\.js\?v=20261125-4/);
  assert.match(html,/js\/modules\/checkout\.js\?v=20261125-4/);
  assert.match(sw,/tempero-v28-whatsapp-manual-order/);
