@@ -39,13 +39,28 @@
       script.async=true;document.head.appendChild(script);
     });
   }
-  function validar(data){
-    if(!data||data.ok!==true||!Array.isArray(data.combos)||!Array.isArray(data.avulsas))return false;
-    return REQUIRED_COMBOS.every(id=>data.combos.some(x=>x&&x.id===id&&Number.isFinite(Number(x.price))&&Number(x.price)>0&&typeof x.active==='boolean')) &&
-      REQUIRED_AVULSAS.length>0&&REQUIRED_AVULSAS.every(def=>data.avulsas.some(x=>x&&x.id===def.id&&x.flavorId===def.flavorId&&x.size===def.size&&Number.isFinite(Number(x.price))&&Number(x.price)>0&&typeof x.active==='boolean'));
+  function diagnosticar(data){
+    if(!data||data.ok!==true)return data&&data.message?'Resposta do servidor: '+String(data.message).slice(0,140):'O servidor não confirmou o catálogo (ok=true).';
+    if(!Array.isArray(data.combos)||!Array.isArray(data.avulsas))return 'A resposta não contém as listas de combos e marmitas avulsas.';
+    for(const id of REQUIRED_COMBOS){
+      const item=data.combos.find(x=>x&&x.id===id);
+      if(!item)return 'Combo ausente no catálogo: '+id+'.';
+      if(!Number.isFinite(Number(item.price))||Number(item.price)<=0)return 'Preço inválido para o combo '+id+'.';
+      if(typeof item.active!=='boolean')return 'Disponibilidade inválida para o combo '+id+'.';
+    }
+    if(!REQUIRED_AVULSAS.length)return 'A lista de marmitas do aplicativo não foi carregada.';
+    for(const def of REQUIRED_AVULSAS){
+      const item=data.avulsas.find(x=>x&&x.id===def.id);
+      if(!item)return 'Marmita avulsa ausente no servidor: '+def.id+'.';
+      if(item.flavorId!==def.flavorId||item.size!==def.size)return 'Identificação divergente para a marmita '+def.id+'.';
+      if(!Number.isFinite(Number(item.price))||Number(item.price)<=0)return 'Preço inválido para a marmita '+def.id+'.';
+      if(typeof item.active!=='boolean')return 'Disponibilidade inválida para a marmita '+def.id+'.';
+    }
+    return '';
   }
+  function validar(data){return diagnosticar(data)==='';}
   function aplicar(data){
-    if(!validar(data))throw new Error('O catálogo retornado está incompleto ou inválido.');
+    if(!validar(data))throw new Error(diagnosticar(data));
     const combosData=new Map(data.combos.map(item=>[item.id,item]));
     combos.forEach(combo=>{
       const remoto=combosData.get(combo.id);
@@ -95,7 +110,7 @@
     try{
       const data=await jsonp();
       if(data&&data.ok===false&&/ação inválida|acao invalida|invalid action/i.test(String(data.message||''))){aviso('legacy','');return;}
-      if(!validar(data))throw new Error(data&&data.message||'O catálogo recebido não passou na validação.');
+      if(!validar(data))throw new Error(diagnosticar(data));
       aplicar(data);
       try{localStorage.setItem(CACHE_KEY,JSON.stringify({data,savedAt:Date.now()}));}catch(error){}
       aviso('ready','');
@@ -103,7 +118,7 @@
       if(aplicarCacheComAviso())return;
       window.TEMPERO_CATALOGO_ULTIMO_ERRO=String(error&&error.message||error||'Falha desconhecida');
       console.error('[Tempero da Ilma] Falha ao atualizar catálogo:',window.TEMPERO_CATALOGO_ULTIMO_ERRO);
-      aviso('error','Não foi possível confirmar os preços atuais. Atualize a página quando a conexão retornar. Por segurança, o envio de novos pedidos ficará temporariamente bloqueado.');
+      aviso('error','Não foi possível confirmar os preços atuais. Atualize a página quando a conexão retornar. Por segurança, o envio de novos pedidos ficará temporariamente bloqueado. Diagnóstico: '+window.TEMPERO_CATALOGO_ULTIMO_ERRO.slice(0,180));
     }finally{
       catalogoEmAtualizacao=false;
     }
