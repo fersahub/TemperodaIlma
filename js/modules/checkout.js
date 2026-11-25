@@ -263,11 +263,11 @@ function openCheckoutModal() {
             if (modoPrePedidoManual) {
                 lines.push('');
                 lines.push('⚠️ *MODO DE CONTINGÊNCIA — PRÉ-PEDIDO, NÃO CONFIRMADO*');
-                lines.push('A consulta automática de preços está temporariamente indisponível. A equipe confirmará disponibilidade, valores e frete pelo WhatsApp.');
+                lines.push('A consulta automática de preços está temporariamente indisponível. A equipe confirmará disponibilidade, valores, frete e eventual benefício de primeira compra pelo WhatsApp.');
                 lines.push('*Não realize Pix nem pagamento antes de receber a confirmação da equipe.*');
             }
             lines.push(`Pedido: ${orderId}`);
-            lines.push(`Código de avaliação: ${reviewOrderId}`);
+            if (!modoPrePedidoManual) lines.push(`Código de avaliação: ${reviewOrderId}`);
             lines.push(``);
             lines.push(`${eUser} *Cliente:* ${name}`);
             lines.push(`${ePhone} *Telefone:* ${phone}`);
