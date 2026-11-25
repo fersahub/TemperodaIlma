@@ -176,7 +176,12 @@ function openCheckoutModal() {
                 return;
             }
             if (window.TEMPERO_CATALOGO_STATUS === 'error' || window.TEMPERO_CATALOGO_STATUS === 'cached') {
-                mostrarToast('Não foi possível confirmar os preços atuais. Reconecte-se e atualize o cardápio antes de enviar o pedido.');
+                if (typeof window.iniciarCatalogoPublico === 'function') {
+                    window.iniciarCatalogoPublico();
+                    mostrarToast('Estamos tentando atualizar os preços novamente. Aguarde alguns segundos e tente enviar o pedido outra vez.');
+                } else {
+                    mostrarToast('Não foi possível atualizar os preços. Atualize a página e tente novamente.');
+                }
                 return;
             }
             if (cartCombos.length === 0) {
