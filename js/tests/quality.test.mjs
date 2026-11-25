@@ -83,7 +83,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v26-catalog-price-by-flavor/);
+ assert.match(read('sw.js'),/tempero-v27-refresh-catalog-assets/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -275,7 +275,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v26-catalog-price-by-flavor'));
+ assert.ok(read('sw.js').includes('tempero-v27-refresh-catalog-assets'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -517,11 +517,13 @@ test('modal de avaliação participa da pilha de modais',()=>{
 });
 test('service worker não armazena painel administrativo no cache público',()=>{
  const sw=read('sw.js');
- assert.match(sw,/tempero-v26-catalog-price-by-flavor/);
+ assert.match(sw,/tempero-v27-refresh-catalog-assets/);
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
-});
+}
+ assert.match(sw,/new Request\(request, \{ cache: 'reload' \}\)/);
+ assert.match(sw,/atualizarArquivo && new Request/););
 
 test('backend rejeita CEP malformado antes de registrar pedido',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
@@ -562,6 +564,16 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
 });
 
 
+test('checkout tenta novamente a consulta do catálogo antes de continuar bloqueado',()=>{
+ const checkout=read('js/modules/checkout.js'),catalog=read('js/modules/catalogo.js'),html=read('index.html');
+ assert.match(checkout,/window\.iniciarCatalogoPublico\(\)/);
+ assert.match(checkout,/Estamos tentando atualizar os preços novamente/);
+ assert.match(catalog,/callback,_:String\(Date\.now\(\)\)/);
+ assert.match(catalog,/TEMPERO_CATALOGO_ULTIMO_ERRO/);
+ assert.match(html,/js\/modules\/catalogo\.js\?v=20261125-3/);
+ assert.match(html,/js\/modules\/checkout\.js\?v=20261125-3/);
+ assert.match(html,/js\/app\.js\?v=20261125-3/);
+});
 test('catálogo público atualiza preços e disponibilidade automaticamente a cada minuto sem interferir no carrinho',()=>{
  const catalog=read('js/modules/catalogo.js'),app=read('js/app.js');
  assert.match(catalog,/window\.setInterval\(\(\) =>/);
