@@ -23,12 +23,12 @@ const CORE_ASSETS = [
   './js/modules/favoritos.js',
   './js/modules/detalhes-prato.js',
   './js/modules/cardapio.js',
-  './js/modules/catalogo.js',
+  './js/modules/catalogo.js?v=20261125-3',
   './js/modules/avulsas.js',
   './js/modules/avaliacoes.js',
   './js/modules/carrinho.js',
-  './js/modules/checkout.js',
-  './js/app.js',
+  './js/modules/checkout.js?v=20261125-3',
+  './js/app.js?v=20261125-3',
   './assets/images/marca/LOGO.PNG',
   './assets/images/optimized/pratos/Empadao de frango.webp',
   './assets/images/pwa/icon-192.png',
@@ -62,7 +62,7 @@ self.addEventListener('fetch', event => {
     event.respondWith((async () => {
       const paginaAdmin = url.pathname.endsWith('/admin.html');
       try {
-        const response = await fetch(new Request(request, { cache: 'reload' }));
+        const response = await fetch(request);
         if (response.ok && !paginaAdmin) {
           const cache = await caches.open(CACHE_NAME);
           await cache.put('./index.html', response.clone());
