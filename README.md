@@ -201,7 +201,7 @@ As avaliações exigem consentimento explícito e um pedido registrado com statu
 
 A senha administrativa fica nas Script Properties do Apps Script e não é enviada ao GitHub Pages. O login usa desafio HMAC e sessões temporárias. A alteração de senha é feita dentro do painel, após autenticação, com mínimo de 8 caracteres e invalida todas as sessões anteriores. A lista de pedidos é atualizada automaticamente a cada 60 segundos, sem recarregar a página. A planilha deve permanecer privada e a conta Google que administra o Apps Script deve ser protegida. A página do painel não é armazenada em cache offline. O login agora diferencia erros de conexão de uma implantação antiga do Apps Script. A atualização automática consulta os dados uma vez por minuto enquanto o painel está aberto e não há modais em uso. O serviço está sujeito às cotas de uso do Google.
 
-O painel administrativo apresenta uma tela de login isolada. Após a autenticação, exibe somente duas opções: **Gestão do Cardápio**, para alterar preços e disponibilidade dos seis combos e de cada marmita avulsa por sabor e tamanho, e **Gestão de Pedidos**, para consultar clientes, filtrar registros, abrir detalhes, atualizar o andamento e preparar mensagens. Cada área é aberta separadamente e possui retorno à seleção de gestões. Cada sabor Tradicional possui controles independentes para 350g e 500g; cada sabor Fit possui controle próprio para 300g. O backend valida o preço e a disponibilidade exatos do sabor escolhido antes de registrar um pedido. A edição dos valores não altera pedidos já gravados.
+O painel administrativo está organizado em duas abas: **Gestão do Cardápio**, para alterar preços e disponibilidade dos seis combos e de cada marmita avulsa por sabor e tamanho, e **Gestão de Pedidos**, para consultar clientes, filtrar registros, abrir detalhes, atualizar o andamento e preparar mensagens. A aba de pedidos abre por padrão após o login. Cada sabor Tradicional possui controles independentes para 350g e 500g; cada sabor Fit possui controle próprio para 300g. O backend valida o preço e a disponibilidade exatos do sabor escolhido antes de registrar um pedido. A edição dos valores não altera pedidos já gravados.
 
 
 ## Gestão do cardápio — preços e disponibilidade
@@ -218,7 +218,7 @@ A aba **Catalogo** é criada automaticamente na planilha central quando a nova v
 
 1. Atualize e publique a nova versão do arquivo `Code.gs` no Apps Script, usando a implantação já associada ao endpoint do site.
 2. Acesse `https://fersahub.github.io/TemperodaIlma/admin.html` e entre com a senha administrativa existente.
-3. Após o login, selecione **Gestão do Cardápio** na tela de opções.
+3. Abra a aba **Gestão do Cardápio** no topo do painel.
 4. Altere o preço no campo do item. Use o ponto como separador decimal se o navegador exigir (por exemplo, `22.50`).
 5. Marque ou desmarque **Ativo** para disponibilizar ou ocultar aquele combo/opção de avulsa.
 6. Clique em **Salvar** na mesma linha. Aguarde a confirmação antes de editar outro item.
