@@ -560,7 +560,7 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
  assert.ok(catalog.includes("prato.id+'|'+size"));
  assert.match(admin,/preços por sabor/);
  assert.match(adminHtml,/Cada sabor possui preço e disponibilidade próprios/);
- assert.match(read('js/modules/checkout.js'),/\['error', 'cached'\]\.includes\(window\.TEMPERO_CATALOGO_STATUS\)/);
+ assert.match(read('js/modules/checkout.js'),/TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA === true/);
 });
 
 
