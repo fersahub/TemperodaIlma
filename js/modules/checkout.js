@@ -171,17 +171,9 @@ function openCheckoutModal() {
         }
 
         function sendToWhatsApp() {
+            const modoPrePedidoManual = ['error', 'cached'].includes(window.TEMPERO_CATALOGO_STATUS);
             if (window.TEMPERO_CATALOGO_STATUS === 'loading') {
-                mostrarToast('Aguarde a confirmação dos preços atuais do cardápio.');
-                return;
-            }
-            if (window.TEMPERO_CATALOGO_STATUS === 'error' || window.TEMPERO_CATALOGO_STATUS === 'cached') {
-                if (typeof window.iniciarCatalogoPublico === 'function') {
-                    window.iniciarCatalogoPublico();
-                    mostrarToast('Estamos tentando atualizar os preços novamente. Aguarde alguns segundos e tente enviar o pedido outra vez.');
-                } else {
-                    mostrarToast('Não foi possível atualizar os preços. Atualize a página e tente novamente.');
-                }
+                mostrarToast('Aguarde a primeira tentativa de confirmação dos preços do cardápio.');
                 return;
             }
             if (cartCombos.length === 0) {
@@ -201,7 +193,7 @@ function openCheckoutModal() {
             const obs = document.getElementById('cust-obs').value.trim();
 
             const telefoneBeneficio = phone.replace(/\D/g, '');
-            if (telefoneBeneficio.length >= 10 && telefoneBeneficio.length <= 13) {
+            if (!modoPrePedidoManual && telefoneBeneficio.length >= 10 && telefoneBeneficio.length <= 13) {
                 if (primeiroPedidoVerificacaoStatus === 'checking') {
                     mostrarToast('Aguarde a verificação do benefício de primeira compra e tente novamente.');
                     return;
@@ -265,9 +257,17 @@ function openCheckoutModal() {
             const orderId = `TI-${p2(agora.year % 100)}${p2(agora.month)}${p2(agora.day)}-${reviewOrderId.slice(0, 10)}`;
             const notificationsOptIn = Boolean(document.getElementById('cust-status-notifications') && document.getElementById('cust-status-notifications').checked);
             let lines = [];
-            lines.push(`${ePlate} *NOVO PEDIDO #${numPedido} - TEMPERO DA ILMA* ${ePlate}`);
+            lines.push(modoPrePedidoManual
+                ? `${ePlate} *SOLICITAÇÃO DE PEDIDO #${numPedido} - TEMPERO DA ILMA* ${ePlate}`
+                : `${ePlate} *NOVO PEDIDO #${numPedido} - TEMPERO DA ILMA* ${ePlate}`);
+            if (modoPrePedidoManual) {
+                lines.push('');
+                lines.push('⚠️ *MODO DE CONTINGÊNCIA — PRÉ-PEDIDO, NÃO CONFIRMADO*');
+                lines.push('A consulta automática de preços está temporariamente indisponível. A equipe confirmará disponibilidade, valores, frete e eventual benefício de primeira compra pelo WhatsApp.');
+                lines.push('*Não realize Pix nem pagamento antes de receber a confirmação da equipe.*');
+            }
             lines.push(`Pedido: ${orderId}`);
-            lines.push(`Código de avaliação: ${reviewOrderId}`);
+            if (!modoPrePedidoManual) lines.push(`Código de avaliação: ${reviewOrderId}`);
             lines.push(``);
             lines.push(`${eUser} *Cliente:* ${name}`);
             lines.push(`${ePhone} *Telefone:* ${phone}`);
@@ -279,7 +279,7 @@ function openCheckoutModal() {
 
             cartCombos.forEach((item, index) => {
                 lines.push('');
-                lines.push(eBox + ' *Combo ' + (index + 1) + ': ' + item.name + '* (R$ ' + item.price.toFixed(2).replace('.', ',') + ')');
+                lines.push(eBox + ' *Combo ' + (index + 1) + ': ' + item.name + '* (R$ ' + item.price.toFixed(2).replace('.', ',') + (modoPrePedidoManual ? ' — referência, confirmar' : '') + ')');
                 if (item.obs) lines.push('   *Obs do combo:* ' + item.obs);
                 lines.push('   *Sabores Escolhidos:*');
                 String(item.flavorsSummary || '').split(', ').filter(Boolean).forEach(sabor => lines.push('   - ' + sabor));
@@ -289,12 +289,12 @@ function openCheckoutModal() {
                 lines.push('');
                 lines.push(eBox + ' *MARMITAS AVULSAS*');
                 cartAvulsas.forEach(item => {
-                    lines.push('- ' + item.quantity + 'x ' + item.name + ' (' + item.size + ') — R$ ' + item.unitPrice.toFixed(2).replace('.', ',') + ' cada — Subtotal R$ ' + item.totalPrice.toFixed(2).replace('.', ','));
+                    lines.push('- ' + item.quantity + 'x ' + item.name + ' (' + item.size + ') — R$ ' + item.unitPrice.toFixed(2).replace('.', ',') + ' cada — Subtotal R$ ' + item.totalPrice.toFixed(2).replace('.', ',') + (modoPrePedidoManual ? ' — referência, confirmar' : ''));
                 });
             }
 
             const subtotalPrice = calcularSubtotalCarrinho();
-            const feFinal = freteEfetivo();
+            const feFinal = modoPrePedidoManual ? currentShippingFee : freteEfetivo();
             const totalPrice = subtotalPrice + feFinal;
 
             const tot = {};
@@ -314,13 +314,14 @@ function openCheckoutModal() {
 
             lines.push(``);
             lines.push(`${eMoney} *RESUMO FINANCEIRO*`);
-            lines.push(`Subtotal: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
+            lines.push(`${modoPrePedidoManual ? 'Subtotal estimado (referência)' : 'Subtotal'}: R$ ${subtotalPrice.toFixed(2).replace('.', ',')}`);
             lines.push(`${eDelivery} Taxa de Entrega (${bairro}): ${feFinal === 0 ? 'GRÁTIS' : 'R$ ' + feFinal.toFixed(2).replace('.', ',')}`);
-            lines.push(`*TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
+            lines.push(modoPrePedidoManual ? `*TOTAL ESTIMADO — NÃO CONFIRMADO:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*` : `*TOTAL GERAL:* *R$ ${totalPrice.toFixed(2).replace('.', ',')}*`);
             lines.push(``);
-            lines.push(`${eCard} *Forma de Pagamento:* ${payment}`);
+            lines.push(`${eCard} *${modoPrePedidoManual ? 'Pagamento pretendido (confirmar com a equipe)' : 'Forma de Pagamento'}:* ${payment}`);
             lines.push(`${eDelivery} *Sábado de entrega:* ${dataEntregaSabado()}`);
 
+            if (modoPrePedidoManual && payment === 'Pix') lines.push('*Atenção: não faça o Pix agora. Aguarde a confirmação do valor e os dados de pagamento pela equipe.*');
             if (payment === 'Dinheiro' && troco) {
                 lines.push(`*Troco para:* ${troco}`);
             }
@@ -329,9 +330,9 @@ function openCheckoutModal() {
             }
 
             lines.push(``);
-            lines.push(`_Pedido gerado automaticamente pelo cardápio digital_ ${eSparkles}`);
+            lines.push(modoPrePedidoManual ? '_Pré-pedido enviado pelo cardápio digital; depende de confirmação manual da Tempero da Ilma._' : `_Pedido gerado automaticamente pelo cardápio digital_ ${eSparkles}`);
 
             const fullText = lines.join('\n');
             const whatsappUrl = `https://wa.me/${CONFIG_LOJA.whatsappNumero}?text=${encodeURIComponent(fullText)}`;
-            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice, fullText, reviewOrderId, reviewFlavors, orderId, deliveryDate: dataEntregaSabado(), notificationsOptIn, firstOrderFreeShipping: primeiroPedidoFreteGratisAtivo(), customerData: { name, phone, cep, bairro, rua, numero, comp } });
+            abrirConfirmacao(whatsappUrl, { name, phone, fullAddress, payment, troco, obs, subtotalPrice, feFinal, totalPrice, fullText, reviewOrderId, reviewFlavors, orderId, deliveryDate: dataEntregaSabado(), notificationsOptIn, firstOrderFreeShipping: !modoPrePedidoManual && primeiroPedidoFreteGratisAtivo(), manualCatalogConfirmation: modoPrePedidoManual, customerData: { name, phone, cep, bairro, rua, numero, comp } });
         }

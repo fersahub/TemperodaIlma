@@ -14,6 +14,8 @@
   let catalogoEmAtualizacao=false;
   function aviso(status,message){
     window.TEMPERO_CATALOGO_STATUS=status;
+    // O Pix só pode aparecer depois que o catálogo oficial estiver confirmado.
+    if(typeof atualizarPixBox==='function'){try{atualizarPixBox();}catch(error){}}
     const el=document.getElementById('catalog-price-status');
     if(!el)return;
     if(!message){el.hidden=true;el.textContent='';return;}

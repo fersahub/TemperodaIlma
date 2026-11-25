@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v27-refresh-catalog-assets';
+const CACHE_NAME = 'tempero-v28-whatsapp-manual-order';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
@@ -16,18 +16,18 @@ const CORE_ASSETS = [
   './js/modules/interface.js',
   './js/services/endereco.js',
   './js/modules/experiencia.js',
-  './js/modules/pedidos.js',
+  './js/modules/pedidos.js?v=20261125-4',
   './js/modules/operacao.js',
-  './js/services/pix.js',
+  './js/services/pix.js?v=20261125-4',
   './js/modules/horarios.js',
   './js/modules/favoritos.js',
   './js/modules/detalhes-prato.js',
   './js/modules/cardapio.js',
-  './js/modules/catalogo.js?v=20261125-3',
+  './js/modules/catalogo.js?v=20261125-4',
   './js/modules/avulsas.js',
   './js/modules/avaliacoes.js',
   './js/modules/carrinho.js',
-  './js/modules/checkout.js?v=20261125-3',
+  './js/modules/checkout.js?v=20261125-4',
   './js/app.js?v=20261125-3',
   './assets/images/marca/LOGO.PNG',
   './assets/images/optimized/pratos/Empadao de frango.webp',

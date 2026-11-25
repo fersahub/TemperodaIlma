@@ -307,7 +307,7 @@
             <div id="confirm-content" class="p-4 overflow-y-auto space-y-3 flex-1 text-xs text-stone-700"></div>
             <div class="p-4 border-t border-stone-200 bg-stone-50 flex gap-2">
                 <button type="button" onclick="document.getElementById('confirm-modal').classList.add('hidden')" class="w-1/3 bg-stone-200 text-stone-700 font-bold py-3 rounded-xl text-xs">Voltar e corrigir</button>
-                <button type="button" onclick="confirmarEnvio()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-base"></i> Confirmar e enviar</button>
+                <button id="confirm-send-button" type="button" onclick="confirmarEnvio()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-base"></i> Confirmar e enviar</button>
             </div>
         </div>
     </div>
@@ -317,7 +317,7 @@
         <div class="bg-white w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl p-6 text-center space-y-3">
             <div class="w-14 h-14 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl"><i class="fa-solid fa-check"></i></div>
             <h3 id="sent-modal-title" class="font-bold text-stone-800 text-lg">Comanda preparada para envio</h3>
-            <p class="text-xs text-stone-600">O WhatsApp foi aberto com sua comanda. O site não consegue confirmar se a mensagem foi enviada: confira a conversa antes de concluir. Seu carrinho foi preservado neste aparelho.</p>
+            <p id="sent-modal-description" class="text-xs text-stone-600">O WhatsApp foi aberto com sua comanda. O site não consegue confirmar se a mensagem foi enviada: confira a conversa antes de concluir. Seu carrinho foi preservado neste aparelho.</p>
             <button id="btn-avaliar-pedido-enviado" type="button" onclick="abrirModalAvaliacao()" class="hidden w-full bg-amber-50 border border-amber-300 text-amber-900 font-bold py-2.5 rounded-xl text-sm"><i class="fa-solid fa-star text-amber-500"></i> Avaliar meu pedido depois de receber</button>
             <div id="sent-pix" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-2">
                 <p class="font-bold text-emerald-900">Pague via Pix: <span id="sent-pix-valor"></span></p>
@@ -631,15 +631,15 @@
                     </div>
 
                     <div id="pix-container" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-2">
-                        <p class="font-bold text-emerald-900">Pague via Pix</p>
+                        <p id="pix-heading" class="font-bold text-emerald-900">Pague via Pix</p>
                         <p class="text-stone-700">Valor: <span id="pix-valor" class="font-bold"></span></p>
                         <div id="pix-qr-area" class="hidden space-y-2 text-center">
                             <div id="pix-qr" class="inline-block pix-qr-frame"></div>
                             <button type="button" onclick="copiarPixCopiaECola()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg">Copiar Pix copia e cola</button>
                             <p class="text-stone-600">No app do seu banco, escolha Pix e leia o QR Code ou cole o código copiado.</p>
                         </div>
-                        <p class="text-stone-700">Chave: <span id="pix-chave" class="font-bold break-all"></span></p>
-                        <button type="button" onclick="copiarPix()" class="bg-white border border-emerald-300 text-emerald-900 font-bold px-3 py-1.5 rounded-lg">Copiar só a chave</button>
+                        <p id="pix-key-row" class="text-stone-700">Chave: <span id="pix-chave" class="font-bold break-all"></span></p>
+                        <button id="pix-copy-button" type="button" onclick="copiarPix()" class="bg-white border border-emerald-300 text-emerald-900 font-bold px-3 py-1.5 rounded-lg">Copiar só a chave</button>
                     </div>
 
                     <div id="troco-container" class="hidden">
@@ -724,18 +724,18 @@
     <script src="js/modules/interface.js"></script>
     <script src="js/services/endereco.js"></script>
     <script src="js/modules/experiencia.js"></script>
-    <script src="js/modules/pedidos.js"></script>
+    <script src="js/modules/pedidos.js?v=20261125-4"></script>
     <script src="js/modules/operacao.js"></script>
-    <script src="js/services/pix.js"></script>
+    <script src="js/services/pix.js?v=20261125-4"></script>
     <script src="js/modules/horarios.js"></script>
     <script src="js/modules/favoritos.js"></script>
     <script src="js/modules/detalhes-prato.js"></script>
     <script src="js/modules/cardapio.js"></script>
-    <script src="js/modules/catalogo.js?v=20261125-3"></script>
+    <script src="js/modules/catalogo.js?v=20261125-4"></script>
     <script src="js/modules/avulsas.js"></script>
     <script src="js/modules/avaliacoes.js"></script>
     <script src="js/modules/carrinho.js"></script>
-    <script src="js/modules/checkout.js?v=20261125-3"></script>
+    <script src="js/modules/checkout.js?v=20261125-4"></script>
     <script src="js/app.js?v=20261125-3"></script>
 </body>
 </html>

@@ -75,17 +75,20 @@ function abrirConfirmacao(url, d) {
         '</div>'
     ).join('');
     document.getElementById('confirm-content').innerHTML =
+        (d.manualCatalogConfirmation ? '<div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-900"><p class="font-extrabold">Pré-pedido — confirmação manual necessária</p><p class="mt-1">A consulta automática do catálogo está indisponível. A equipe confirmará preços, disponibilidade, frete e eventual benefício de primeira compra pelo WhatsApp. Não realize pagamentos antes dessa confirmação.</p></div>' : '') +
         '<div><p><b>Cliente:</b> ' + e(d.name) + '</p><p><b>Telefone:</b> ' + e(d.phone) + '</p><p><b>Endereço:</b> ' + e(d.fullAddress) + '</p></div>' +
         (itensCombos ? '<p class="font-bold text-stone-700">Combos</p><div class="space-y-2">' + itensCombos + '</div>' : '') +
         (itensAvulsas ? '<p class="font-bold text-stone-700">Marmitas avulsas</p><div class="space-y-2">' + itensAvulsas + '</div>' : '') +
         '<div class="border-t border-stone-200 pt-2 space-y-1">' +
-        '<p class="flex justify-between"><span>Subtotal</span><b>' + fmt(d.subtotalPrice) + '</b></p>' +
-        '<p class="flex justify-between"><span>Entrega</span><b>' + (d.feFinal === 0 ? 'GRÁTIS' : fmt(d.feFinal)) + '</b></p>' +
-        '<p class="flex justify-between text-base text-stone-800"><b>Total</b><b class="text-brand-accent">' + fmt(d.totalPrice) + '</b></p>' +
-        '<p><b>Pagamento:</b> ' + e(d.payment) + (d.payment === 'Dinheiro' && d.troco ? ' (troco para ' + e(d.troco) + ')' : '') + '</p>' +
+        '<p class="flex justify-between"><span>' + (d.manualCatalogConfirmation ? 'Subtotal estimado' : 'Subtotal') + '</span><b>' + fmt(d.subtotalPrice) + '</b></p>' +
+        '<p class="flex justify-between"><span>' + (d.manualCatalogConfirmation ? 'Frete (a confirmar)' : 'Entrega') + '</span><b>' + (d.feFinal === 0 ? 'GRÁTIS' : fmt(d.feFinal)) + '</b></p>' +
+        '<p class="flex justify-between text-base text-stone-800"><b>' + (d.manualCatalogConfirmation ? 'Total estimado' : 'Total') + '</b><b class="text-brand-accent">' + fmt(d.totalPrice) + '</b></p>' +
+        '<p><b>' + (d.manualCatalogConfirmation ? 'Pagamento pretendido (não pagar ainda):' : 'Pagamento:') + '</b> ' + e(d.payment) + (d.payment === 'Dinheiro' && d.troco ? ' (troco para ' + e(d.troco) + ')' : '') + '</p>' +
         '<p><b>Entrega:</b> sábado, ' + dataEntregaSabado() + ' (horário a confirmar)</p>' +
         (d.obs ? '<p><b>Observações:</b> ' + e(d.obs) + '</p>' : '') +
         '</div>';
+    const confirmButton = document.getElementById('confirm-send-button');
+    if (confirmButton) confirmButton.textContent = d.manualCatalogConfirmation ? 'Enviar pré-pedido pelo WhatsApp' : 'Confirmar e enviar';
     document.getElementById('confirm-modal').classList.remove('hidden');
 }
 
@@ -93,7 +96,7 @@ function confirmarEnvio() {
     const sentPix = document.getElementById('sent-pix');
     sentPix.classList.add('hidden');
     const dp = pendingPedido;
-    if (dp && dp.payment === 'Pix' && pixConfigurado() && dp.totalPrice > 0) {
+    if (dp && !dp.manualCatalogConfirmation && dp.payment === 'Pix' && pixConfigurado() && dp.totalPrice > 0) {
         pixAtual = gerarPixPayload(dp.totalPrice);
         document.getElementById('sent-pix-valor').innerText = 'R$ ' + dp.totalPrice.toFixed(2).replace('.', ',');
         desenharQr('sent-pix-qr', pixAtual);
@@ -101,17 +104,25 @@ function confirmarEnvio() {
     }
     window.open(pendingWhatsUrl, '_blank');
     if (dp && dp.customerData) salvarUltimoCliente(dp.customerData);
-    if (dp && typeof registrarPedidoCentralizado === 'function') {
+    if (dp && !dp.manualCatalogConfirmation && typeof registrarPedidoCentralizado === 'function') {
         registrarPedidoCentralizado(dp).then(registrado => {
             if (registrado && dp.firstOrderFreeShipping && typeof revalidarBeneficioAposPrimeiroPedido === 'function') {
                 revalidarBeneficioAposPrimeiroPedido(dp);
             }
         });
     }
-    if (dp && typeof registrarPedidoPendenteAvaliacao === 'function') registrarPedidoPendenteAvaliacao(dp);
+    if (dp && !dp.manualCatalogConfirmation && typeof registrarPedidoPendenteAvaliacao === 'function') registrarPedidoPendenteAvaliacao(dp);
     document.getElementById('confirm-modal').classList.add('hidden');
     closeCheckoutModal();
     document.getElementById('sent-link').href = pendingWhatsUrl;
+    const sentTitle = document.getElementById('sent-modal-title');
+    const sentDescription = document.getElementById('sent-modal-description');
+    const reviewButton = document.getElementById('btn-avaliar-pedido-enviado');
+    if (sentTitle) sentTitle.textContent = dp && dp.manualCatalogConfirmation ? 'Pré-pedido preparado para confirmação' : 'Comanda preparada para envio';
+    if (sentDescription) sentDescription.textContent = dp && dp.manualCatalogConfirmation
+        ? 'O WhatsApp foi aberto com sua solicitação. A equipe confirmará os preços, a disponibilidade e o frete antes de aceitar o pedido. Não realize Pix ou outro pagamento até receber a confirmação. Esta solicitação não foi registrada automaticamente no painel.'
+        : 'O WhatsApp foi aberto com sua comanda. O site não consegue confirmar se a mensagem foi enviada: confira a conversa antes de concluir. Seu carrinho foi preservado neste aparelho.';
+    if (reviewButton) reviewButton.classList.toggle('hidden', Boolean(dp && dp.manualCatalogConfirmation));
     document.getElementById('sent-modal').classList.remove('hidden');
 }
 
