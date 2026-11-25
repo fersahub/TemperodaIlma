@@ -576,7 +576,7 @@ test('checkout tenta novamente a consulta do catálogo antes de continuar bloque
 });
 test('catálogo público atualiza preços e disponibilidade automaticamente a cada minuto sem interferir no carrinho',()=>{
  const catalog=read('js/modules/catalogo.js'),app=read('js/app.js');
- assert.match(catalog,/window\.setInterval\(\(\) =>/);
+ assert.match(catalog,/window\.setInterval\(\(\)\s*=>/);
  assert.match(catalog,/},60000\)/);
  assert.match(catalog,/document\.visibilityState!=='visible'/);
  assert.match(catalog,/cartCombos\.length>0/);
