@@ -18,7 +18,7 @@ const CORE_ASSETS = [
   './js/modules/experiencia.js',
   './js/modules/pedidos.js',
   './js/modules/operacao.js',
-  './js/services/pix.js',
+  './js/services/pix.js?v=20261125-4',
   './js/modules/horarios.js',
   './js/modules/favoritos.js',
   './js/modules/detalhes-prato.js',
