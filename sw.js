@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v26-catalog-price-by-flavor';
+const CACHE_NAME = 'tempero-v27-refresh-catalog-assets';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
@@ -62,7 +62,7 @@ self.addEventListener('fetch', event => {
     event.respondWith((async () => {
       const paginaAdmin = url.pathname.endsWith('/admin.html');
       try {
-        const response = await fetch(request);
+        const response = await fetch(new Request(request, { cache: 'reload' }));
         if (response.ok && !paginaAdmin) {
           const cache = await caches.open(CACHE_NAME);
           await cache.put('./index.html', response.clone());
@@ -80,7 +80,9 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const cached = await caches.match(request);
     try {
-      const response = await fetch(request);
+      // Scripts e estilos locais usam a rede sem reutilizar uma cópia antiga do cache HTTP.
+      const atualizarArquivo = local && ['script', 'style'].includes(request.destination);
+      const response = await fetch(atualizarArquivo ? new Request(request, { cache: 'reload' }) : request);
       if (response.ok || response.type === 'opaque') {
         const cache = await caches.open(CACHE_NAME);
         await cache.put(request, response.clone());
