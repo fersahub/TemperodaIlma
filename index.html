@@ -631,15 +631,15 @@
                     </div>
 
                     <div id="pix-container" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs space-y-2">
-                        <p class="font-bold text-emerald-900">Pague via Pix</p>
+                        <p id="pix-heading" class="font-bold text-emerald-900">Pague via Pix</p>
                         <p class="text-stone-700">Valor: <span id="pix-valor" class="font-bold"></span></p>
                         <div id="pix-qr-area" class="hidden space-y-2 text-center">
                             <div id="pix-qr" class="inline-block pix-qr-frame"></div>
                             <button type="button" onclick="copiarPixCopiaECola()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg">Copiar Pix copia e cola</button>
                             <p class="text-stone-600">No app do seu banco, escolha Pix e leia o QR Code ou cole o código copiado.</p>
                         </div>
-                        <p class="text-stone-700">Chave: <span id="pix-chave" class="font-bold break-all"></span></p>
-                        <button type="button" onclick="copiarPix()" class="bg-white border border-emerald-300 text-emerald-900 font-bold px-3 py-1.5 rounded-lg">Copiar só a chave</button>
+                        <p id="pix-key-row" class="text-stone-700">Chave: <span id="pix-chave" class="font-bold break-all"></span></p>
+                        <button id="pix-copy-button" type="button" onclick="copiarPix()" class="bg-white border border-emerald-300 text-emerald-900 font-bold px-3 py-1.5 rounded-lg">Copiar só a chave</button>
                     </div>
 
                     <div id="troco-container" class="hidden">
@@ -726,7 +726,7 @@
     <script src="js/modules/experiencia.js"></script>
     <script src="js/modules/pedidos.js?v=20261125-4"></script>
     <script src="js/modules/operacao.js"></script>
-    <script src="js/services/pix.js"></script>
+    <script src="js/services/pix.js?v=20261125-4"></script>
     <script src="js/modules/horarios.js"></script>
     <script src="js/modules/favoritos.js"></script>
     <script src="js/modules/detalhes-prato.js"></script>
