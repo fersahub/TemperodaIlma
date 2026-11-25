@@ -30,8 +30,8 @@ test('HTML: referências locais existem e scripts carregam na ordem',()=>{
  const html=read('index.html'),refs=[];
  for(const m of html.matchAll(/<(?:script|link|img)\b[^>]*(?:src|href)=["']([^"']+)["'][^>]*>/gi)){const v=m[1];if(v&&!/^(?:https?:|data:|#|mailto:|tel:|javascript:)/i.test(v))refs.push(v.split(/[?#]/)[0]);}
  for(const p of refs)assert.ok(exists(p),p);
- const appAt=html.indexOf('<script src="js/app.js">');
- for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/favoritos.js','js/modules/detalhes-prato.js','js/modules/cardapio.js','js/modules/avulsas.js','js/modules/avaliacoes.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p+'">');assert.ok(i>=0&&i<appAt,p);}
+ const appAt=html.indexOf('<script src="js/app.js');
+ for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/favoritos.js','js/modules/detalhes-prato.js','js/modules/cardapio.js','js/modules/avulsas.js','js/modules/avaliacoes.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p);assert.ok(i>=0&&i<appAt,p);}
 });
 test('Service Worker: pré-cache contém arquivos existentes e remove versões antigas',()=>{
  const s=read('sw.js'),m=s.match(/const CORE_ASSETS\s*=\s*(\[[\s\S]*?\]);/);assert.ok(m);
@@ -385,7 +385,7 @@ test('avaliações: comentários aparecem em carrossel compacto com avanço lent
  const html=read('index.html'),module=read('js/modules/avaliacoes.js'),css=read('css/styles.css');
  assert.match(html,/id="avaliacoes-carrossel"/);
  assert.match(html,/id="avaliacoes-comentarios" class="flex/);
- assert.match(module,/window\.setInterval\(\(\) =>/);
+ assert.match(module,/window\.setInterval\(\(\)\s*=>/);
  assert.match(module,/}, 7500\)/);
  assert.match(module,/translateX\(-'/);
  assert.match(css,/\.avaliacoes-carrossel \{ min-height: 78px; \}/);
