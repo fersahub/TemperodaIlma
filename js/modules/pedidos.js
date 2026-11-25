@@ -75,7 +75,7 @@ function abrirConfirmacao(url, d) {
         '</div>'
     ).join('');
     document.getElementById('confirm-content').innerHTML =
-        (d.manualCatalogConfirmation ? '<div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-900"><p class="font-extrabold">Pré-pedido — confirmação manual necessária</p><p class="mt-1">A consulta automática do catálogo está indisponível. A equipe confirmará preços, disponibilidade e frete pelo WhatsApp. Não realize pagamentos antes dessa confirmação.</p></div>' : '') +
+        (d.manualCatalogConfirmation ? '<div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-900"><p class="font-extrabold">Pré-pedido — confirmação manual necessária</p><p class="mt-1">A consulta automática do catálogo está indisponível. A equipe confirmará preços, disponibilidade, frete e eventual benefício de primeira compra pelo WhatsApp. Não realize pagamentos antes dessa confirmação.</p></div>' : '') +
         '<div><p><b>Cliente:</b> ' + e(d.name) + '</p><p><b>Telefone:</b> ' + e(d.phone) + '</p><p><b>Endereço:</b> ' + e(d.fullAddress) + '</p></div>' +
         (itensCombos ? '<p class="font-bold text-stone-700">Combos</p><div class="space-y-2">' + itensCombos + '</div>' : '') +
         (itensAvulsas ? '<p class="font-bold text-stone-700">Marmitas avulsas</p><div class="space-y-2">' + itensAvulsas + '</div>' : '') +
