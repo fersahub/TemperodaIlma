@@ -23,7 +23,7 @@
     return new Promise((resolve,reject)=>{
       if(!API)return reject(new Error('Endpoint não configurado.'));
       const callback='tempCatalog_'+Date.now()+'_'+Math.floor(Math.random()*100000);
-      const script=document.createElement('script'),query=new URLSearchParams({action:'catalog',callback});
+      const script=document.createElement('script'),query=new URLSearchParams({action:'catalog',callback,_:String(Date.now())});
       let finished=false,called=false;
       const finish=(error,data)=>{
         if(finished)return;finished=true;
@@ -101,6 +101,8 @@
       aviso('ready','');
     }catch(error){
       if(aplicarCacheComAviso())return;
+      window.TEMPERO_CATALOGO_ULTIMO_ERRO=String(error&&error.message||error||'Falha desconhecida');
+      console.error('[Tempero da Ilma] Falha ao atualizar catálogo:',window.TEMPERO_CATALOGO_ULTIMO_ERRO);
       aviso('error','Não foi possível confirmar os preços atuais. Atualize a página quando a conexão retornar. Por segurança, o envio de novos pedidos ficará temporariamente bloqueado.');
     }finally{
       catalogoEmAtualizacao=false;

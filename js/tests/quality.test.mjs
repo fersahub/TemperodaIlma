@@ -30,12 +30,12 @@ test('HTML: referências locais existem e scripts carregam na ordem',()=>{
  const html=read('index.html'),refs=[];
  for(const m of html.matchAll(/<(?:script|link|img)\b[^>]*(?:src|href)=["']([^"']+)["'][^>]*>/gi)){const v=m[1];if(v&&!/^(?:https?:|data:|#|mailto:|tel:|javascript:)/i.test(v))refs.push(v.split(/[?#]/)[0]);}
  for(const p of refs)assert.ok(exists(p),p);
- const appAt=html.indexOf('<script src="js/app.js">');
- for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/favoritos.js','js/modules/detalhes-prato.js','js/modules/cardapio.js','js/modules/avulsas.js','js/modules/avaliacoes.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p+'">');assert.ok(i>=0&&i<appAt,p);}
+ const appAt=html.indexOf('<script src="js/app.js');
+ for(const p of ['js/config/loja.js','js/data/combos.js','js/data/pratos.js','js/core/estado.js','js/modules/favoritos.js','js/modules/detalhes-prato.js','js/modules/cardapio.js','js/modules/avulsas.js','js/modules/avaliacoes.js','js/modules/checkout.js']){const i=html.indexOf('<script src="'+p);assert.ok(i>=0&&i<appAt,p);}
 });
 test('Service Worker: pré-cache contém arquivos existentes e remove versões antigas',()=>{
  const s=read('sw.js'),m=s.match(/const CORE_ASSETS\s*=\s*(\[[\s\S]*?\]);/);assert.ok(m);
- const list=new Function('return '+m[1])();for(const p of list)assert.ok(exists(p.replace(/^\.\//,'')),p);
+ const list=new Function('return '+m[1])();for(const p of list)assert.ok(exists(p.replace(/^\.\//,'').split(/[?#]/)[0]),p);
  assert.match(s,/startsWith\(CACHE_PREFIX\)/);assert.match(s,/response\.ok \|\| response\.type === 'opaque'/);
 });
 test('WhatsApp: abrir conversa não limpa carrinho automaticamente',()=>{
@@ -83,7 +83,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v26-catalog-price-by-flavor/);
+ assert.match(read('sw.js'),/tempero-v27-refresh-catalog-assets/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -275,7 +275,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v26-catalog-price-by-flavor'));
+ assert.ok(read('sw.js').includes('tempero-v27-refresh-catalog-assets'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -385,7 +385,7 @@ test('avaliações: comentários aparecem em carrossel compacto com avanço lent
  const html=read('index.html'),module=read('js/modules/avaliacoes.js'),css=read('css/styles.css');
  assert.match(html,/id="avaliacoes-carrossel"/);
  assert.match(html,/id="avaliacoes-comentarios" class="flex/);
- assert.match(module,/window\.setInterval\(\(\) =>/);
+ assert.match(module,/window\.setInterval\(\(\)\s*=>/);
  assert.match(module,/}, 7500\)/);
  assert.match(module,/translateX\(-'/);
  assert.match(css,/\.avaliacoes-carrossel \{ min-height: 78px; \}/);
@@ -515,14 +515,16 @@ test('modal de avaliação participa da pilha de modais',()=>{
  assert.match(interfaceJs,/MODAIS_ORDEM = \['avaliacao-modal'/);
  assert.match(interfaceJs,/id === 'avaliacao-modal'/);
 });
-test('service worker não armazena painel administrativo no cache público',()=>{
+test('service worker não armazena painel administrativo no cache público e renova arquivos do app',()=>{
  const sw=read('sw.js');
- assert.match(sw,/tempero-v26-catalog-price-by-flavor/);
+ assert.match(sw,/tempero-v27-refresh-catalog-assets/);
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
+ assert.match(sw,/atualizarArquivo \? new Request\(request, \{ cache: 'reload' \}\) : request/);
+ assert.match(sw,/\?v=20261125-3/);
+ assert.match(read('js/app.js'),/updateViaCache: 'none'/);
 });
-
 test('backend rejeita CEP malformado antes de registrar pedido',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
  assert.ok(backend.includes('var cep=limparCampo_(cliente.cep,9);'));
@@ -562,9 +564,19 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
 });
 
 
+test('checkout tenta novamente a consulta do catálogo antes de continuar bloqueado',()=>{
+ const checkout=read('js/modules/checkout.js'),catalog=read('js/modules/catalogo.js'),html=read('index.html');
+ assert.match(checkout,/window\.iniciarCatalogoPublico\(\)/);
+ assert.match(checkout,/Estamos tentando atualizar os preços novamente/);
+ assert.match(catalog,/callback,_:String\(Date\.now\(\)\)/);
+ assert.match(catalog,/TEMPERO_CATALOGO_ULTIMO_ERRO/);
+ assert.match(html,/js\/modules\/catalogo\.js\?v=20261125-3/);
+ assert.match(html,/js\/modules\/checkout\.js\?v=20261125-3/);
+ assert.match(html,/js\/app\.js\?v=20261125-3/);
+});
 test('catálogo público atualiza preços e disponibilidade automaticamente a cada minuto sem interferir no carrinho',()=>{
  const catalog=read('js/modules/catalogo.js'),app=read('js/app.js');
- assert.match(catalog,/window\.setInterval\(\(\) =>/);
+ assert.match(catalog,/window\.setInterval\(\(\)\s*=>/);
  assert.match(catalog,/},60000\)/);
  assert.match(catalog,/document\.visibilityState!=='visible'/);
  assert.match(catalog,/cartCombos\.length>0/);

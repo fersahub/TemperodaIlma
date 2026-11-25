@@ -241,3 +241,9 @@ A aba **Catalogo** é criada automaticamente na planilha central quando a nova v
 ### Limites desta etapa
 
 O painel edita preços e ativa/desativa as opções comerciais já existentes. Cadastro de novos combos, novos tamanhos, novos sabores, alteração de nomes/descrições/fotos e mudança das quantidades dos combos continuam exigindo ajuste técnico porque esses elementos estão ligados às regras de montagem, avaliações e validações de pedidos. O módulo não altera taxas de entrega, cupons ou horário da loja.
+
+
+### Atualização do catálogo no navegador e no aplicativo instalado
+O Service Worker usa o cache `tempero-v27-refresh-catalog-assets`. Navegações, scripts e estilos locais são atualizados pela rede sem reutilizar cópias antigas do cache HTTP; se o catálogo falhar, o checkout solicita uma nova tentativa antes de manter o bloqueio. O cache continua disponível como fallback offline, mas preços não confirmados nunca são usados para enviar um pedido.
+
+A consulta do catálogo recebe um parâmetro de atualização único a cada tentativa. Quando o checkout encontra uma resposta antiga ou uma falha temporária, oferece uma nova consulta; os preços só liberam o envio após validação atual no servidor.

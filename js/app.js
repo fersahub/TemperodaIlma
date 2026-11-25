@@ -18,5 +18,5 @@ document.addEventListener('DOMContentLoaded', function() {
             restaurarCarrinho();
             atualizarIconeTema();
             renderFreteBanner();
-            if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
         });
