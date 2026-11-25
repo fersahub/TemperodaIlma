@@ -9,6 +9,7 @@
   let toastTimer = null;
   let carregandoPainel = false;
   let refreshIntervalId = null;
+  let abaAtiva = 'orders';
 
   function escapar(value) {
     return String(value === null || value === undefined ? '' : value).replace(/[&<>"']/g, c => ({
@@ -145,6 +146,7 @@
       statuses=Array.isArray(data.statuses)?data.statuses:[];
       catalog=Array.isArray(data.catalog)?data.catalog:[];
       $('login-view').hidden=true; $('dashboard-view').hidden=false; $('top-actions').hidden=false;
+      ativarAba(abaAtiva);
       $('spreadsheet-link').href=data.spreadsheetUrl || '#';
       renderStats(data.stats || {});
       renderCatalog();
@@ -161,6 +163,40 @@
     } finally {
       carregandoPainel = false;
     }
+  }
+
+  function ativarAba(nome, focar=false) {
+    if(!['catalog','orders'].includes(nome)) return;
+    abaAtiva=nome;
+    const botoes=Array.from(document.querySelectorAll('[data-admin-tab]'));
+    botoes.forEach(botao=>{
+      const selecionado=botao.dataset.adminTab===nome;
+      botao.setAttribute('aria-selected',String(selecionado));
+      botao.tabIndex=selecionado?0:-1;
+    });
+    $('catalog-tab-panel').hidden=nome!=='catalog';
+    $('orders-tab-panel').hidden=nome!=='orders';
+    if(focar) {
+      const ativo=botoes.find(botao=>botao.dataset.adminTab===nome);
+      if(ativo)ativo.focus();
+    }
+  }
+  function iniciarAbas() {
+    const botoes=Array.from(document.querySelectorAll('[data-admin-tab]'));
+    botoes.forEach((botao,index)=>{
+      botao.addEventListener('click',()=>ativarAba(botao.dataset.adminTab));
+      botao.addEventListener('keydown',event=>{
+        let proximo=index;
+        if(event.key==='ArrowRight')proximo=(index+1)%botoes.length;
+        else if(event.key==='ArrowLeft')proximo=(index-1+botoes.length)%botoes.length;
+        else if(event.key==='Home')proximo=0;
+        else if(event.key==='End')proximo=botoes.length-1;
+        else return;
+        event.preventDefault();
+        ativarAba(botoes[proximo].dataset.adminTab,true);
+      });
+    });
+    ativarAba(abaAtiva);
   }
 
   function renderCatalog() {
@@ -400,6 +436,7 @@
   }
 
   document.addEventListener('DOMContentLoaded',async()=>{
+    iniciarAbas();
     $('login-form').addEventListener('submit',entrar);
     $('search-orders').addEventListener('input',renderOrders);
     $('filter-status').addEventListener('change',renderOrders);

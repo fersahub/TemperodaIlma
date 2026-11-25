@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#234b32">
   <title>Painel administrativo | Tempero da Ilma</title>
-  <link rel="stylesheet" href="css/admin.css?v=20261120-6">
+  <link rel="stylesheet" href="css/admin.css?v=20261125-1">
 </head>
 <body>
   <header class="topbar">
@@ -57,29 +57,44 @@
       <div class="page-heading">
         <div>
           <span class="eyebrow">VISÃO GERAL</span>
-          <h1>Gestão de pedidos</h1>
-          <p>Os registros vêm da planilha central do Tempero da Ilma. Atualização automática a cada minuto · Última atualização: <strong id="last-updated">—</strong></p>
+          <h1>Gestão da marmitaria</h1>
+          <p>Organize os preços do cardápio e acompanhe cada pedido em áreas separadas. Atualização automática dos pedidos a cada minuto · Última atualização: <strong id="last-updated">—</strong></p>
         </div>
         <a class="sheet-link" id="spreadsheet-link" href="#" target="_blank" rel="noopener">Abrir planilha ↗</a>
       </div>
 
-      <div class="stats-grid" id="stats-grid">
-        <article class="stat-card"><span>Pedidos registrados</span><strong id="stat-total">—</strong><small>Últimos registros</small></article>
-        <article class="stat-card stat-pending"><span>Aguardando confirmação</span><strong id="stat-awaiting">—</strong><small>Precisam de conferência</small></article>
-        <article class="stat-card stat-progress"><span>Em andamento</span><strong id="stat-progress">—</strong><small>Confirmados ou em preparo</small></article>
-        <article class="stat-card stat-delivery"><span>Saiu para entrega</span><strong id="stat-delivery">—</strong><small>Em rota com o cliente</small></article>
-      </div>
+      <nav id="admin-tabs" class="admin-tabs" role="tablist" aria-label="Áreas administrativas">
+        <button id="tab-catalog" class="admin-tab" type="button" role="tab" data-admin-tab="catalog" aria-controls="catalog-tab-panel" aria-selected="false" tabindex="-1">
+          <span class="admin-tab-index">01</span>
+          <span class="admin-tab-copy"><strong>Gestão do Cardápio</strong><small>Preços e disponibilidade</small></span>
+          <span class="admin-tab-arrow" aria-hidden="true">→</span>
+        </button>
+        <button id="tab-orders" class="admin-tab" type="button" role="tab" data-admin-tab="orders" aria-controls="orders-tab-panel" aria-selected="true" tabindex="0">
+          <span class="admin-tab-index">02</span>
+          <span class="admin-tab-copy"><strong>Gestão de Pedidos</strong><small>Clientes, andamento e entregas</small></span>
+          <span class="admin-tab-arrow" aria-hidden="true">→</span>
+        </button>
+      </nav>
 
-      <section class="orders-panel catalog-panel" aria-labelledby="catalog-heading">
+      <section id="catalog-tab-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-catalog" hidden>
+        <section class="orders-panel catalog-panel" aria-labelledby="catalog-heading">
         <div class="panel-heading"><div><h2 id="catalog-heading">Gestão do cardápio</h2><p>Altere preços e disponibilidade dos combos e das marmitas avulsas.</p></div></div>
         <div class="catalog-intro">Cada sabor possui preço e disponibilidade próprios. Nos sabores Tradicionais, o controle é separado para 350g e 500g; na Linha Fit, para 300g. Pedidos já registrados preservam seus valores originais.</div>
         <div id="catalog-list" class="catalog-list"><div class="loading-state">Carregando catálogo…</div></div>
         <div class="panel-footnote">Os valores são validados novamente pelo servidor antes do registro de cada pedido. Mantenha pelo menos um combo ativo.</div>
       </section>
+      </section>
 
-      <section class="orders-panel">
+      <section id="orders-tab-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-orders">
+        <div class="stats-grid" id="stats-grid">
+        <article class="stat-card"><span>Pedidos registrados</span><strong id="stat-total">—</strong><small>Últimos registros</small></article>
+        <article class="stat-card stat-pending"><span>Aguardando confirmação</span><strong id="stat-awaiting">—</strong><small>Precisam de conferência</small></article>
+        <article class="stat-card stat-progress"><span>Em andamento</span><strong id="stat-progress">—</strong><small>Confirmados ou em preparo</small></article>
+        <article class="stat-card stat-delivery"><span>Saiu para entrega</span><strong id="stat-delivery">—</strong><small>Em rota com o cliente</small></article>
+      </div>
+        <section class="orders-panel" aria-labelledby="orders-heading">
         <div class="panel-heading">
-          <div><h2>Pedidos</h2><p id="orders-caption">Carregando pedidos…</p></div>
+          <div><h2 id="orders-heading">Pedidos</h2><p id="orders-caption">Carregando pedidos…</p></div>
           <div class="filters">
             <input id="search-orders" type="search" placeholder="Buscar cliente ou pedido" aria-label="Buscar cliente ou pedido">
             <select id="filter-status" aria-label="Filtrar pedidos">
@@ -92,7 +107,9 @@
         </div>
         <div class="panel-footnote">O painel exibe os 200 pedidos mais recentes. Os registros completos permanecem na planilha.</div>
       </section>
+      </section>
       <p class="privacy-note">Dados de clientes são exibidos apenas após autenticação. Não compartilhe o acesso ao painel.</p>
+
     </section>
   </main>
 
@@ -121,6 +138,6 @@
   <div class="toast" id="admin-toast" role="status" aria-live="polite"></div>
 
   <script src="js/config/loja.js?v=20261120-2"></script>
-  <script src="js/admin.js?v=20261120-6"></script>
+  <script src="js/admin.js?v=20261125-1"></script>
 </body>
 </html>
