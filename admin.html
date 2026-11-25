@@ -6,9 +6,9 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#234b32">
   <title>Painel administrativo | Tempero da Ilma</title>
-  <link rel="stylesheet" href="css/admin.css?v=20261125-1">
+  <link rel="stylesheet" href="css/admin.css?v=20261125-2">
 </head>
-<body>
+<body class="login-mode">
   <header class="topbar">
     <a class="brand" href="index.html" aria-label="Voltar ao cardápio">
       <span class="brand-mark">TI</span>
@@ -49,43 +49,58 @@
           </div>
           <p id="api-status" class="api-status" data-state="info" role="status" aria-live="polite">Verificando comunicação com o Apps Script…</p>
         </div>
-        <small>Após entrar, você verá os pedidos, filtros, detalhes, atualização de status e mensagens. A sessão expira automaticamente.</small>
+        <small>Após entrar, escolha entre Gestão do Cardápio e Gestão de Pedidos. A sessão expira automaticamente.</small>
       </form>
     </section>
 
     <section id="dashboard-view" hidden>
-      <div class="page-heading">
-        <div>
-          <span class="eyebrow">VISÃO GERAL</span>
-          <h1>Gestão da marmitaria</h1>
-          <p>Organize os preços do cardápio e acompanhe cada pedido em áreas separadas. Atualização automática dos pedidos a cada minuto · Última atualização: <strong id="last-updated">—</strong></p>
+      <section id="management-home" class="management-home">
+        <div class="management-home-heading">
+          <span class="eyebrow">PAINEL ADMINISTRATIVO</span>
+          <h1>O que deseja gerenciar?</h1>
+          <p>Escolha uma área para continuar. Cada gestão será aberta separadamente.</p>
         </div>
-        <a class="sheet-link" id="spreadsheet-link" href="#" target="_blank" rel="noopener">Abrir planilha ↗</a>
-      </div>
+        <div class="management-choice-grid">
+          <button class="management-choice" type="button" data-open-management="catalog">
+            <span class="management-choice-number">01</span>
+            <span class="management-choice-icon" aria-hidden="true">▤</span>
+            <span class="management-choice-copy">
+              <strong>Gestão do Cardápio</strong>
+              <small>Cadastre, organize preços e controle a disponibilidade dos produtos.</small>
+              <span class="management-choice-action">Acessar gestão <span aria-hidden="true">→</span></span>
+            </span>
+          </button>
+          <button class="management-choice" type="button" data-open-management="orders">
+            <span class="management-choice-number">02</span>
+            <span class="management-choice-icon" aria-hidden="true">▣</span>
+            <span class="management-choice-copy">
+              <strong>Gestão de Pedidos</strong>
+              <small>Consulte pedidos, acompanhe etapas e organize o atendimento.</small>
+              <span class="management-choice-action">Acessar gestão <span aria-hidden="true">→</span></span>
+            </span>
+          </button>
+        </div>
+      </section>
 
-      <nav id="admin-tabs" class="admin-tabs" role="tablist" aria-label="Áreas administrativas">
-        <button id="tab-catalog" class="admin-tab" type="button" role="tab" data-admin-tab="catalog" aria-controls="catalog-tab-panel" aria-selected="false" tabindex="-1">
-          <span class="admin-tab-index">01</span>
-          <span class="admin-tab-copy"><strong>Gestão do Cardápio</strong><small>Preços e disponibilidade</small></span>
-          <span class="admin-tab-arrow" aria-hidden="true">→</span>
-        </button>
-        <button id="tab-orders" class="admin-tab" type="button" role="tab" data-admin-tab="orders" aria-controls="orders-tab-panel" aria-selected="true" tabindex="0">
-          <span class="admin-tab-index">02</span>
-          <span class="admin-tab-copy"><strong>Gestão de Pedidos</strong><small>Clientes, andamento e entregas</small></span>
-          <span class="admin-tab-arrow" aria-hidden="true">→</span>
-        </button>
-      </nav>
-
-      <section id="catalog-tab-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-catalog" hidden>
-        <section class="orders-panel catalog-panel" aria-labelledby="catalog-heading">
+      <section id="management-workspace" class="management-workspace" hidden>
+        <header class="workspace-header">
+          <div class="workspace-heading">
+            <button class="workspace-back" id="back-to-management" type="button">← Voltar às gestões</button>
+            <span class="eyebrow">ÁREA DE TRABALHO</span>
+            <h1 id="workspace-title">Gestão</h1>
+          </div>
+          <a class="sheet-link" id="spreadsheet-link" href="#" target="_blank" rel="noopener">Abrir planilha ↗</a>
+        </header>
+        <section id="catalog-workspace-panel" class="workspace-panel" hidden>
+                  <section class="orders-panel catalog-panel" aria-labelledby="catalog-heading">
         <div class="panel-heading"><div><h2 id="catalog-heading">Gestão do cardápio</h2><p>Altere preços e disponibilidade dos combos e das marmitas avulsas.</p></div></div>
         <div class="catalog-intro">Cada sabor possui preço e disponibilidade próprios. Nos sabores Tradicionais, o controle é separado para 350g e 500g; na Linha Fit, para 300g. Pedidos já registrados preservam seus valores originais.</div>
         <div id="catalog-list" class="catalog-list"><div class="loading-state">Carregando catálogo…</div></div>
         <div class="panel-footnote">Os valores são validados novamente pelo servidor antes do registro de cada pedido. Mantenha pelo menos um combo ativo.</div>
       </section>
-      </section>
-
-      <section id="orders-tab-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-orders">
+        </section>
+        <section id="orders-workspace-panel" class="workspace-panel" hidden>
+                
         <div class="stats-grid" id="stats-grid">
         <article class="stat-card"><span>Pedidos registrados</span><strong id="stat-total">—</strong><small>Últimos registros</small></article>
         <article class="stat-card stat-pending"><span>Aguardando confirmação</span><strong id="stat-awaiting">—</strong><small>Precisam de conferência</small></article>
@@ -107,9 +122,9 @@
         </div>
         <div class="panel-footnote">O painel exibe os 200 pedidos mais recentes. Os registros completos permanecem na planilha.</div>
       </section>
+        </section>
+        <p class="privacy-note">Dados de clientes são exibidos apenas após autenticação. Não compartilhe o acesso ao painel.</p>
       </section>
-      <p class="privacy-note">Dados de clientes são exibidos apenas após autenticação. Não compartilhe o acesso ao painel.</p>
-
     </section>
   </main>
 
@@ -138,6 +153,6 @@
   <div class="toast" id="admin-toast" role="status" aria-live="polite"></div>
 
   <script src="js/config/loja.js?v=20261120-2"></script>
-  <script src="js/admin.js?v=20261125-1"></script>
+  <script src="js/admin.js?v=20261125-2"></script>
 </body>
 </html>
