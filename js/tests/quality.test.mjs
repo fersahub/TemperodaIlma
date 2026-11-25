@@ -399,8 +399,8 @@ test('avulsas: novo pedido reinicia e persiste preferência mesmo após escolha 
 
 test('painel administrativo: arquivos, autenticação e sessão não expõem segredo no frontend',()=>{
  const adminHtml=read('admin.html');
- assert.match(adminHtml,/js\/admin\.js\?v=20261125-1/);
- assert.match(adminHtml,/css\/admin\.css\?v=20261125-1/);
+ assert.match(adminHtml,/js\/admin\.js\?v=20261125-2/);
+ assert.match(adminHtml,/css\/admin\.css\?v=20261125-2/);
  const html=read('admin.html'),css=read('css/admin.css'),js=read('js/admin.js'),backend=read('integrations/google-apps-script/Code.gs');
  assert.ok(exists('admin.html')&&exists('css/admin.css')&&exists('js/admin.js'));
  assert.match(html,/noindex,nofollow/);
@@ -439,23 +439,27 @@ test('painel administrativo: arquivos, autenticação e sessão não expõem seg
  assert.match(backend,/Utilities\.computeHmacSha256Signature/);
  assert.match(css,/\.orders-panel/);
 });
-test('painel administrativo: cardápio e pedidos ficam organizados em abas acessíveis',()=>{
+test('painel administrativo: login isolado e tela inicial mostra apenas as opções de gestão',()=>{
  const html=read('admin.html'),js=read('js/admin.js'),css=read('css/admin.css');
- assert.match(html,/id="admin-tabs" class="admin-tabs" role="tablist"/);
- assert.match(html,/id="tab-catalog"[^>]*role="tab"[^>]*data-admin-tab="catalog"/);
- assert.match(html,/id="tab-orders"[^>]*role="tab"[^>]*data-admin-tab="orders"/);
- assert.match(html,/id="catalog-tab-panel" class="tab-panel" role="tabpanel"[^>]*hidden/);
- assert.match(html,/id="orders-tab-panel" class="tab-panel" role="tabpanel"/);
- assert.match(html,/aria-labelledby="tab-catalog"/);
- assert.match(html,/aria-labelledby="tab-orders"/);
- assert.match(js,/function ativarAba\(nome, focar=false\)/);
- assert.match(js,/function iniciarAbas\(\)/);
- assert.match(js,/event\.key==='ArrowRight'/);
- assert.match(js,/event\.key==='ArrowLeft'/);
- assert.match(js,/ativarAba\(abaAtiva\)/);
- assert.match(css,/\.admin-tabs/);
- assert.match(css,/\.admin-tab\[aria-selected="true"\]/);
- assert.match(css,/\.tab-panel\[hidden\]/);
+ assert.match(html,/<body class="login-mode">/);
+ assert.match(html,/id="login-view" class="login-layout"/);
+ assert.match(html,/id="management-home" class="management-home"/);
+ assert.match(html,/id="management-workspace" class="management-workspace" hidden/);
+ assert.match(html,/data-open-management="catalog"/);
+ assert.match(html,/data-open-management="orders"/);
+ assert.match(html,/id="catalog-workspace-panel" class="workspace-panel" hidden/);
+ assert.match(html,/id="orders-workspace-panel" class="workspace-panel" hidden/);
+ assert.match(html,/id="back-to-management"/);
+ assert.match(js,/function atualizarNavegacaoGestao\(\)/);
+ assert.match(js,/function abrirGestao\(nome\)/);
+ assert.match(js,/function voltarGestao\(\)/);
+ assert.match(js,/iniciarNavegacaoGestao\(\)/);
+ assert.match(js,/document\.body\.classList\.remove\('login-mode'\)/);
+ assert.match(js,/document\.body\.classList\.add\('login-mode'\)/);
+ assert.match(css,/\.login-mode \.topbar\{display:none\}/);
+ assert.match(css,/\.management-choice-grid/);
+ assert.match(css,/\.management-workspace\[hidden\]/);
+ assert.doesNotMatch(js,/iniciarAbas|ativarAba/);
 });
 test('Apps Script centraliza pedidos sem substituir a planilha de avaliações',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
