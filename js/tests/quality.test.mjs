@@ -522,7 +522,7 @@ test('service worker não armazena painel administrativo no cache público e ren
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
  assert.match(sw,/atualizarArquivo \? new Request\(request, \{ cache: 'reload' \}\) : request/);
- assert.match(sw,/\?v=20261125-3/);
+ assert.match(sw,/\?v=20261125-4/);
  assert.match(read('js/app.js'),/updateViaCache: 'none'/);
 });
 test('backend rejeita CEP malformado antes de registrar pedido',()=>{
