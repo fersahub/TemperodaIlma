@@ -565,7 +565,7 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
 
 
 test('contingência: permite pré-pedido pelo WhatsApp sem confirmar preços ou registrar valores incertos',()=>{
- const checkout=read('js/modules/checkout.js'),pedidos=read('js/modules/pedidos.js'),html=read('index.html'),sw=read('sw.js');
+ const checkout=read('js/modules/checkout.js'),pedidos=read('js/modules/pedidos.js'),catalog=read('js/modules/catalogo.js'),html=read('index.html'),sw=read('sw.js');
  assert.match(catalog,/TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA=true/);
  assert.match(checkout,/TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA === true/);
  assert.match(checkout,/window\.TEMPERO_CATALOGO_STATUS === 'loading' && !tentativaInicialConcluida/);
