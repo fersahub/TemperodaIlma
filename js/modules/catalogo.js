@@ -9,6 +9,7 @@
       id:'avulsa-'+prato.id+'-'+size,flavorId:prato.id,size,key:prato.id+'|'+size
     })));
   window.TEMPERO_CATALOGO_STATUS='loading';
+  window.TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA=false;
   window.TEMPERO_PRECOS_AVULSAS={};
   window.TEMPERO_CATALOGO_CARREGADO=false;
   let catalogoEmAtualizacao=false;
@@ -122,6 +123,8 @@
       console.error('[Tempero da Ilma] Falha ao atualizar catálogo:',window.TEMPERO_CATALOGO_ULTIMO_ERRO);
       aviso('error','Não foi possível confirmar os preços atuais. Atualize a página quando a conexão retornar. Por segurança, o envio de novos pedidos ficará temporariamente bloqueado. Diagnóstico: '+window.TEMPERO_CATALOGO_ULTIMO_ERRO.slice(0,180));
     }finally{
+      // Depois da primeira resposta, uma nova tentativa em segundo plano não pode travar o pré-pedido.
+      window.TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA=true;
       catalogoEmAtualizacao=false;
     }
   }
