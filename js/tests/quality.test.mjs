@@ -521,8 +521,9 @@ test('service worker não armazena painel administrativo no cache público e ren
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
- assert.match(sw,/new Request\(request, \{ cache: 'reload' \}\)/);
- assert.match(sw,/atualizarArquivo \? new Request/);
+ assert.match(sw,/atualizarArquivo \? new Request\(request, \{ cache: 'reload' \}\) : request/);
+ assert.match(sw,/\?v=20261125-3/);
+ assert.match(read('js/app.js'),/updateViaCache: 'none'/);
 });
 test('backend rejeita CEP malformado antes de registrar pedido',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
