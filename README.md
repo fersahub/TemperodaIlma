@@ -245,3 +245,5 @@ O painel edita preços e ativa/desativa as opções comerciais já existentes. C
 
 ### Atualização do catálogo no navegador e no aplicativo instalado
 O Service Worker usa o cache `tempero-v27-refresh-catalog-assets`. Navegações, scripts e estilos locais são atualizados pela rede sem reutilizar cópias antigas do cache HTTP; se o catálogo falhar, o checkout solicita uma nova tentativa antes de manter o bloqueio. O cache continua disponível como fallback offline, mas preços não confirmados nunca são usados para enviar um pedido.
+
+A consulta do catálogo recebe um parâmetro de atualização único a cada tentativa. Quando o checkout encontra uma resposta antiga ou uma falha temporária, oferece uma nova consulta; os preços só liberam o envio após validação atual no servidor.
