@@ -35,7 +35,7 @@ test('HTML: referências locais existem e scripts carregam na ordem',()=>{
 });
 test('Service Worker: pré-cache contém arquivos existentes e remove versões antigas',()=>{
  const s=read('sw.js'),m=s.match(/const CORE_ASSETS\s*=\s*(\[[\s\S]*?\]);/);assert.ok(m);
- const list=new Function('return '+m[1])();for(const p of list)assert.ok(exists(p.replace(/^\.\//,'')),p);
+ const list=new Function('return '+m[1])();for(const p of list)assert.ok(exists(p.replace(/^\.\//,'').split(/[?#]/)[0]),p);
  assert.match(s,/startsWith\(CACHE_PREFIX\)/);assert.match(s,/response\.ok \|\| response\.type === 'opaque'/);
 });
 test('WhatsApp: abrir conversa não limpa carrinho automaticamente',()=>{
