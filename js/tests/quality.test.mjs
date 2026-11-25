@@ -515,16 +515,15 @@ test('modal de avaliação participa da pilha de modais',()=>{
  assert.match(interfaceJs,/MODAIS_ORDEM = \['avaliacao-modal'/);
  assert.match(interfaceJs,/id === 'avaliacao-modal'/);
 });
-test('service worker não armazena painel administrativo no cache público',()=>{
+test('service worker não armazena painel administrativo no cache público e renova arquivos do app',()=>{
  const sw=read('sw.js');
  assert.match(sw,/tempero-v27-refresh-catalog-assets/);
- assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
- assert.match(sw,/response\.ok && !paginaAdmin/);
- assert.match(sw,/if \(paginaAdmin\) return new Response/);
-}
- assert.match(sw,/new Request\(request, \{ cache: 'reload' \}\)/);
- assert.match(sw,/atualizarArquivo && new Request/););
-
+ assert.match(sw,/const paginaAdmin = url\\.pathname\\.endsWith\\('\\/admin\\.html'\\)/);
+ assert.match(sw,/response\\.ok && !paginaAdmin/);
+ assert.match(sw,/if \\(paginaAdmin\\) return new Response/);
+ assert.match(sw,/new Request\\(request, \\{ cache: 'reload' \\}\\)/);
+ assert.match(sw,/atualizarArquivo \\? new Request/);
+});
 test('backend rejeita CEP malformado antes de registrar pedido',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
  assert.ok(backend.includes('var cep=limparCampo_(cliente.cep,9);'));
