@@ -63,9 +63,25 @@
             const pix = document.getElementById('cust-payment').value === 'Pix';
             box.classList.toggle('hidden', !pix);
             if (!pix) return;
+            const area = document.getElementById('pix-qr-area');
+            const emContingencia = ['error', 'cached'].includes(window.TEMPERO_CATALOGO_STATUS);
+            const titulo = document.getElementById('pix-heading');
+            const chaveLinha = document.getElementById('pix-key-row');
+            const botaoChave = document.getElementById('pix-copy-button');
+            if (emContingencia) {
+                if (titulo) titulo.innerText = 'Pagamento somente após confirmação';
+                document.getElementById('pix-valor').innerText = 'Aguardando confirmação dos valores pela equipe.';
+                document.getElementById('pix-chave').innerText = 'A chave será informada após a confirmação.';
+                area.classList.add('hidden');
+                if (chaveLinha) chaveLinha.classList.add('hidden');
+                if (botaoChave) botaoChave.classList.add('hidden');
+                return;
+            }
+            if (titulo) titulo.innerText = 'Pague via Pix';
+            if (chaveLinha) chaveLinha.classList.remove('hidden');
+            if (botaoChave) botaoChave.classList.remove('hidden');
             const sub = calcularSubtotalCarrinho();
             const fe = freteEfetivo();
-            const area = document.getElementById('pix-qr-area');
             document.getElementById('pix-chave').innerText = CONFIG.pixChave;
             if (fe === null) {
                 document.getElementById('pix-valor').innerText = 'calcule o frete para ver o total';
