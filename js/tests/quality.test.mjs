@@ -83,7 +83,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v28-whatsapp-manual-order/);
+ assert.match(read('sw.js'),/tempero-v29-retry-nao-bloqueia-prepedido/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -275,7 +275,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v28-whatsapp-manual-order'));
+ assert.ok(read('sw.js').includes('tempero-v29-retry-nao-bloqueia-prepedido'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -517,12 +517,12 @@ test('modal de avaliação participa da pilha de modais',()=>{
 });
 test('service worker não armazena painel administrativo no cache público e renova arquivos do app',()=>{
  const sw=read('sw.js');
- assert.match(sw,/tempero-v28-whatsapp-manual-order/);
+ assert.match(sw,/tempero-v29-retry-nao-bloqueia-prepedido/);
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
  assert.match(sw,/atualizarArquivo \? new Request\(request, \{ cache: 'reload' \}\) : request/);
- assert.match(sw,/\?v=20261125-4/);
+ assert.match(sw,/\?v=20261125-5/);
  assert.match(read('js/app.js'),/updateViaCache: 'none'/);
 });
 test('backend rejeita CEP malformado antes de registrar pedido',()=>{
@@ -560,13 +560,15 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
  assert.ok(catalog.includes("prato.id+'|'+size"));
  assert.match(admin,/preços por sabor/);
  assert.match(adminHtml,/Cada sabor possui preço e disponibilidade próprios/);
- assert.match(read('js/modules/checkout.js'),/\['error', 'cached'\]\.includes\(window\.TEMPERO_CATALOGO_STATUS\)/);
+ assert.match(read('js/modules/checkout.js'),/TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA === true/);
 });
 
 
 test('contingência: permite pré-pedido pelo WhatsApp sem confirmar preços ou registrar valores incertos',()=>{
- const checkout=read('js/modules/checkout.js'),pedidos=read('js/modules/pedidos.js'),html=read('index.html'),sw=read('sw.js');
- assert.match(checkout,/\['error', 'cached'\]\.includes\(window\.TEMPERO_CATALOGO_STATUS\)/);
+ const checkout=read('js/modules/checkout.js'),pedidos=read('js/modules/pedidos.js'),catalog=read('js/modules/catalogo.js'),html=read('index.html'),sw=read('sw.js');
+ assert.match(catalog,/TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA=true/);
+ assert.match(checkout,/TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA === true/);
+ assert.match(checkout,/window\.TEMPERO_CATALOGO_STATUS === 'loading' && !tentativaInicialConcluida/);
  assert.match(checkout,/MODO DE CONTINGÊNCIA — PRÉ-PEDIDO, NÃO CONFIRMADO/);
  assert.match(checkout,/Não realize Pix nem pagamento antes de receber a confirmação/);
  assert.match(checkout,/manualCatalogConfirmation: modoPrePedidoManual/);
@@ -580,12 +582,12 @@ test('contingência: permite pré-pedido pelo WhatsApp sem confirmar preços ou 
  assert.match(html,/id="pix-copy-button"/);
  assert.match(read('js/services/pix.js'),/window\.TEMPERO_CATALOGO_STATUS !== 'ready'/);
  assert.match(read('js/services/pix.js'),/Aguardando confirmação dos valores pela equipe/);
- assert.match(html,/js\/services\/pix\.js\?v=20261125-4/);
- assert.match(html,/js\/modules\/pedidos\.js\?v=20261125-4/);
- assert.match(html,/js\/modules\/checkout\.js\?v=20261125-4/);
- assert.match(sw,/tempero-v28-whatsapp-manual-order/);
- assert.match(sw,/js\/modules\/pedidos\.js\?v=20261125-4/);
- assert.match(sw,/js\/modules\/checkout\.js\?v=20261125-4/);
+ assert.match(html,/js\/services\/pix\.js\?v=20261125-5/);
+ assert.match(html,/js\/modules\/pedidos\.js\?v=20261125-5/);
+ assert.match(html,/js\/modules\/checkout\.js\?v=20261125-5/);
+ assert.match(sw,/tempero-v29-retry-nao-bloqueia-prepedido/);
+ assert.match(sw,/js\/modules\/pedidos\.js\?v=20261125-5/);
+ assert.match(sw,/js\/modules\/checkout\.js\?v=20261125-5/);
  assert.match(read('js/modules/catalogo.js'),/callback,_:String\(Date\.now\(\)\)/);
 });
 test('catálogo público atualiza preços e disponibilidade automaticamente a cada minuto sem interferir no carrinho',()=>{

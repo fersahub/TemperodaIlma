@@ -171,8 +171,9 @@ function openCheckoutModal() {
         }
 
         function sendToWhatsApp() {
-            const modoPrePedidoManual = ['error', 'cached'].includes(window.TEMPERO_CATALOGO_STATUS);
-            if (window.TEMPERO_CATALOGO_STATUS === 'loading') {
+            const tentativaInicialConcluida = window.TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA === true;
+            const modoPrePedidoManual = tentativaInicialConcluida && window.TEMPERO_CATALOGO_STATUS !== 'ready';
+            if (window.TEMPERO_CATALOGO_STATUS === 'loading' && !tentativaInicialConcluida) {
                 mostrarToast('Aguarde a primeira tentativa de confirmação dos preços do cardápio.');
                 return;
             }
