@@ -64,7 +64,7 @@
             box.classList.toggle('hidden', !pix);
             if (!pix) return;
             const area = document.getElementById('pix-qr-area');
-            const emContingencia = ['error', 'cached'].includes(window.TEMPERO_CATALOGO_STATUS);
+            const emContingencia = window.TEMPERO_CATALOGO_STATUS !== 'ready';
             const titulo = document.getElementById('pix-heading');
             const chaveLinha = document.getElementById('pix-key-row');
             const botaoChave = document.getElementById('pix-copy-button');
