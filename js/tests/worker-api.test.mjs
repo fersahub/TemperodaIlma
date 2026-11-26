@@ -128,10 +128,11 @@ test('protege textos contra fórmula em células da planilha',()=>{
   assert.equal(safeSheetText('Cliente normal'),'Cliente normal');
 });
 
-test('formata data das avaliações no fuso de Salvador',()=>{
-  const instant=new Date('2026-11-26T15:00:00.000Z');
-  const serial=instant.getTime()/86400000+25569;
+test('grava e lê datas no horário civil de Salvador, inclusive perto da meia-noite UTC',()=>{
+  const instant=new Date('2026-11-27T02:30:00.000Z');
+  const serial=dateSerial(instant);
   assert.equal(reviewDate(serial),'2026-11-26');
+  assert.match(panelDate(serial),/26\/11\/2026, 23:30/);
 });
 
 test('Durable Object serializa incrementos concorrentes e aplica limite sem ultrapassagem',async()=>{
