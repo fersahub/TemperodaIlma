@@ -23,6 +23,8 @@ jobs:
         with:
           node-version: 22
       - name: Verificar sintaxe JavaScript
-        run: find js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+        run: find js workers/tempero-api -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Verificar Worker Cloudflare
+        run: npm --prefix workers/tempero-api run check
       - name: Executar testes
         run: npm test
