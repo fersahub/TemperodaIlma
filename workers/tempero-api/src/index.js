@@ -697,10 +697,16 @@ async function handleGet(request,env) {
       if(!await verifyAdminSession(env,params.get('token'))) result={ok:false,code:'SESSION_INVALID',message:'Sessão inválida ou expirada.'};
       else result=await getAdminData(env);
     } else if(action==='adminOperation') {
-      if(!await verifyAdminSession(env,params.get('token'))) result={ok:false,code:'SESSION_INVALID',message:'Sessão inválida ou expirada.'};
-      else {
-        const op=String(params.get('operationId')||'');
-        result=/^[A-Fa-f0-9-]{20,50}$/.test(op)?JSON.parse(await requireState(env).get('admin-op:'+op)||'{"ok":false,"pending":true,"message":"Operação ainda não confirmada pelo servidor."}'):{ok:false,pending:false,message:'Identificação da operação inválida.'};
+      const op=String(params.get('operationId')||'');
+      const operacao=/^[A-Fa-f0-9-]{20,50}$/.test(op)
+        ? JSON.parse(await requireState(env).get('admin-op:'+op)||'{"ok":false,"pending":true,"message":"Operação ainda não confirmada pelo servidor."}')
+        : {ok:false,pending:false,message:'Identificação da operação inválida.'};
+      // A alteração de senha invalida a sessão que iniciou a operação; ainda assim,
+      // o chamador pode consultar o resultado específico dessa troca.
+      if(!await verifyAdminSession(env,params.get('token')) && operacao.passwordChanged!==true) {
+        result={ok:false,code:'SESSION_INVALID',message:'Sessão inválida ou expirada.'};
+      } else {
+        result=operacao;
       }
     } else if(action==='check') {
       const orderId=String(params.get('orderId')||'');
