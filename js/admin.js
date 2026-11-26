@@ -69,8 +69,9 @@
         }
         throw new Error(detail || 'O Apps Script não confirmou a disponibilidade do serviço.');
       }
-      if(health.apiVersion!=='2026.11.20.7') {
-        throw new Error('A implantação respondeu com uma versão diferente da esperada ('+String(health.apiVersion||'sem versão')+'). Publique uma nova versão do Code.gs na implantação cujo ID corresponde ao endereço do site.');
+      const versaoEsperada=health.service==='Tempero da Ilma API independente'?'2026.11.26.1':'2026.11.20.7';
+      if(health.apiVersion!==versaoEsperada) {
+        throw new Error('A API respondeu com uma versão diferente da esperada ('+String(health.apiVersion||'sem versão')+'). Confira a publicação e a URL configurada no site.');
       }
       if(!health.adminConfigured) {
         throw new Error('O Apps Script está atualizado, mas a senha administrativa não está configurada neste projeto. Não gere outra senha ainda; primeiro confira se esta é a implantação correta.');
@@ -88,7 +89,7 @@
       if(!challenge || challenge.ok!==true || !/^[A-Fa-f0-9]{64}$/.test(String(challenge.nonce||''))) {
         throw new Error(String(challenge && challenge.message || 'O Apps Script não conseguiu iniciar o desafio de autenticação.'));
       }
-      mostrarEstadoConexao('Conexão confirmada · Apps Script '+health.apiVersion+'.','ok');
+      mostrarEstadoConexao('Conexão confirmada · '+(health.service||'Apps Script')+' '+health.apiVersion+'.','ok');
       return true;
     } catch(error) {
       mostrarEstadoConexao(error.message || 'Não foi possível verificar o Apps Script.','error');
