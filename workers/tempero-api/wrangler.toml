@@ -1,0 +1,15 @@
+name = "tempero-ilma-api"
+main = "src/index.js"
+compatibility_date = "2026-11-26"
+workers_dev = true
+
+[observability]
+enabled = true
+
+[[durable_objects.bindings]]
+name = "OPERATIONS"
+class_name = "OperationsCoordinator"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["OperationsCoordinator"]
