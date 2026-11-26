@@ -825,3 +825,6 @@ export class OperationsCoordinator {
     if(next) await this.ctx.storage.setAlarm(Math.max(Date.now()+1000,next));
   }
 };
+
+
+export const __test = Object.freeze({fixedCatalogDefinitions,publicCatalog,validateOrderPayload,reviewDate,safeSheetText,deliveryDateSaturday});
