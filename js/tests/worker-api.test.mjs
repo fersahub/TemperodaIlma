@@ -7,7 +7,7 @@ import {
   default as worker
 } from '../../workers/tempero-api/src/index.js';
 
-const {fixedCatalogDefinitions,publicCatalog,validateOrderPayload,reviewDate,safeSheetText}=__test;
+const {fixedCatalogDefinitions,publicCatalog,validateOrderPayload,reviewDate,safeSheetText,dateSerial,panelDate}=__test;
 
 function catalogSample() {
   return fixedCatalogDefinitions().map((definition,index)=>({
@@ -222,18 +222,18 @@ test('API lê o catálogo pela Sheets API e registra um pedido uma única vez',a
   };
   try {
     const storage=makeStorage();
-    const coordinator=new OperationsCoordinator({storage},{});
-    const namespace={
-      idFromName:name=>name,
-      get:()=>({fetch:request=>coordinator.fetch(request)})
-    };
     const env={
       GOOGLE_SERVICE_ACCOUNT_JSON:JSON.stringify(serviceAccount),
       SPREADSHEET_ID:'test-sheet-id-12345678901234567890',
       ADMIN_PASSWORD:'SenhaDeTeste123',
-      REVIEW_HASH_SALT:'salt-de-teste-para-avaliacoes',
-      OPERATIONS:namespace
+      REVIEW_HASH_SALT:'salt-de-teste-para-avaliacoes'
     };
+    const coordinator=new OperationsCoordinator({storage},env);
+    const namespace={
+      idFromName:name=>name,
+      get:()=>({fetch:request=>coordinator.fetch(request)})
+    };
+    env.OPERATIONS=namespace;
     const catalogResponse=await worker.fetch(new Request('https://tempero-ilma-api.test.workers.dev/exec?action=catalog&callback=loadCatalog'),env);
     const catalogText=await catalogResponse.text();
     assert.match(catalogText,/loadCatalog\(\{"ok":true/);
@@ -249,7 +249,7 @@ test('API lê o catálogo pela Sheets API e registra um pedido uma única vez',a
     });
     const first=await worker.fetch(request(),env);
     const firstResult=await first.json();
-    assert.equal(firstResult.ok,true);
+    assert.equal(firstResult.ok,true,JSON.stringify(firstResult));
     assert.equal(firstResult.orderId,payload.orderId);
     assert.equal(writes.length,1);
     const second=await worker.fetch(request(),env);
