@@ -156,6 +156,7 @@ test('Durable Object serializa incrementos concorrentes e aplica limite sem ultr
 });
 
 
+// Integração simulada do contrato público com OAuth, Sheets API, idempotência e Durable Object.
 test('API lê o catálogo pela Sheets API e registra um pedido uma única vez',async()=>{
   const originalFetch=globalThis.fetch;
   const {privateKey}=generateKeyPairSync('rsa',{
