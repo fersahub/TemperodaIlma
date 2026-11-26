@@ -10,7 +10,9 @@ let indiceCarrosselAvaliacoes = 0;
 
 function urlApiAvaliacoes() {
     const url = String(window.TEMPERO_CONFIG?.avaliacoes?.apiUrl || '').trim();
-    return /^https:\/\/script\.google\.com\/macros\/s\/[^/?#]+\/exec\/?$/.test(url) ? url : '';
+    const appsScript=/^https:\/\/script\.google\.com\/macros\/s\/[^/?#]+\/exec\/?$/.test(url);
+    const cloudflareWorker=/^https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev\/exec\/?$/i.test(url);
+    return appsScript||cloudflareWorker ? url : '';
 }
 
 function gerarCodigoPedidoAvaliacao() {
