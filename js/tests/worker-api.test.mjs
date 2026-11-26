@@ -200,7 +200,7 @@ test('API lê o catálogo pela Sheets API e registra um pedido uma única vez',a
       return new Response(JSON.stringify({access_token:'mock-google-access-token',expires_in:3600}),{status:200,headers:{'Content-Type':'application/json'}});
     }
     if(url.hostname==='sheets.googleapis.com') {
-      if(url.pathname.endsWith('/batchUpdate')) {
+      if(url.pathname.includes(':batchUpdate')) {
         writes.push(JSON.parse(init.body||'{}'));
         return new Response(JSON.stringify({replies:[{}]}),{status:200,headers:{'Content-Type':'application/json'}});
       }
