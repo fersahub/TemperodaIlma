@@ -1,11 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { generateKeyPairSync } from 'node:crypto';
 import {
   __test,
-  OperationsCoordinator
+  OperationsCoordinator,
+  default as worker
 } from '../../workers/tempero-api/src/index.js';
 
-const {fixedCatalogDefinitions,publicCatalog,validateOrderPayload,reviewDate,safeSheetText}=__test;
+const {fixedCatalogDefinitions,publicCatalog,validateOrderPayload,reviewDate,safeSheetText,dateSerial,panelDate}=__test;
 
 function catalogSample() {
   return fixedCatalogDefinitions().map((definition,index)=>({
@@ -128,10 +130,11 @@ test('protege textos contra fórmula em células da planilha',()=>{
   assert.equal(safeSheetText('Cliente normal'),'Cliente normal');
 });
 
-test('formata data das avaliações no fuso de Salvador',()=>{
-  const instant=new Date('2026-11-26T15:00:00.000Z');
-  const serial=instant.getTime()/86400000+25569;
+test('grava e lê datas no horário civil de Salvador, inclusive perto da meia-noite UTC',()=>{
+  const instant=new Date('2026-11-27T02:30:00.000Z');
+  const serial=dateSerial(instant);
   assert.equal(reviewDate(serial),'2026-11-26');
+  assert.match(panelDate(serial),/26\/11\/2026, 23:30/);
 });
 
 test('Durable Object serializa incrementos concorrentes e aplica limite sem ultrapassagem',async()=>{
@@ -150,4 +153,111 @@ test('Durable Object serializa incrementos concorrentes e aplica limite sem ultr
     method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:'rate:customer'})
   }));
   assert.deepEqual(await result.json(),{ok:true,value:'5'});
+});
+
+
+// Integração simulada do contrato público com OAuth, Sheets API, idempotência e Durable Object.
+test('API lê o catálogo pela Sheets API e registra um pedido uma única vez',async()=>{
+  const originalFetch=globalThis.fetch;
+  const {privateKey}=generateKeyPairSync('rsa',{
+    modulusLength:2048,
+    publicKeyEncoding:{type:'spki',format:'pem'},
+    privateKeyEncoding:{type:'pkcs8',format:'pem'}
+  });
+  const serviceAccount={
+    client_email:'tempero-api-test@example.iam.gserviceaccount.com',
+    private_key:privateKey
+  };
+  const definitions=fixedCatalogDefinitions();
+  const defaultComboPrices={
+    'combo-5-350g':100,'combo-10-350g':200,
+    'combo-5-500g':125,'combo-10-500g':250,
+    'combo-5-300g-fit':130,'combo-10-300g-fit':260
+  };
+  const catalogRows=[
+    ['ID','Tipo','Nome','Categoria','Tamanho','Quantidade','Preço','Ativo','Atualizado em'],
+    ...definitions.map(item=>[
+      item.id,item.type,item.name,item.category,item.size,item.quantity,
+      item.type==='COMBO'?defaultComboPrices[item.id]:(item.category==='Linha Fit'?26:(item.size==='500g'?25:20)),
+      true,0
+    ])
+  ];
+  const sheets={
+    Catalogo:catalogRows,
+    Fretes:[['Bairro','Taxa','Ativo'],['Centro',9,true]],
+    Pedidos:[['ID do pedido','Código de avaliação','Criado em','Atualizado em','Status','Cliente','Telefone']],
+    ItensPedidos:[['Pedido ID','Tipo','Referência','Produto','Sabor/Resumo','Tamanho','Quantidade','Valor unitário','Subtotal','Observação']],
+    Clientes:[['Telefone','Nome','CEP','Rua','Número','Complemento','Bairro','Primeiro pedido','Último pedido','Quantidade de pedidos','Total em pedidos','Aceita atualizações WhatsApp']],
+    HistoricoPedidos:[['ID','Pedido ID','Data e hora','Status anterior','Novo status','Observação interna','Responsável']],
+    Notificacoes:[['ID','Pedido ID','Criada em','Telefone','Status do pedido','Mensagem preparada','Situação da notificação','Atualizada em']],
+    Avaliacoes:[['ID','Criado em','Código do pedido (hash)','Nome público','Nota geral','Comentário geral','Notas por sabor (JSON)','Status']]
+  };
+  const sheetNames=Object.keys(sheets);
+  const metadata={sheets:sheetNames.map((title,index)=>({properties:{title,sheetId:index+1}}))};
+  const writes=[];
+  globalThis.fetch=async(input,init={})=>{
+    const url=new URL(typeof input==='string'?input:input.url);
+    if(url.hostname==='oauth2.googleapis.com') {
+      return new Response(JSON.stringify({access_token:'mock-google-access-token',expires_in:3600}),{status:200,headers:{'Content-Type':'application/json'}});
+    }
+    if(url.hostname==='sheets.googleapis.com') {
+      if(url.pathname.includes(':batchUpdate')) {
+        writes.push(JSON.parse(init.body||'{}'));
+        return new Response(JSON.stringify({replies:[{}]}),{status:200,headers:{'Content-Type':'application/json'}});
+      }
+      if(url.pathname.includes('/values/')) {
+        const range=decodeURIComponent(url.pathname.split('/values/')[1]||'');
+        const match=range.match(/^'([^']+)'!/);
+        const name=match&&match[1];
+        return new Response(JSON.stringify({values:sheets[name]||[]}),{status:200,headers:{'Content-Type':'application/json'}});
+      }
+      if(url.pathname.endsWith('/spreadsheets/test-sheet-id')) {
+        return new Response(JSON.stringify(metadata),{status:200,headers:{'Content-Type':'application/json'}});
+      }
+      if(url.pathname.includes('/spreadsheets/test-sheet-id')) {
+        return new Response(JSON.stringify(metadata),{status:200,headers:{'Content-Type':'application/json'}});
+      }
+    }
+    throw new Error('Requisição externa inesperada no teste: '+url.href);
+  };
+  try {
+    const storage=makeStorage();
+    const env={
+      GOOGLE_SERVICE_ACCOUNT_JSON:JSON.stringify(serviceAccount),
+      SPREADSHEET_ID:'test-sheet-id-12345678901234567890',
+      ADMIN_PASSWORD:'SenhaDeTeste123',
+      REVIEW_HASH_SALT:'salt-de-teste-para-avaliacoes'
+    };
+    const coordinator=new OperationsCoordinator({storage},env);
+    const namespace={
+      idFromName:name=>name,
+      get:()=>({fetch:request=>coordinator.fetch(request)})
+    };
+    env.OPERATIONS=namespace;
+    const catalogResponse=await worker.fetch(new Request('https://tempero-ilma-api.test.workers.dev/exec?action=catalog&callback=loadCatalog'),env);
+    const catalogText=await catalogResponse.text();
+    assert.match(catalogText,/loadCatalog\(\{"ok":true/);
+    assert.match(catalogText,/"combos":\[\{"id":"combo-5-350g","price":100/);
+    assert.match(catalogText,/"avulsas":\[/);
+
+    const payload=payloadBase();
+    const body=new URLSearchParams({action:'registerOrder',payload:JSON.stringify(payload)});
+    const request=()=>new Request('https://tempero-ilma-api.test.workers.dev/exec',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','Origin':'https://fersahub.github.io'},
+      body:body.toString()
+    });
+    const first=await worker.fetch(request(),env);
+    const firstResult=await first.json();
+    assert.equal(firstResult.ok,true,JSON.stringify(firstResult));
+    assert.equal(firstResult.orderId,payload.orderId);
+    assert.equal(writes.length,1);
+    const second=await worker.fetch(request(),env);
+    const secondResult=await second.json();
+    assert.equal(secondResult.ok,true);
+    assert.equal(secondResult.duplicate,true);
+    assert.equal(writes.length,1);
+  } finally {
+    globalThis.fetch=originalFetch;
+  }
 });

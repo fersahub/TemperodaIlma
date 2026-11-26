@@ -93,18 +93,31 @@ function money(value) {
   return Math.round(n*100)/100;
 }
 function truthy(value) { return value===true || String(value).toUpperCase()==='TRUE'; }
-function dateSerial(date=new Date()) { return date.getTime()/86400000+25569; }
+function dateSerial(date=new Date()) {
+  // Google Sheets guarda datas como número serial sem fuso. Gravamos a hora civil
+  // de Salvador para que a planilha e o painel exibam o mesmo horário.
+  const parts=new Intl.DateTimeFormat('en-US',{
+    timeZone:'America/Bahia',year:'numeric',month:'2-digit',day:'2-digit',
+    hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'
+  }).formatToParts(date);
+  const values=Object.fromEntries(parts.map(part=>[part.type,part.value]));
+  const wallClock=Date.UTC(Number(values.year),Number(values.month)-1,Number(values.day),
+    Number(values.hour),Number(values.minute),Number(values.second));
+  return wallClock/86400000+25569;
+}
 function fromSerial(value) {
   const n=Number(value);
   return Number.isFinite(n) ? new Date((n-25569)*86400000) : null;
 }
 function panelDate(value) {
-  let date=null;
+  let date=null,serial=false;
   if(value instanceof Date) date=value;
-  else if(typeof value==='number') date=fromSerial(value);
+  else if(typeof value==='number') {date=fromSerial(value);serial=true;}
   else if(value) { const parsed=new Date(value); if(!Number.isNaN(parsed.getTime())) date=parsed; }
   if(!date) return String(value||'');
-  return new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Bahia',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(date);
+  return new Intl.DateTimeFormat('pt-BR',{
+    timeZone:serial?'UTC':'America/Bahia',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'
+  }).format(date);
 }
 function cellData(value) {
   if(value===null || value===undefined || value==='') return {userEnteredValue:{stringValue:''}};
@@ -396,7 +409,7 @@ async function existsOrderByReview(env,reviewId,rows=null) {
 function reviewDate(value) {
   const date=typeof value==='number'?fromSerial(value):(value instanceof Date?value:new Date(value));
   if(!date||Number.isNaN(date.getTime())) return String(value||'');
-  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bahia',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:typeof value==='number'?'UTC':'America/Bahia',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);
   const data=Object.fromEntries(parts.map(part=>[part.type,part.value]));
   return data.year+'-'+data.month+'-'+data.day;
 }
@@ -833,4 +846,4 @@ export class OperationsCoordinator {
 };
 
 
-export const __test = Object.freeze({fixedCatalogDefinitions,publicCatalog,validateOrderPayload,reviewDate,safeSheetText,deliveryDateSaturday});
+export const __test = Object.freeze({fixedCatalogDefinitions,publicCatalog,validateOrderPayload,reviewDate,safeSheetText,deliveryDateSaturday,dateSerial,panelDate});
