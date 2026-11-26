@@ -252,9 +252,27 @@ async function appendRow(env,ids,sheet,values) {
 function sheetRowsMap(rows) {
   return (rows||[]).slice(1).map((row,index)=>({row,index:index+1,number:index+2}));
 }
+async function fixedCatalogDefinitions() {
+  const definitions=Object.entries(COMBOS).map(([id,combo])=>({
+    id,type:'COMBO',name:combo.name,category:combo.type,
+    size:combo.type==='Linha Fit'?'300g':(id.includes('500g')?'500g':'350g'),quantity:combo.qty
+  }));
+  for(const [flavorId,name] of Object.entries(FLAVORS)) {
+    const category=FIT_IDS.has(flavorId)?'Linha Fit':'Tradicional';
+    const sizes=category==='Linha Fit'?['300g']:['350g','500g'];
+    for(const size of sizes) definitions.push({
+      id:'avulsa-'+flavorId+'-'+size,type:'AVULSA',name,category,size,quantity:1,flavorId
+    });
+  }
+  return definitions;
+}
 async function getCatalogItems(env) {
   const rows=await readSheet(env,'Catalogo');
   if(rows.length<2) throw new Error('A aba Catalogo está vazia.');
+  const expectedHeaders=['ID','Tipo','Nome','Categoria','Tamanho','Quantidade','Preço','Ativo','Atualizado em'];
+  if(expectedHeaders.some((header,index)=>String(rows[0][index]||'')!==header)) {
+    throw new Error('Os cabeçalhos da aba Catalogo não correspondem ao formato esperado. Nenhum dado foi alterado.');
+  }
   const byId=new Map();
   for(const {row,number} of sheetRowsMap(rows)) {
     const id=String(row[0]||'');
@@ -264,7 +282,14 @@ async function getCatalogItems(env) {
     if(!Number.isFinite(price)||price<=0||price>9999.99) throw new Error('Preço inválido no catálogo para '+id+'.');
     byId.set(id,{id,type:String(row[1]||''),name:String(row[2]||''),category:String(row[3]||''),size:String(row[4]||''),quantity:Number(row[5]||0),price,active:truthy(row[7]),updatedAt:panelDate(row[8]),rowNumber:number});
   }
-  return Array.from(byId.values());
+  return fixedCatalogDefinitions().map(definition=>{
+    const item=byId.get(definition.id);
+    if(!item) throw new Error('O item '+definition.id+' não foi encontrado na aba Catalogo.');
+    if(item.type!==definition.type||item.category!==definition.category||item.size!==definition.size||item.quantity!==definition.quantity||item.name!==definition.name) {
+      throw new Error('A estrutura do item '+definition.id+' foi alterada indevidamente na aba Catalogo.');
+    }
+    return item;
+  });
 }
 function publicCatalog(items) {
   return {
@@ -368,6 +393,13 @@ async function existsOrderByReview(env,reviewId,rows=null) {
   const orders=rows||await readSheet(env,'Pedidos');
   return sheetRowsMap(orders).some(x=>String(x.row[1]||'')===reviewId);
 }
+function reviewDate(value) {
+  const date=typeof value==='number'?fromSerial(value):(value instanceof Date?value:new Date(value));
+  if(!date||Number.isNaN(date.getTime())) return String(value||'');
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bahia',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);
+  const data=Object.fromEntries(parts.map(part=>[part.type,part.value]));
+  return data.year+'-'+data.month+'-'+data.day;
+}
 function hashHex(bytes) {
   return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
 }
@@ -383,7 +415,7 @@ async function getPublicReviews(env) {
     if(String(row[7]||'')!=='PUBLICADO') continue;
     const overall=Number(row[4]);
     if(Number.isInteger(overall)&&overall>=1&&overall<=5){result.overall.count++;sum+=overall;}
-    const date=panelDate(row[1]).slice(0,10);
+    const date=reviewDate(row[1]);
     const comment=String(row[5]||'');
     if(comment) result.comments.push({name:String(row[3]||'Cliente'),rating:overall,comment,date});
     let flavors=[];
