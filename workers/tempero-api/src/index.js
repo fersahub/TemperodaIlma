@@ -252,7 +252,7 @@ async function appendRow(env,ids,sheet,values) {
 function sheetRowsMap(rows) {
   return (rows||[]).slice(1).map((row,index)=>({row,index:index+1,number:index+2}));
 }
-async function fixedCatalogDefinitions() {
+function fixedCatalogDefinitions() {
   const definitions=Object.entries(COMBOS).map(([id,combo])=>({
     id,type:'COMBO',name:combo.name,category:combo.type,
     size:combo.type==='Linha Fit'?'300g':(id.includes('500g')?'500g':'350g'),quantity:combo.qty
@@ -285,7 +285,7 @@ async function getCatalogItems(env) {
   return fixedCatalogDefinitions().map(definition=>{
     const item=byId.get(definition.id);
     if(!item) throw new Error('O item '+definition.id+' não foi encontrado na aba Catalogo.');
-    if(item.type!==definition.type||item.category!==definition.category||item.size!==definition.size||item.quantity!==definition.quantity||item.name!==definition.name) {
+    if(item.type!==definition.type||item.category!==definition.category||item.size!==definition.size||item.quantity!==definition.quantity) {
       throw new Error('A estrutura do item '+definition.id+' foi alterada indevidamente na aba Catalogo.');
     }
     return item;
