@@ -119,11 +119,65 @@ function appendCellsRequest(sheetId, rows) {
 function updateCellsRequest(sheetId,rowIndex,columnIndex,rows) {
   return {updateCells:{start:{sheetId,rowIndex,columnIndex},rows:rows.map(sheetRow),fields:'userEnteredValue'}};
 }
+function operationsStub(env) {
+  if(!env.OPERATIONS) throw new Error('O Durable Object OPERATIONS ainda não foi vinculado ao Cloudflare Worker.');
+  return env.OPERATIONS.get(env.OPERATIONS.idFromName('tempero-global'));
+}
+function stateProxy(env) {
+  const stub=operationsStub(env);
+  const call=async(action,data={})=>{
+    const response=await stub.fetch('https://operations.internal/state/'+action,{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||result.ok!==true) throw new Error(result.message||'Não foi possível acessar o estado seguro da API.');
+    return result.value;
+  };
+  return {
+    get:key=>call('get',{key}),
+    put:(key,value,options={})=>call('put',{key,value,expirationTtl:options.expirationTtl||0}),
+    delete:key=>call('delete',{key}),
+    consume:key=>call('consume',{key}),
+    increment:(key,limit,ttl)=>call('increment',{key,limit,ttl})
+  };
+}
 function requireState(env) {
-  if(!env.STATE || typeof env.STATE.get!=='function' || typeof env.STATE.put!=='function') {
-    throw new Error('O vínculo KV STATE ainda não foi configurado no Cloudflare Worker.');
-  }
-  return env.STATE;
+  if(env.STATE && typeof env.STATE.get==='function' && typeof env.STATE.put==='function') return env.STATE;
+  return stateProxy(env);
+}
+function directState(ctx) {
+  const storageKey=key=>'state:'+String(key);
+  const read=async key=>{
+    const item=await ctx.storage.get(storageKey(key));
+    if(!item) return null;
+    if(item.expiresAt && item.expiresAt<=Date.now()) {
+      await ctx.storage.delete(storageKey(key));
+      return null;
+    }
+    return item.value;
+  };
+  const write=async(key,value,expirationTtl=0)=>{
+    const ttl=Number(expirationTtl)||0;
+    const expiresAt=ttl>0?Date.now()+ttl*1000:0;
+    await ctx.storage.put(storageKey(key),{value:String(value),expiresAt});
+    if(ttl>0 && !(await ctx.storage.getAlarm())) await ctx.storage.setAlarm(Date.now()+60*60*1000);
+  };
+  return {
+    get:read,
+    put:(key,value,options={})=>write(key,value,options.expirationTtl||0),
+    delete:key=>ctx.storage.delete(storageKey(key)),
+    consume:async key=>{
+      const value=await read(key);
+      if(value!==null) await ctx.storage.delete(storageKey(key));
+      return value;
+    },
+    increment:async(key,limit,ttl)=>{
+      const count=Number(await read(key)||0)+1;
+      if(count>Number(limit)) throw new Error('Muitas solicitações em pouco tempo. Aguarde alguns minutos e tente novamente.');
+      await write(key,String(count),ttl);
+      return count;
+    }
+  };
 }
 
 async function googleAccessToken(env) {
@@ -514,10 +568,13 @@ async function submitReview(env,payload) {
   return {ok:true,published:true};
 }
 async function incrementRate(env,key,limit,ttl) {
-  const state=requireState(env),now=Math.floor(Date.now()/1000),window=Math.floor(now/ttl),name='rate:'+key+':'+window;
+  const now=Math.floor(Date.now()/1000),window=Math.floor(now/ttl),name='rate:'+key+':'+window;
+  const state=requireState(env);
+  if(typeof state.increment==='function') return state.increment(name,limit,ttl+5);
   const count=Number(await state.get(name)||0)+1;
   if(count>limit) throw new Error('Muitas solicitações em pouco tempo. Aguarde alguns minutos e tente novamente.');
   await state.put(name,String(count),{expirationTtl:ttl+5});
+  return count;
 }
 async function verifyAdminSession(env,token) {
   if(!/^[A-Fa-f0-9]{64}$/.test(String(token||''))) return false;
@@ -540,8 +597,10 @@ async function adminChallenge(env) {
 }
 async function adminLogin(env,params) {
   const state=requireState(env),nonce=String(params.nonce||''),proof=String(params.proof||'');
-  if(!/^[A-Fa-f0-9]{64}$/.test(nonce)||await state.get('nonce:'+nonce)!=='1') return {ok:false,code:'CHALLENGE_EXPIRED',message:'Desafio de autenticação expirado. Tente novamente.'};
-  await state.delete('nonce:'+nonce);
+  if(!/^[A-Fa-f0-9]{64}$/.test(nonce)) return {ok:false,code:'CHALLENGE_EXPIRED',message:'Desafio de autenticação expirado. Tente novamente.'};
+  const nonceValue=typeof state.consume==='function'?await state.consume('nonce:'+nonce):await state.get('nonce:'+nonce);
+  if(nonceValue!=='1') return {ok:false,code:'CHALLENGE_EXPIRED',message:'Desafio de autenticação expirado. Tente novamente.'};
+  if(typeof state.consume!=='function') await state.delete('nonce:'+nonce);
   const password=await getAdminPassword(env);
   const expected=await hmacBase64(password,nonce);
   if(!constantTimeEqual(expected,proof)) return {ok:false,code:'INVALID_CREDENTIALS',message:'Senha incorreta.'};
@@ -625,7 +684,7 @@ async function handleGet(request,env) {
   }
   return callbackResponse(result,callback);
 }
-async function handlePost(request,env) {
+async function dispatchPost(request,env) {
   const params=await readRequestParams(request),action=String(params.action||'');
   try {
     let result;
@@ -684,7 +743,53 @@ export default {
       for(const [k,v] of Object.entries(headers)) merged.set(k,v);
       return new Response(response.body,{status:response.status,headers:merged});
     }
-    if(request.method==='POST') return handlePost(request,env);
+    if(request.method==='POST') {
+      if(!env.OPERATIONS) return jsonResponse({ok:false,message:'O Durable Object OPERATIONS não está configurado.'},503,headers);
+      const coordinator=env.OPERATIONS.get(env.OPERATIONS.idFromName('tempero-global'));
+      return coordinator.fetch(request);
+    }
     return jsonResponse({ok:false,message:'Método não permitido.'},405,headers);
+  }
+};
+
+export class OperationsCoordinator {
+  constructor(ctx,env) {
+    this.ctx=ctx;
+    this.env=env;
+    this.queue=Promise.resolve();
+  }
+  fetch(request) {
+    const run=this.queue.then(()=>this.handle(request));
+    this.queue=run.then(()=>undefined,()=>undefined);
+    return run;
+  }
+  async handle(request) {
+    const url=new URL(request.url);
+    if(url.pathname.startsWith('/state/')) {
+      try {
+        const params=await request.json(),state=directState(this.ctx);
+        let value=null;
+        if(url.pathname==='/state/get') value=await state.get(params.key);
+        else if(url.pathname==='/state/put') {await state.put(params.key,params.value,{expirationTtl:params.expirationTtl});value=true;}
+        else if(url.pathname==='/state/delete') {await state.delete(params.key);value=true;}
+        else if(url.pathname==='/state/consume') value=await state.consume(params.key);
+        else if(url.pathname==='/state/increment') value=await state.increment(params.key,params.limit,params.ttl);
+        else return jsonResponse({ok:false,message:'Operação de estado desconhecida.'},404);
+        return jsonResponse({ok:true,value});
+      } catch(error) {
+        return jsonResponse({ok:false,message:clean(error&&error.message||error,180)},400);
+      }
+    }
+    const serializedEnv=Object.assign({},this.env,{STATE:directState(this.ctx)});
+    return dispatchPost(request,serializedEnv);
+  }
+  async alarm() {
+    const entries=await this.ctx.storage.list({prefix:'state:'});
+    let next=0;
+    for(const [key,item] of entries) {
+      if(item&&item.expiresAt&&item.expiresAt<=Date.now()) await this.ctx.storage.delete(key);
+      else if(item&&item.expiresAt&&(!next||item.expiresAt<next)) next=item.expiresAt;
+    }
+    if(next) await this.ctx.storage.setAlarm(Math.max(Date.now()+1000,next));
   }
 };
