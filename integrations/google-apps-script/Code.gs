@@ -362,7 +362,18 @@ function respostaTexto_(dados) {
  * Mantém a aba Avaliacoes existente e cria as novas abas na mesma planilha.
  * ------------------------------------------------------------------ */
 
-var TEMPERO_API_VERSION = '2026.11.20.7';
+var TEMPERO_API_VERSION = '2026.11.27.1';
+
+// A chave GitHub fica exclusivamente nas Script Properties do Apps Script.
+var PUBLICACAO_CATALOGO_ = {
+  TOKEN_PROPERTY: 'TEMPERODA_ILMA_GITHUB_TOKEN',
+  SNAPSHOT_PROPERTY: 'TEMPERODA_ILMA_CATALOGO_PUBLICADO_JSON',
+  META_PROPERTY: 'TEMPERODA_ILMA_CATALOGO_PUBLICADO_META',
+  OWNER: 'fersahub',
+  REPOSITORY: 'TemperodaIlma',
+  BRANCH: 'main',
+  PATH: 'dados/catalogo-publicado.json'
+};
 
 var GESTAO = {
   ADMIN_SECRET_PROPERTY: 'TEMPERODA_ILMA_ADMIN_SECRET',
@@ -554,7 +565,20 @@ function lerCatalogo_() {
   });
 }
 function obterItemCatalogo_(id) {
-  var item=lerCatalogo_().filter(function(x){return x.id===String(id||'');})[0];
+  var identificador=String(id||'');
+  var publicado=obterSnapshotCatalogoPublicado_();
+  if(publicado) {
+    var definicao=CATALOGO_ITENS_FIXOS_.filter(function(x){return x.id===identificador;})[0];
+    if(!definicao)return null;
+    var dados=definicao.tipo==='COMBO'
+      ? publicado.combos.filter(function(x){return x.id===identificador;})[0]
+      : publicado.avulsas.filter(function(x){return x.id===identificador;})[0];
+    if(!dados)return null;
+    return {id:definicao.id,tipo:definicao.tipo,nome:definicao.nome,categoria:definicao.categoria,
+      tamanho:definicao.tamanho,quantidade:definicao.quantidade,preco:Number(dados.price),
+      ativo:dados.active===true,atualizadoEm:String(publicado.publishedAt||'')};
+  }
+  var item=lerCatalogo_().filter(function(x){return x.id===identificador;})[0];
   return item||null;
 }
 function obterCatalogoAdmin_(){return lerCatalogo_();}
@@ -568,6 +592,102 @@ function obterCatalogoPublico_() {
     })
   };
 }
+function obterSnapshotCatalogoPublicado_() {
+  var raw=PropertiesService.getScriptProperties().getProperty(PUBLICACAO_CATALOGO_.SNAPSHOT_PROPERTY);
+  if(!raw)return null;
+  var data=JSON.parse(raw);
+  if(!data||data.ok!==true||!Array.isArray(data.combos)||!Array.isArray(data.avulsas)) {
+    throw new Error('A versão publicada do catálogo está inválida. Publique o cardápio novamente pelo painel.');
+  }
+  return data;
+}
+
+function obterMetadadosCatalogoPublicado_() {
+  var raw=PropertiesService.getScriptProperties().getProperty(PUBLICACAO_CATALOGO_.META_PROPERTY);
+  if(!raw)return {published:false,publishedAt:'',publicationId:''};
+  try {
+    var data=JSON.parse(raw);
+    return {published:true,publishedAt:String(data.publishedAt||''),publicationId:String(data.publicationId||''),
+      combos:Number(data.combos||0),avulsas:Number(data.avulsas||0)};
+  } catch(ignorar) {return {published:false,publishedAt:'',publicationId:''};}
+}
+
+function githubCatalogoRequest_(method,url,token,payload) {
+  var opcoes={method:method,muteHttpExceptions:true,headers:{
+    Authorization:'Bearer '+token,
+    Accept:'application/vnd.github+json',
+    'X-GitHub-Api-Version':'2022-11-28'
+  }};
+  if(payload){opcoes.contentType='application/json';opcoes.payload=JSON.stringify(payload);}
+  return UrlFetchApp.fetch(url,opcoes);
+}
+
+function verificarAcessoPublicacaoCatalogoTempero() {
+  var token=String(PropertiesService.getScriptProperties().getProperty(PUBLICACAO_CATALOGO_.TOKEN_PROPERTY)||'').trim();
+  if(!token)throw new Error('Cadastre TEMPERODA_ILMA_GITHUB_TOKEN nas propriedades do Apps Script antes do teste.');
+  var caminho=PUBLICACAO_CATALOGO_.PATH.split('/').map(encodeURIComponent).join('/');
+  var url='https://api.github.com/repos/'+PUBLICACAO_CATALOGO_.OWNER+'/'+PUBLICACAO_CATALOGO_.REPOSITORY+'/contents/'+caminho+'?ref='+encodeURIComponent(PUBLICACAO_CATALOGO_.BRANCH);
+  var resposta=githubCatalogoRequest_('get',url,token);
+  var status=resposta.getResponseCode();
+  if(status!==200&&status!==404)throw new Error('Não foi possível validar a permissão do GitHub (HTTP '+status+'). Confira se o token tem acesso Contents: Read and write ao repositório.');
+  return {ok:true,httpStatus:status,repository:PUBLICACAO_CATALOGO_.OWNER+'/'+PUBLICACAO_CATALOGO_.REPOSITORY,
+    path:PUBLICACAO_CATALOGO_.PATH,message:'A conexão com o GitHub foi autorizada. Nenhum arquivo foi alterado.'};
+}
+
+function publicarCatalogoNoSite_() {
+  var props=PropertiesService.getScriptProperties();
+  var token=String(props.getProperty(PUBLICACAO_CATALOGO_.TOKEN_PROPERTY)||'').trim();
+  if(!token)throw new Error('A publicação ainda não está configurada. Cadastre a chave do GitHub nas propriedades do Apps Script.');
+
+  var snapshot=obterCatalogoPublico_();
+  if(snapshot.combos.length!==6||snapshot.avulsas.length!==38) {
+    throw new Error('O catálogo precisa conter os 6 combos e as 38 marmitas avulsas esperadas antes de publicar.');
+  }
+  if(!snapshot.combos.some(function(item){return item.active===true;})) {
+    throw new Error('Mantenha pelo menos um combo ativo antes de publicar o cardápio.');
+  }
+  snapshot.publishedAt=new Date().toISOString();
+  snapshot.publicationId=Utilities.getUuid().replace(/-/g,'').toUpperCase();
+  snapshot.source='Tempero da Ilma · publicação manual';
+  var conteudo=JSON.stringify(snapshot,null,2);
+  if(Utilities.newBlob(conteudo,'application/json').getBytes().length>8000) {
+    throw new Error('O arquivo publicado ultrapassou o limite seguro de armazenamento.');
+  }
+
+  var caminho=PUBLICACAO_CATALOGO_.PATH.split('/').map(encodeURIComponent).join('/');
+  var base='https://api.github.com/repos/'+PUBLICACAO_CATALOGO_.OWNER+'/'+PUBLICACAO_CATALOGO_.REPOSITORY+'/contents/'+caminho;
+  var consulta=githubCatalogoRequest_('get',base+'?ref='+encodeURIComponent(PUBLICACAO_CATALOGO_.BRANCH),token);
+  var statusConsulta=consulta.getResponseCode(),sha='';
+  if(statusConsulta===200) {
+    var arquivoAtual=JSON.parse(consulta.getContentText());
+    sha=String(arquivoAtual.sha||'');
+    if(!sha)throw new Error('O GitHub não informou a versão atual do arquivo do cardápio.');
+  } else if(statusConsulta!==404) {
+    throw new Error('O GitHub não permitiu consultar o arquivo do cardápio (HTTP '+statusConsulta+'). Confira as permissões do token.');
+  }
+
+  var payload={message:'Publica cardápio do Tempero da Ilma',content:Utilities.base64Encode(Utilities.newBlob(conteudo,'application/json').getBytes()),branch:PUBLICACAO_CATALOGO_.BRANCH};
+  if(sha)payload.sha=sha;
+  var metadados={publishedAt:snapshot.publishedAt,publicationId:snapshot.publicationId,combos:snapshot.combos.length,avulsas:snapshot.avulsas.length};
+  var anterior=props.getProperty(PUBLICACAO_CATALOGO_.SNAPSHOT_PROPERTY);
+  var metaAnterior=props.getProperty(PUBLICACAO_CATALOGO_.META_PROPERTY);
+  props.setProperty(PUBLICACAO_CATALOGO_.SNAPSHOT_PROPERTY,conteudo);
+  try {
+    var resposta=githubCatalogoRequest_('put',base,token,payload);
+    var status=resposta.getResponseCode();
+    if(status!==200&&status!==201)throw new Error('O GitHub recusou a publicação (HTTP '+status+'). Confira o token e a permissão Contents: Read and write.');
+    props.setProperty(PUBLICACAO_CATALOGO_.META_PROPERTY,JSON.stringify(metadados));
+  } catch(erro) {
+    if(anterior)props.setProperty(PUBLICACAO_CATALOGO_.SNAPSHOT_PROPERTY,anterior);
+    else props.deleteProperty(PUBLICACAO_CATALOGO_.SNAPSHOT_PROPERTY);
+    if(metaAnterior)props.setProperty(PUBLICACAO_CATALOGO_.META_PROPERTY,metaAnterior);
+    else props.deleteProperty(PUBLICACAO_CATALOGO_.META_PROPERTY);
+    throw erro;
+  }
+  return {ok:true,publishedAt:snapshot.publishedAt,publicationId:snapshot.publicationId,
+    message:'Cardápio enviado para publicação. O site passará a exibir esta versão assim que o GitHub Pages concluir a atualização.'};
+}
+
 function atualizarCatalogoAdmin_(payload) {
   var id=String(payload&&payload.id||'');
   var definicao=CATALOGO_ITENS_FIXOS_.filter(function(item){return item.id===id;})[0];
@@ -802,6 +922,7 @@ function doPost(e) {
   if (action === 'adminMarkNotification') return executarOperacaoAdmin_(params,'notification');
   if (action === 'adminChangePassword') return executarOperacaoAdmin_(params,'password');
   if (action === 'adminSaveCatalog') return executarOperacaoAdmin_(params,'catalog');
+  if (action === 'adminPublishCatalog') return executarOperacaoAdmin_(params,'publish');
   return doPostAvaliacoes_(e);
 }
 
@@ -1189,7 +1310,7 @@ function obterDadosPainelAdmin_() {
     inProgress:(statusCounts['Pedido confirmado']||0)+(statusCounts['Em preparação']||0),
     outForDelivery:statusCounts['Saiu para entrega']||0,
     delivered:statusCounts['Entregue']||0
-  },catalog:obterCatalogoAdmin_(),spreadsheetUrl:planilhaGestao_().getUrl()};
+  },catalog:obterCatalogoAdmin_(),catalogPublication:obterMetadadosCatalogoPublicado_(),spreadsheetUrl:planilhaGestao_().getUrl()};
 }
 
 function formatarDataPainel_(valor) {
@@ -1228,6 +1349,7 @@ function executarOperacaoAdmin_(params,tipo) {
       else if(tipo==='notification') resultado=marcarNotificacaoAdmin_(payload);
       else if(tipo==='password') resultado=alterarSenhaAdmin_(payload);
       else if(tipo==='catalog') resultado=atualizarCatalogoAdmin_(payload);
+      else if(tipo==='publish') resultado=publicarCatalogoNoSite_();
     } finally {
       if(lock.hasLock()) lock.releaseLock();
     }
