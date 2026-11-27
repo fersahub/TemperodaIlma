@@ -5,6 +5,7 @@
   let orders = [];
   let statuses = [];
   let catalog = [];
+  let catalogPublication = null;
   let currentOrder = null;
   let toastTimer = null;
   let carregandoPainel = false;
@@ -69,7 +70,7 @@
         }
         throw new Error(detail || 'O Apps Script não confirmou a disponibilidade do serviço.');
       }
-      const versaoEsperada=health.service==='Tempero da Ilma API independente'?'2026.11.26.1':'2026.11.20.7';
+      const versaoEsperada=health.service==='Tempero da Ilma API independente'?'2026.11.26.1':'2026.11.27.1';
       if(health.apiVersion!==versaoEsperada) {
         throw new Error('A API respondeu com uma versão diferente da esperada ('+String(health.apiVersion||'sem versão')+'). Confira a publicação e a URL configurada no site.');
       }
@@ -146,11 +147,13 @@
       orders=Array.isArray(data.orders)?data.orders:[];
       statuses=Array.isArray(data.statuses)?data.statuses:[];
       catalog=Array.isArray(data.catalog)?data.catalog:[];
+      catalogPublication=data.catalogPublication||{published:false,publishedAt:''};
       $('login-view').hidden=true; $('dashboard-view').hidden=false; $('top-actions').hidden=false;
       ativarAba(abaAtiva);
       $('spreadsheet-link').href=data.spreadsheetUrl || '#';
       renderStats(data.stats || {});
       renderCatalog();
+      renderCatalogPublication();
       renderFilterOptions();
       renderOrders();
       const atualizadoEm = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -214,7 +217,7 @@
       return '<article class="catalog-row"><div class="catalog-description"><strong>'+escapar(item.nome)+'</strong><small>'+resumo+'</small></div>'+
         '<div class="catalog-price"><label for="catalog-price-'+id+'">Preço (R$)</label><input id="catalog-price-'+id+'" type="number" min="0.01" max="9999.99" step="0.01" value="'+preco+'" inputmode="decimal"></div>'+
         '<label class="catalog-active"><input id="catalog-active-'+id+'" type="checkbox" '+(item.ativo?'checked':'')+'> <span>Ativo</span></label>'+
-        '<button class="button button-primary catalog-save" type="button" data-catalog-id="'+id+'" onclick="AdminPainel.salvarCatalogo(\''+id+'\')">Salvar</button></article>';
+        '<button class="button button-primary catalog-save" type="button" data-catalog-id="'+id+'" onclick="AdminPainel.salvarCatalogo(\''+id+'\')">Salvar rascunho</button></article>';
     }).join('');
     const gruposAvulsas=[{categoria:'Tradicional',tamanho:'350g'},{categoria:'Tradicional',tamanho:'500g'},{categoria:'Linha Fit',tamanho:'300g'}];
     root.innerHTML='<section class="catalog-group"><h3>Combos</h3>'+renderRows(combosCatalogo)+'</section>'+
@@ -224,6 +227,35 @@
         return itens.length?'<div class="catalog-subgroup"><h4>'+escapar(grupo.categoria+' · '+grupo.tamanho)+'</h4>'+renderRows(itens)+'</div>':'';
       }).join('')+'</section>';
   }
+  function renderCatalogPublication() {
+    const status=$('catalog-publication-status');
+    if(!status)return;
+    if(catalogPublication&&catalogPublication.publishedAt) {
+      const date=new Date(catalogPublication.publishedAt);
+      const formatted=Number.isNaN(date.getTime())?String(catalogPublication.publishedAt):date.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+      status.textContent='Última versão enviada: '+formatted+'. Alterações feitas depois desse horário ainda não aparecem no site.';
+    } else {
+      status.textContent='Nenhuma publicação manual registrada neste projeto. Salve e publique o catálogo para iniciar o novo fluxo.';
+    }
+  }
+  async function publicarCatalogo() {
+    const button=$('publish-catalog-button');
+    if(!button)return;
+    if(!catalog.length){toast('Carregue o catálogo antes de publicar.');return;}
+    if(!window.confirm('Publicar agora os preços e a disponibilidade atuais para todos os clientes? As alterações salvas passarão a valer no site após a atualização do GitHub Pages.'))return;
+    button.disabled=true;button.textContent='Publicando…';
+    try {
+      const result=await postarAcao('adminPublishCatalog',{});
+      catalogPublication={published:true,publishedAt:result.publishedAt,publicationId:result.publicationId};
+      renderCatalogPublication();
+      toast(result.message||'Publicação enviada.');
+    } catch(error) {
+      toast(error.message||'Não foi possível publicar o cardápio.');
+    } finally {
+      button.disabled=false;button.textContent='Publicar cardápio';
+    }
+  }
+
   async function salvarCatalogo(id) {
     const item=catalog.find(entry=>entry.id===id);
     if(!item)return;
@@ -236,10 +268,10 @@
       const active=Boolean(activeInput&&activeInput.checked);
       const result=await postarAcao('adminSaveCatalog',{id,price,active});
       item.preco=price;item.ativo=active;item.atualizadoEm='Agora';
-      renderCatalog();toast(result.message||'Catálogo atualizado.');
+      renderCatalog();toast('Rascunho salvo na planilha. Para atualizar o site, clique em Publicar cardápio.');
     }catch(error){
       toast(error.message||'Não foi possível atualizar o catálogo.');
-      if(button){button.disabled=false;button.textContent='Salvar';}
+      if(button){button.disabled=false;button.textContent='Salvar rascunho';}
     }
   }
 
@@ -443,9 +475,10 @@
     $('filter-status').addEventListener('change',renderOrders);
     $('password-form').addEventListener('submit',salvarNovaSenha);
     $('api-test-button').addEventListener('click',testarConexao);
+    $('publish-catalog-button').addEventListener('click',publicarCatalogo);
     if(token) await carregarPainel();
     iniciarAtualizacaoAutomatica();
     testarConexao();
   });
-  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp,abrirAlterarSenha,fecharAlterarSenha,testarConexao,salvarCatalogo};
+  window.AdminPainel={abrirPedido,fecharPedido,atualizar,sair,copiarMensagem,abrirWhatsApp,abrirAlterarSenha,fecharAlterarSenha,testarConexao,salvarCatalogo,publicarCatalogo};
 })();
