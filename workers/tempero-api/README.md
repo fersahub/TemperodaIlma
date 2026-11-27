@@ -1,78 +1,94 @@
-# API independente — Tempero da Ilma
+# Cloudflare Worker — proxy do Apps Script | Tempero da Ilma
 
-Este Worker substitui o Apps Script **somente como camada pública de API**. A planilha Google existente continua sendo a base de dados e permanece privada. O Worker lê e grava nela pela Google Sheets API usando uma conta de serviço.
+## Arquitetura escolhida
 
-> **Não altere ainda o endereço da API no site.** Primeiro publique o Worker, configure os segredos, teste catálogo, pedidos e painel. A troca do site acontece somente depois desses testes.
+O Worker da Cloudflare funciona como uma camada de entrada para o site. Ele encaminha as chamadas GET e POST para o **Apps Script já existente**, que continua sendo o backend autorizado e responsável por acessar a planilha privada.
 
-## 1. Preparar a planilha e a conta de serviço
+Isso evita a criação de um projeto Google Cloud, conta de serviço ou chave JSON.
 
-1. Entre no Google Cloud Console e crie ou selecione um projeto.
-2. Ative a **Google Sheets API** nesse projeto.
-3. Crie uma conta de serviço e gere uma chave JSON.
-4. Abra a planilha atualmente usada pelo painel Tempero da Ilma.
-5. Compartilhe essa planilha com o endereço `client_email` que aparece no JSON da conta de serviço, com permissão **Editor**. Não torne a planilha pública.
+Fluxo:
 
-A conta de serviço deve receber acesso somente a essa planilha. Não compartilhe o arquivo JSON da chave em conversas, GitHub ou no site.
+```text
+Site / Painel administrativo
+          |
+          v
+Cloudflare Worker (workers.dev)
+          |
+          v
+Apps Script existente (executa como proprietário)
+          |
+          v
+Planilha Google privada
+```
 
-## 2. Obter os valores de configuração
+O Worker encaminha os parâmetros e o corpo dos formulários sem reinterpretar pedidos ou operações administrativas. O Apps Script continua fazendo as validações, aplicando o LockService e gravando nas abas atuais.
 
-Você precisará de quatro valores privados:
+## 1. Configuração do Worker
 
-- `GOOGLE_SERVICE_ACCOUNT_JSON`: conteúdo completo do arquivo JSON da conta de serviço.
-- `SPREADSHEET_ID`: identificador entre `/d/` e `/edit` no endereço da planilha.
-- `ADMIN_PASSWORD`: senha administrativa atual do painel. Para consultar a propriedade antiga, abra o projeto Apps Script, entre em **Configurações do projeto > Propriedades do script** e localize `TEMPERODA_ILMA_ADMIN_SECRET`.
-- `REVIEW_HASH_SALT`: na mesma tela, localize `TEMPERODA_ILMA_REVIEWS_HASH_SALT`.
+O endereço do Apps Script existente é configurado como variável pública não sensível em `wrangler.toml`:
 
-Copie os valores diretamente para os segredos do Cloudflare. **Não envie esses valores neste chat nem os coloque em arquivos do repositório.** A chave da conta de serviço e os dois valores do Apps Script são credenciais.
+- `APPS_SCRIPT_URL`: URL de implantação atual do Apps Script, terminada em `/exec`.
 
-## 3. Criar o Worker no Cloudflare
+Essa URL já era utilizada pelo site, portanto não é uma nova credencial. O Worker só aceita como destino um endpoint HTTPS em `script.google.com/macros/s/.../exec`.
 
-1. Entre no painel Cloudflare e abra **Workers & Pages**.
-2. Escolha **Create application > Connect to Git** e conecte o GitHub.
-3. Selecione o repositório `fersahub/TemperodaIlma`.
-4. Configure o diretório raiz como `workers/tempero-api`.
-5. Confirme que o nome do Worker é exatamente `tempero-ilma-api`, conforme `wrangler.toml`.
-6. Faça a primeira publicação. O Wrangler criará o Durable Object SQLite `OperationsCoordinator` pela migração `v1`.
+O projeto continua com:
 
-O Durable Object organiza as gravações em sequência para impedir que dois pedidos simultâneos ou uma alteração de preço concorrente ultrapassem a validação. Ele também guarda temporariamente sessões administrativas, desafios de login, limites de consultas e chaves de idempotência.
+- Nome: `tempero-ilma-api`
+- Diretório raiz: `workers/tempero-api`
+- Comando de implantação: `npx wrangler deploy`
 
-## 4. Cadastrar os segredos
+## 2. O que NÃO precisa ser configurado na Cloudflare
 
-No Worker `tempero-ilma-api`, abra **Settings > Variables and Secrets** e crie os quatro itens como **Secrets**, não como variáveis públicas:
+Neste modo proxy, não cadastre estes segredos no Worker:
 
-| Nome | Valor |
-|---|---|
-| `GOOGLE_SERVICE_ACCOUNT_JSON` | JSON completo da chave da conta de serviço |
-| `SPREADSHEET_ID` | ID da planilha atual |
-| `ADMIN_PASSWORD` | Senha administrativa atual |
-| `REVIEW_HASH_SALT` | Valor de `TEMPERODA_ILMA_REVIEWS_HASH_SALT` |
+- `GOOGLE_SERVICE_ACCOUNT_JSON`
+- `SPREADSHEET_ID`
+- `ADMIN_PASSWORD`
+- `REVIEW_HASH_SALT`
 
-Salve e publique uma nova versão do Worker após adicionar os segredos.
+A senha administrativa e o salt das avaliações permanecem nas Propriedades do script do Apps Script. A autorização para acessar a planilha continua sendo a autorização da conta proprietária do Apps Script.
 
-## 5. Testes antes de ligar o site
+## 3. Requisito da implantação Apps Script
 
-O Cloudflare fornecerá um endereço parecido com:
+A implantação atual precisa continuar ativa e configurada como:
 
-`https://tempero-ilma-api.<subdominio-da-conta>.workers.dev`
+- Executar como: proprietário / usuário que implantou.
+- Quem pode acessar: qualquer pessoa, inclusive anônimos, conforme a opção disponível na conta.
 
-Use o endereço com `/exec` no fim nos testes:
+O Apps Script precisa continuar com o `Code.gs` que atende às ações `health`, `catalog`, `orderCheck`, `firstOrderCheck`, `adminChallenge`, `adminLogin`, `adminData`, `adminOperation`, `registerOrder`, `adminUpdateStatus`, `adminMarkNotification`, `adminSaveCatalog`, `adminChangePassword` e avaliações.
 
-- `/exec?action=health` — deve retornar `ok:true`, `spreadsheetAccessible:true` e nenhuma aba obrigatória ausente.
-- `/exec?action=catalog` — deve retornar os 6 combos e os 38 itens avulsos, com preços e disponibilidade iguais aos da aba `Catalogo`.
+Não crie uma implantação nova nem altere o ID da implantação sem necessidade. A planilha permanece privada.
 
-Depois precisam ser testados, em ambiente controlado, um pedido completo, a gravação nas abas relacionadas, a consulta de confirmação, a edição de um item do catálogo no painel, uma mudança de status e uma avaliação. Não use um pedido real de cliente como primeiro teste.
+## 4. Por que o Worker segue redirecionamentos
+
+As respostas do Content Service do Apps Script podem redirecionar para um endereço temporário em `script.googleusercontent.com`. O Worker usa `redirect: 'follow'` para receber o conteúdo final e devolvê-lo ao navegador.
+
+O Worker preserva o query string do GET (incluindo callback JSONP) e encaminha o corpo form-urlencoded do POST. A resposta é devolvida com cabeçalhos CORS para o domínio público do site.
+
+## 5. Testes antes de trocar o endereço do site
+
+Depois que a alteração for incorporada à branch principal e a Cloudflare concluir a nova implantação, testar:
+
+1. `/exec?action=health`: deve retornar a saúde informada pelo Apps Script, incluindo `adminConfigured: true`, `spreadsheetConfigured: true`, `spreadsheetAccessible: true` e `missingSheets: []`.
+2. `/exec?action=catalog`: deve trazer os 6 combos e os 38 itens avulsos da aba `Catalogo`.
+3. Login no painel, carregamento de pedidos, alteração de status e consulta de `adminOperation`.
+4. Alteração de um preço de teste pelo painel e conferência na planilha.
+5. Pedido de teste e conferência nas abas `Pedidos`, `ItensPedidos`, `Clientes` e `HistoricoPedidos`.
+6. Fluxo de avaliação.
+
+Não use um pedido real de cliente como primeiro teste.
 
 ## 6. Troca do endereço do site
 
-Somente depois de os testes acima passarem, substitua o endereço em `js/config/loja.js` pelo Worker URL terminado em `/exec`. O cliente passará a consultar preços, registrar pedidos e enviar avaliações pela API independente. O painel administrativo continuará usando a mesma API e a mesma planilha.
+Somente depois de todos os testes passarem, alterar `js/config/loja.js` para apontar para o endereço Cloudflare terminado em `/exec`.
 
-Mantenha a implantação Apps Script antiga durante a transição e até validar o fluxo novo em celular e computador. Ela poderá ser mantida como contingência de retorno, sem ser o caminho principal dos clientes.
+Até lá:
 
-## Observações de segurança e operação
+- O site continua usando o endereço Apps Script atual.
+- A implantação Apps Script atual deve ser mantida.
+- Não apagar nem redefinir propriedades do Apps Script.
+- Não publicar a alteração do endereço do site antes dos testes.
 
-- A planilha não precisa ser pública.
-- A chave privada da conta de serviço fica somente em Cloudflare Secrets.
-- O Worker valida preços, disponibilidade, composição dos combos, endereço, frete e total novamente no servidor antes de gravar um pedido.
-- As alterações de preço e as gravações de pedido são serializadas pelo Durable Object.
-- O painel usa a mesma autenticação HMAC do site; a senha inicial é copiada do projeto atual. Trocas futuras de senha são guardadas no armazenamento seguro do Durable Object.
-- A API mantém o contrato de ações atual para permitir a migração sem reconstruir o checkout.
+## 7. Limites e transparência
+
+Esta alternativa não elimina o Apps Script: ele continua executando a lógica e acessando a planilha. A Cloudflare atua como proxy de entrada e padroniza o acesso do navegador. Portanto, os limites de execução e cotas do Apps Script continuam aplicáveis. O proxy pode contornar problemas de chamada direta do navegador, mas isso precisa ser confirmado em testes reais de celular e computador; não é uma garantia antecipada.
