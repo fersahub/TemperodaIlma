@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#234b32">
   <title>Painel administrativo | Tempero da Ilma</title>
-  <link rel="stylesheet" href="css/admin.css?v=20261125-1">
+  <link rel="stylesheet" href="css/admin.css?v=20261127-1">
 </head>
 <body>
   <header class="topbar">
@@ -78,10 +78,11 @@
 
       <section id="catalog-tab-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-catalog" hidden>
         <section class="orders-panel catalog-panel" aria-labelledby="catalog-heading">
-        <div class="panel-heading"><div><h2 id="catalog-heading">Gestão do cardápio</h2><p>Altere preços e disponibilidade dos combos e das marmitas avulsas.</p></div></div>
-        <div class="catalog-intro">Cada sabor possui preço e disponibilidade próprios. Nos sabores Tradicionais, o controle é separado para 350g e 500g; na Linha Fit, para 300g. Pedidos já registrados preservam seus valores originais.</div>
+        <div class="panel-heading"><div><h2 id="catalog-heading">Gestão do cardápio</h2><p>Edite os preços e a disponibilidade. As alterações só chegam ao site quando você publicar o cardápio.</p></div></div>
+        <div class="catalog-intro">Cada sabor possui preço e disponibilidade próprios. Nos sabores Tradicionais, o controle é separado para 350g e 500g; na Linha Fit, para 300g. Salvar uma alteração atualiza apenas a planilha; o site continua com a última versão publicada.</div>
+        <div class="catalog-publish-box"><div><strong>Publicação no site</strong><p id="catalog-publication-status" role="status" aria-live="polite">Verificando a última publicação…</p></div><button class="button button-primary" id="publish-catalog-button" type="button">Publicar cardápio</button></div>
         <div id="catalog-list" class="catalog-list"><div class="loading-state">Carregando catálogo…</div></div>
-        <div class="panel-footnote">Os valores são validados novamente pelo servidor antes do registro de cada pedido. Mantenha pelo menos um combo ativo.</div>
+        <div class="panel-footnote">As alterações salvas ficam como rascunho até a publicação. O servidor confere os valores da última versão publicada antes de registrar cada pedido. Mantenha pelo menos um combo ativo.</div>
       </section>
       </section>
 
@@ -138,6 +139,6 @@
   <div class="toast" id="admin-toast" role="status" aria-live="polite"></div>
 
   <script src="js/config/loja.js?v=20261120-2"></script>
-  <script src="js/admin.js?v=20261125-1"></script>
+  <script src="js/admin.js?v=20261127-1"></script>
 </body>
 </html>
