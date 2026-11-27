@@ -62,6 +62,80 @@ function makeStorage() {
   };
 }
 
+
+test('Worker encaminha GET ao Apps Script, preserva JSONP e adiciona CORS',async()=>{
+  const originalFetch=globalThis.fetch;
+  let capturedUrl='',capturedInit=null;
+  globalThis.fetch=async(input,init={})=>{
+    capturedUrl=String(input);
+    capturedInit=init;
+    return new Response('loadCatalog({"ok":true,"combos":[],"avulsas":[]});',{
+      status:200,headers:{'Content-Type':'application/javascript; charset=utf-8'}
+    });
+  };
+  try {
+    const request=new Request('https://tempero-ilma-api.test.workers.dev/exec?action=catalog&callback=loadCatalog',{
+      headers:{Origin:'https://fersahub.github.io'}
+    });
+    const response=await worker.fetch(request,{
+      APPS_SCRIPT_URL:'https://script.google.com/macros/s/test-deployment-id/exec'
+    });
+    assert.equal(response.status,200);
+    assert.equal(response.headers.get('Access-Control-Allow-Origin'),'https://fersahub.github.io');
+    assert.match(response.headers.get('Content-Type')||'',/javascript/);
+    assert.match(await response.text(),/^loadCatalog\(/);
+    assert.equal(capturedUrl,'https://script.google.com/macros/s/test-deployment-id/exec?action=catalog&callback=loadCatalog');
+    assert.equal(capturedInit.redirect,'follow');
+    assert.equal(capturedInit.method,'GET');
+  } finally {
+    globalThis.fetch=originalFetch;
+  }
+});
+
+test('Worker encaminha POST form-urlencoded ao Apps Script sem alterar os parâmetros',async()=>{
+  const originalFetch=globalThis.fetch;
+  let capturedUrl='',capturedInit=null;
+  globalThis.fetch=async(input,init={})=>{
+    capturedUrl=String(input);
+    capturedInit=init;
+    return new Response(JSON.stringify({ok:true,orderId:'TI-261127-ABCDEF1234'}),{
+      status:200,headers:{'Content-Type':'application/json; charset=utf-8'}
+    });
+  };
+  try {
+    const body=new URLSearchParams({action:'registerOrder',payload:JSON.stringify({orderId:'TI-261127-ABCDEF1234'})});
+    const request=new Request('https://tempero-ilma-api.test.workers.dev/exec',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8',
+        Origin:'https://fersahub.github.io'
+      },
+      body:body.toString()
+    });
+    const response=await worker.fetch(request,{
+      APPS_SCRIPT_URL:'https://script.google.com/macros/s/test-deployment-id/exec'
+    });
+    assert.equal(response.status,200);
+    assert.equal(response.headers.get('Access-Control-Allow-Origin'),'https://fersahub.github.io');
+    assert.deepEqual(await response.json(),{ok:true,orderId:'TI-261127-ABCDEF1234'});
+    assert.equal(capturedUrl,'https://script.google.com/macros/s/test-deployment-id/exec');
+    assert.equal(capturedInit.method,'POST');
+    assert.equal(capturedInit.redirect,'follow');
+    assert.equal(capturedInit.headers['Content-Type'],'application/x-www-form-urlencoded;charset=UTF-8');
+    assert.equal(new TextDecoder().decode(capturedInit.body),body.toString());
+  } finally {
+    globalThis.fetch=originalFetch;
+  }
+});
+
+test('Worker recusa APPS_SCRIPT_URL fora do endpoint oficial de Apps Script',async()=>{
+  const response=await worker.fetch(new Request('https://tempero-ilma-api.test.workers.dev/exec?action=health'),{
+    APPS_SCRIPT_URL:'https://example.com/exec'
+  });
+  assert.equal(response.status,503);
+  assert.match((await response.json()).message,/Apps Script não é válido/);
+});
+
 test('catálogo esperado contém os 6 combos e 38 avulsas, sem identificadores repetidos',()=>{
   const definitions=fixedCatalogDefinitions();
   assert.equal(definitions.filter(item=>item.type==='COMBO').length,6);
