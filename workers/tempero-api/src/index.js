@@ -1,8 +1,6 @@
-/* Tempero da Ilma — API independente via Cloudflare Workers + Google Sheets API.
- * Compatível com o contrato JSONP/POST atual do site para permitir migração gradual.
- * Segredos obrigatórios (Cloudflare Secrets): GOOGLE_SERVICE_ACCOUNT_JSON,
- * SPREADSHEET_ID, ADMIN_PASSWORD, REVIEW_HASH_SALT.
- * Binding KV obrigatório: STATE.
+/* Tempero da Ilma — Cloudflare Worker.
+ * Em produção, APPS_SCRIPT_URL ativa o modo proxy para o Apps Script existente.
+ * O modo nativo Google Sheets permanece como fallback de desenvolvimento.
  */
 const API_VERSION = '2026.11.26.1';
 const REQUIRED_SHEETS = ['Avaliacoes','Pedidos','ItensPedidos','Clientes','HistoricoPedidos','Notificacoes','Configuracoes','Fretes','Produtos','Catalogo'];
@@ -780,10 +778,67 @@ async function dispatchPost(request,env) {
     return jsonResponse(failure,200,corsHeaders(request));
   }
 }
+
+/**
+ * Modo proxy: o Apps Script existente continua sendo o backend autorizado.
+ * O Worker só encaminha GET/POST e devolve a resposta ao navegador com CORS.
+ * O ContentService do Apps Script redireciona o conteúdo para
+ * script.googleusercontent.com; por isso o fetch precisa seguir redirects.
+ */
+async function proxyToAppsScript(request,env) {
+  const responseHeaders=corsHeaders(request);
+  let target;
+  try {
+    target=new URL(String(env.APPS_SCRIPT_URL||''));
+    if(target.protocol!=='https:' ||
+       target.hostname!=='script.google.com' ||
+       !/^\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(target.pathname) ||
+       target.username || target.password || target.hash) {
+      throw new Error('O endereço do Apps Script não é válido.');
+    }
+  } catch(error) {
+    return jsonResponse({ok:false,message:clean(error.message,180)||'Configure APPS_SCRIPT_URL no Worker.'},503,responseHeaders);
+  }
+
+  const incoming=new URL(request.url);
+  if(incoming.pathname!=='/exec') {
+    return jsonResponse({ok:false,message:'Rota não encontrada.'},404,responseHeaders);
+  }
+  target.search=incoming.search;
+
+  try {
+    const init={
+      method:request.method,
+      redirect:'follow',
+      headers:{Accept:'application/json, application/javascript, text/plain;q=0.9, */*;q=0.8'}
+    };
+    if(request.method==='POST') {
+      init.headers['Content-Type']=request.headers.get('Content-Type')||'application/x-www-form-urlencoded;charset=UTF-8';
+      init.body=await request.arrayBuffer();
+    } else if(request.method!=='GET') {
+      return jsonResponse({ok:false,message:'Método não permitido.'},405,responseHeaders);
+    }
+
+    const upstream=await fetch(target.toString(),init);
+    const body=await upstream.text();
+    const headers=new Headers(responseHeaders);
+    headers.set('Cache-Control','no-store');
+    headers.set('X-Content-Type-Options','nosniff');
+    headers.set('Content-Type',upstream.headers.get('Content-Type')||'application/json; charset=utf-8');
+    return new Response(body,{status:upstream.status,headers});
+  } catch(error) {
+    return jsonResponse({
+      ok:false,
+      message:'Não foi possível consultar o Apps Script pela Cloudflare. Verifique a implantação do App da Web e tente novamente.'
+    },502,responseHeaders);
+  }
+}
+
 export default {
   async fetch(request,env) {
     const headers=corsHeaders(request);
     if(request.method==='OPTIONS') return new Response(null,{status:204,headers});
+    if(env.APPS_SCRIPT_URL) return proxyToAppsScript(request,env);
     const path=new URL(request.url).pathname;
     if(path==='/health'&&request.method==='GET') {
       return callbackResponse(await (async()=>{try{return {ok:true,service:'Tempero da Ilma API independente',apiVersion:API_VERSION,spreadsheetConfigured:Boolean(env.SPREADSHEET_ID),spreadsheetAccessible:!!(await getSheetIds(env))};}catch(e){return {ok:false,message:clean(e.message,180)};}})(),'');
