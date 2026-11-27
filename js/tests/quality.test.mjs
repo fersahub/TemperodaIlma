@@ -601,6 +601,8 @@ test('catálogo público utiliza a última publicação manual e não consulta o
  assert.match(catalog,/dados\/catalogo-publicado\.json/);
  assert.match(catalog,/fetch\('dados\/catalogo-publicado\.json'/);
  assert.match(catalog,/source==='published'/);
+ assert.match(catalog,/erroPublicacao&&erroPublicacao\.code==='CATALOG_NOT_PUBLISHED'/);
+ assert.match(catalog,/else if\(aplicarCacheComAviso\(true\)\)/);
  assert.doesNotMatch(catalog,/window\.setInterval/);
  assert.doesNotMatch(app,/iniciarAtualizacaoAutomaticaCatalogo/);
  assert.match(sw,/url\.pathname\.endsWith\('\/dados\/catalogo-publicado\.json'\)/);
