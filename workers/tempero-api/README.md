@@ -78,16 +78,13 @@ Depois que a alteração for incorporada à branch principal e a Cloudflare conc
 
 Não use um pedido real de cliente como primeiro teste.
 
-## 6. Troca do endereço do site
+## 6. Ativação do endereço do site
 
-Somente depois de todos os testes passarem, alterar `js/config/loja.js` para apontar para o endereço Cloudflare terminado em `/exec`.
+Após os testes de saúde, catálogo, desafio administrativo, consultas, autenticação, gravação administrativa e registro de pedido terem passado, `js/config/loja.js` foi atualizado para usar o Worker URL terminado em `/exec`. O site público e o painel usam a mesma configuração.
 
-Até lá:
-
-- O site continua usando o endereço Apps Script atual.
-- A implantação Apps Script atual deve ser mantida.
+- A implantação Apps Script atual deve ser mantida como backend e contingência.
 - Não apagar nem redefinir propriedades do Apps Script.
-- Não publicar a alteração do endereço do site antes dos testes.
+- Validar o site em celular e computador após a publicação do GitHub Pages.
 
 ## 7. Limites e transparência
 
