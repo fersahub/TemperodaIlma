@@ -116,6 +116,7 @@
     const response=await fetch('dados/catalogo-publicado.json',{cache:'no-store',headers:{Accept:'application/json'}});
     if(!response.ok)throw new Error('O arquivo do cardápio publicado ainda não está disponível.');
     const data=await response.json();
+    if(data&&data.published===false){const error=new Error('A primeira publicação manual do catálogo ainda não foi realizada.');error.code='CATALOG_NOT_PUBLISHED';throw error;}
     if(!validar(data))throw new Error(diagnosticar(data));
     return data;
   }
@@ -128,11 +129,16 @@
       try{
         data=await carregarCatalogoPublicado();
       }catch(erroPublicacao){
-        // Durante a migração, usa o Apps Script somente até a primeira publicação manual.
-        // Depois disso, a última cópia publicada salva no aparelho é a contingência offline.
-        if(aplicarCacheComAviso(true))return;
-        source='legacy';
-        data=await jsonp();
+        // Somente o arquivo marcador "published:false" autoriza o modo de transição.
+        // Uma falha de rede ou cache nunca dispara consulta automática ao Apps Script.
+        if(erroPublicacao&&erroPublicacao.code==='CATALOG_NOT_PUBLISHED'){
+          source='legacy';
+          data=await jsonp();
+        }else if(aplicarCacheComAviso(true)){
+          return;
+        }else{
+          throw erroPublicacao;
+        }
       }
       if(!validar(data))throw new Error(diagnosticar(data));
       aplicar(data);
