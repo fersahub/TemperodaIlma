@@ -11,7 +11,7 @@ function data(p){const window={TEMPERO_DADOS:{}};runInNewContext(read(p),{window
 
 test('Apps Script expõe a versão atualizada para o benefício de primeiro pedido',()=>{
  const backend=read('integrations/google-apps-script/Code.gs');
- assert.match(backend,/TEMPERO_API_VERSION = '2026.11.20.7'/);
+ assert.match(backend,/TEMPERO_API_VERSION = '2026.11.27.1'/);
 });
 test('combos: IDs, preços, quantidades e imagens',()=>{
  const xs=data('js/data/combos.js').combos;assert.ok(xs.length>0);assert.equal(new Set(xs.map(x=>x.id)).size,xs.length);
@@ -83,7 +83,7 @@ test('backend Apps Script: JSONP somente leitura, validação, deduplicação e 
  assert.match(backend,/CONFIG\.STATUS_PUBLICADO/);
  assert.match(backend,/SABORES_PERMITIDOS/);
  assert.match(backend,/callback.*A-Za-z0-9_/s);
- assert.match(read('sw.js'),/tempero-v29-retry-nao-bloqueia-prepedido/);
+ assert.match(read('sw.js'),/tempero-v30-catalogo-publicado-manual/);
 });
 
 test('página offline está incluída no cache',()=>{assert.ok(exists('offline.html'));assert.match(read('sw.js'),/\.\/offline\.html/);});
@@ -275,7 +275,7 @@ test('avulsas oferecem Sim/Não, iniciam recolhidas e podem ser reabertas pelo c
  assert.ok(html.includes('Não vendemos pedidos somente de 1 ou 2 marmitas'));
  assert.ok(avulsas.includes('if (!temComboNoCarrinho()) return null'));
  assert.ok(avulsas.includes('disabled'));
- assert.ok(read('sw.js').includes('tempero-v29-retry-nao-bloqueia-prepedido'));
+ assert.ok(read('sw.js').includes('tempero-v30-catalogo-publicado-manual'));
 });
 
 test('avulsas: Não oculta a área, Sim expande e o atalho do cardápio reabre',()=>{
@@ -399,8 +399,8 @@ test('avulsas: novo pedido reinicia e persiste preferência mesmo após escolha 
 
 test('painel administrativo: arquivos, autenticação e sessão não expõem segredo no frontend',()=>{
  const adminHtml=read('admin.html');
- assert.match(adminHtml,/js\/admin\.js\?v=20261125-1/);
- assert.match(adminHtml,/css\/admin\.css\?v=20261125-1/);
+ assert.match(adminHtml,/js\/admin\.js\?v=20261127-1/);
+ assert.match(adminHtml,/css\/admin\.css\?v=20261127-1/);
  const html=read('admin.html'),css=read('css/admin.css'),js=read('js/admin.js'),backend=read('integrations/google-apps-script/Code.gs');
  assert.ok(exists('admin.html')&&exists('css/admin.css')&&exists('js/admin.js'));
  assert.match(html,/noindex,nofollow/);
@@ -517,7 +517,7 @@ test('modal de avaliação participa da pilha de modais',()=>{
 });
 test('service worker não armazena painel administrativo no cache público e renova arquivos do app',()=>{
  const sw=read('sw.js');
- assert.match(sw,/tempero-v29-retry-nao-bloqueia-prepedido/);
+ assert.match(sw,/tempero-v30-catalogo-publicado-manual/);
  assert.match(sw,/const paginaAdmin = url\.pathname\.endsWith\('\/admin\.html'\)/);
  assert.match(sw,/response\.ok && !paginaAdmin/);
  assert.match(sw,/if \(paginaAdmin\) return new Response/);
@@ -541,6 +541,10 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
  assert.match(backend,/function obterCatalogoPublico_\(\)/);
  assert.match(backend,/action === 'catalog'/);
  assert.match(backend,/action === 'adminSaveCatalog'/);
+ assert.match(backend,/action === 'adminPublishCatalog'/);
+ assert.match(backend,/function publicarCatalogoNoSite_\(\)/);
+ assert.match(backend,/TEMPERODA_ILMA_GITHUB_TOKEN/);
+ assert.match(backend,/obterSnapshotCatalogoPublicado_/);
  assert.match(backend,/comboCatalogo\.preco/);
  assert.match(backend,/avulsaCatalogo\.preco/);
  const registro=backend.slice(backend.indexOf('function registrarPedidoPublico_'));
@@ -550,6 +554,8 @@ test('catálogo comercial: API, planilha, validação no servidor e painel de ed
  assert.match(admin,/function salvarCatalogo\(id\)/);
  assert.match(admin,/adminSaveCatalog/);
  assert.match(adminHtml,/id="catalog-list"/);
+ assert.match(adminHtml,/id="publish-catalog-button"/);
+ assert.match(admin,/function publicarCatalogo\(\)/);
  assert.match(catalog,/TEMPERO_CATALOGO_STATUS/);
  assert.match(html,/js\/modules\/catalogo\.js/);
  assert.match(app,/iniciarCatalogoPublico\(\)/);
@@ -585,18 +591,36 @@ test('contingência: permite pré-pedido pelo WhatsApp sem confirmar preços ou 
  assert.match(html,/js\/services\/pix\.js\?v=20261125-5/);
  assert.match(html,/js\/modules\/pedidos\.js\?v=20261125-5/);
  assert.match(html,/js\/modules\/checkout\.js\?v=20261125-5/);
- assert.match(sw,/tempero-v29-retry-nao-bloqueia-prepedido/);
+ assert.match(sw,/tempero-v30-catalogo-publicado-manual/);
  assert.match(sw,/js\/modules\/pedidos\.js\?v=20261125-5/);
  assert.match(sw,/js\/modules\/checkout\.js\?v=20261125-5/);
  assert.match(read('js/modules/catalogo.js'),/callback,_:String\(Date\.now\(\)\)/);
 });
-test('catálogo público atualiza preços e disponibilidade automaticamente a cada minuto sem interferir no carrinho',()=>{
- const catalog=read('js/modules/catalogo.js'),app=read('js/app.js');
- assert.match(catalog,/window\.setInterval\(\(\)\s*=>/);
- assert.match(catalog,/},60000\)/);
- assert.match(catalog,/document\.visibilityState!=='visible'/);
- assert.match(catalog,/cartCombos\.length>0/);
- assert.match(catalog,/cartAvulsas\.length>0/);
- assert.match(catalog,/if\(catalogoEmAtualizacao\)return/);
- assert.match(app,/iniciarAtualizacaoAutomaticaCatalogo\(\)/);
+test('catálogo público utiliza a última publicação manual e não consulta o Apps Script em segundo plano',()=>{
+ const catalog=read('js/modules/catalogo.js'),app=read('js/app.js'),sw=read('sw.js'),admin=read('js/admin.js'),adminHtml=read('admin.html');
+ assert.match(catalog,/dados\/catalogo-publicado\.json/);
+ assert.match(catalog,/fetch\('dados\/catalogo-publicado\.json'/);
+ assert.match(catalog,/source==='published'/);
+ assert.match(catalog,/erroPublicacao&&erroPublicacao\.code==='CATALOG_NOT_PUBLISHED'/);
+ assert.match(catalog,/else if\(aplicarCacheComAviso\(true\)\)/);
+ assert.doesNotMatch(catalog,/window\.setInterval/);
+ assert.doesNotMatch(app,/iniciarAtualizacaoAutomaticaCatalogo/);
+ assert.match(sw,/url\.pathname\.endsWith\('\/dados\/catalogo-publicado\.json'\)/);
+ assert.match(admin,/adminPublishCatalog/);
+ assert.match(admin,/Rascunho salvo na planilha/);
+ assert.match(adminHtml,/id="publish-catalog-button"/);
+ assert.match(adminHtml,/As alterações só chegam ao site quando você publicar o cardápio/);
+});
+
+test('publicação manual mantém um snapshot público sem expor a chave do GitHub',()=>{
+ const backend=read('integrations/google-apps-script/Code.gs'),admin=read('js/admin.js'),html=read('admin.html');
+ assert.match(backend,/function verificarAcessoPublicacaoCatalogoTempero\(\)/);
+ assert.match(backend,/Authorization:'Bearer '\+token/);
+ assert.match(backend,/UrlFetchApp\.fetch/);
+ assert.match(backend,/PropertiesService\.getScriptProperties\(\)/);
+ assert.match(backend,/obterSnapshotCatalogoPublicado_/);
+ assert.match(backend,/publishedAt/);
+ assert.match(admin,/adminPublishCatalog/);
+ assert.doesNotMatch(admin,/github_pat_|ghp_|TEMPERODA_ILMA_GITHUB_TOKEN/);
+ assert.match(html,/Publicar cardápio/);
 });

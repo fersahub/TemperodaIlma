@@ -97,49 +97,64 @@
     if(typeof renderAvulsasDisplay==='function')renderAvulsasDisplay();
     if(typeof renderFlavorsDisplay==='function')renderFlavorsDisplay();
   }
-  function aplicarCacheComAviso(){
+  function aplicarCacheComAviso(apenasPublicado){
     try{
       const saved=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
-      if(!saved||!saved.data||Date.now()-Number(saved.savedAt||0)>24*60*60*1000)return false;
+      if(!saved||!saved.data)return false;
+      const idade=Date.now()-Number(saved.savedAt||0);
+      if(apenasPublicado&&saved.source!=='published')return false;
+      if(saved.source!=='published'&&idade>24*60*60*1000)return false;
       aplicar(saved.data);
-      aviso('cached','Estamos exibindo o último catálogo salvo neste aparelho. Reconecte-se e atualize a página para confirmar os preços atuais antes de enviar um pedido.');
+      window.TEMPERO_CATALOGO_ORIGEM=saved.source||'legacy';
+      aviso('cached',saved.source==='published'
+        ? 'Não foi possível conferir se existe uma publicação mais recente. Exibindo a última versão publicada salva neste aparelho.'
+        : 'Estamos exibindo o último catálogo salvo neste aparelho. Reconecte-se para confirmar os preços antes de enviar um pedido.');
       return true;
     }catch(error){return false;}
+  }
+  async function carregarCatalogoPublicado(){
+    const response=await fetch('dados/catalogo-publicado.json',{cache:'no-store',headers:{Accept:'application/json'}});
+    if(!response.ok)throw new Error('O arquivo do cardápio publicado ainda não está disponível.');
+    const data=await response.json();
+    if(data&&data.published===false){const error=new Error('A primeira publicação manual do catálogo ainda não foi realizada.');error.code='CATALOG_NOT_PUBLISHED';throw error;}
+    if(!validar(data))throw new Error(diagnosticar(data));
+    return data;
   }
   async function iniciarCatalogoPublico(){
     if(catalogoEmAtualizacao)return;
     catalogoEmAtualizacao=true;
-    aviso('loading','Atualizando preços e disponibilidade do cardápio…');
+    aviso('loading','Carregando o cardápio publicado…');
     try{
-      const data=await jsonp();
-      if(data&&data.ok===false&&/ação inválida|acao invalida|invalid action/i.test(String(data.message||''))){aviso('legacy','');return;}
+      let data,source='published';
+      try{
+        data=await carregarCatalogoPublicado();
+      }catch(erroPublicacao){
+        // Somente o arquivo marcador "published:false" autoriza o modo de transição.
+        // Uma falha de rede ou cache nunca dispara consulta automática ao Apps Script.
+        if(erroPublicacao&&erroPublicacao.code==='CATALOG_NOT_PUBLISHED'){
+          source='legacy';
+          data=await jsonp();
+        }else if(aplicarCacheComAviso(true)){
+          return;
+        }else{
+          throw erroPublicacao;
+        }
+      }
       if(!validar(data))throw new Error(diagnosticar(data));
       aplicar(data);
-      try{localStorage.setItem(CACHE_KEY,JSON.stringify({data,savedAt:Date.now()}));}catch(error){}
+      window.TEMPERO_CATALOGO_ORIGEM=source;
+      try{localStorage.setItem(CACHE_KEY,JSON.stringify({data,savedAt:Date.now(),source}));}catch(error){}
       aviso('ready','');
     }catch(error){
-      if(aplicarCacheComAviso())return;
+      if(aplicarCacheComAviso(false))return;
       window.TEMPERO_CATALOGO_ULTIMO_ERRO=String(error&&error.message||error||'Falha desconhecida');
-      console.error('[Tempero da Ilma] Falha ao atualizar catálogo:',window.TEMPERO_CATALOGO_ULTIMO_ERRO);
-      aviso('error','Não foi possível confirmar os preços atuais. Atualize a página quando a conexão retornar. Por segurança, o envio de novos pedidos ficará temporariamente bloqueado. Diagnóstico: '+window.TEMPERO_CATALOGO_ULTIMO_ERRO.slice(0,180));
+      console.error('[Tempero da Ilma] Falha ao carregar catálogo:',window.TEMPERO_CATALOGO_ULTIMO_ERRO);
+      aviso('error','Não foi possível carregar um catálogo válido. Por segurança, o envio de novos pedidos ficará temporariamente bloqueado. Diagnóstico: '+window.TEMPERO_CATALOGO_ULTIMO_ERRO.slice(0,180));
     }finally{
-      // Depois da primeira resposta, uma nova tentativa em segundo plano não pode travar o pré-pedido.
       window.TEMPERO_CATALOGO_TENTATIVA_INICIAL_CONCLUIDA=true;
       catalogoEmAtualizacao=false;
     }
   }
-  function iniciarAtualizacaoAutomaticaCatalogo(){
-    if(window.TEMPERO_CATALOGO_TIMER)return;
-    window.TEMPERO_CATALOGO_TIMER=window.setInterval(()=>{
-      if(document.visibilityState!=='visible')return;
-      const temItensNoCarrinho=(typeof cartCombos!=='undefined'&&Array.isArray(cartCombos)&&cartCombos.length>0)||
-        (typeof cartAvulsas!=='undefined'&&Array.isArray(cartAvulsas)&&cartAvulsas.length>0);
-      // Não alterar preços ou disponibilidade enquanto o cliente estiver montando um pedido.
-      if(temItensNoCarrinho)return;
-      iniciarCatalogoPublico();
-    },60000);
-  }
   window.iniciarCatalogoPublico=iniciarCatalogoPublico;
-  window.iniciarAtualizacaoAutomaticaCatalogo=iniciarAtualizacaoAutomaticaCatalogo;
   window.TEMPERO_CATALOGO_ATUALIZAR=atualizarCarrinho;
 })();

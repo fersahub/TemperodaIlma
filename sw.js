@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tempero-v29-retry-nao-bloqueia-prepedido';
+const CACHE_NAME = 'tempero-v30-catalogo-publicado-manual';
 const CACHE_PREFIX = 'tempero-';
 const CORE_ASSETS = [
   './index.html',
@@ -23,12 +23,12 @@ const CORE_ASSETS = [
   './js/modules/favoritos.js',
   './js/modules/detalhes-prato.js',
   './js/modules/cardapio.js',
-  './js/modules/catalogo.js?v=20261125-5',
+  './js/modules/catalogo.js?v=20261127-1',
   './js/modules/avulsas.js',
   './js/modules/avaliacoes.js',
   './js/modules/carrinho.js',
   './js/modules/checkout.js?v=20261125-5',
-  './js/app.js?v=20261125-3',
+  './js/app.js?v=20261127-1',
   './assets/images/marca/LOGO.PNG',
   './assets/images/optimized/pratos/Empadao de frango.webp',
   './assets/images/pwa/icon-192.png',
@@ -57,6 +57,25 @@ self.addEventListener('fetch', event => {
   const local = url.origin === self.location.origin;
   const cdn = CDN_HOSTS.has(url.hostname);
   if (!local && !cdn) return;
+
+  // O catálogo publicado usa rede primeiro: uma nova publicação passa a valer
+  // sem deixar uma cópia antiga presa no cache do aplicativo instalado.
+  if (local && url.pathname.endsWith('/dados/catalogo-publicado.json')) {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(new Request(request, { cache: 'no-store' }));
+        if (response.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, response.clone());
+        }
+        if (response.ok) return response;
+        return (await caches.match(request)) || response;
+      } catch (error) {
+        return (await caches.match(request)) || Response.error();
+      }
+    })());
+    return;
+  }
 
   if (request.mode === 'navigate') {
     event.respondWith((async () => {

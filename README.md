@@ -7,6 +7,8 @@ Aplicação publicada pelo **GitHub Pages**, com cardápio estático e backend l
 ```text
 TemperodaIlma/
 ├── assets/                 # Fotografias, logotipo e ícones
+├── dados/                  # Cópia pública da última publicação manual do catálogo
+│   └── catalogo-publicado.json
 ├── css/styles.css          # Aparência do cardápio
 ├── css/admin.css           # Aparência do painel administrativo
 ├── js/
@@ -147,6 +149,22 @@ A interface de avaliações fica no próprio site e usa **Google Apps Script + G
 - O código do pedido impede uma segunda avaliação pelo mesmo pedido. Como o site não confirma a entrega pelo WhatsApp, esse código identifica o pedido gerado no navegador, mas não é uma comprovação antifraude de compra/entrega.
 - A coluna **Status** da planilha começa como `PUBLICADO`. Para ocultar uma avaliação, altere manualmente para `OCULTO`; ela deixa de entrar nas médias e nos comentários públicos.
 - O backend está em `integrations/google-apps-script/Code.gs`. O endpoint é configurado em `js/config/loja.js`, no campo `avaliacoes.apiUrl`. Não coloque senhas ou tokens privados no site.
+
+### Publicação manual do catálogo
+
+O site utiliza a última cópia publicada em `dados/catalogo-publicado.json`. A primeira publicação é feita pelo painel administrativo; depois disso, abrir o site não consulta o Apps Script para buscar preços. O Apps Script continua responsável por registrar os pedidos e validar os preços contra a última publicação confirmada.
+
+O painel separa duas ações: **Salvar rascunho** grava a alteração na aba `Catalogo` da planilha; **Publicar cardápio** copia o catálogo validado para o arquivo público do GitHub Pages. Alterações ainda não publicadas não aparecem aos clientes e não mudam os preços usados na validação dos pedidos.
+
+Configuração única necessária:
+
+1. No GitHub, abra **Settings → Developer settings → Fine-grained personal access tokens** e crie um token restrito ao repositório `fersahub/TemperodaIlma`, com permissão **Contents: Read and write**. Não conceda acesso a outros repositórios.
+2. No projeto existente do Apps Script, abra **Configurações do projeto → Propriedades do script** e cadastre `TEMPERODA_ILMA_GITHUB_TOKEN` com o token criado. Não coloque o token em `js/config/loja.js`, no site ou na planilha.
+3. No editor do Apps Script, execute `verificarAcessoPublicacaoCatalogoTempero()` uma vez e autorize a solicitação de acesso externo. A função apenas testa a permissão; não publica nem altera arquivos.
+4. Atualize o arquivo `Code.gs` do mesmo projeto com esta versão e edite a implantação existente do App da Web, publicando uma **Nova versão**. Preserve o mesmo endereço `/exec`, a execução como proprietário e o acesso para qualquer pessoa. Não crie outra implantação.
+5. Entre no painel, confira os preços e clique em **Publicar cardápio**. O arquivo público será atualizado e o GitHub Pages fará a publicação. A interface informa que a atualização pode levar alguns instantes.
+
+A chave do GitHub permanece no Apps Script. O arquivo JSON contém somente IDs, preços e disponibilidade do catálogo, sem dados de clientes. Se a primeira publicação ainda não tiver sido feita, o site mantém temporariamente o carregamento anterior do Apps Script para não interromper o catálogo durante a migração.
 
 ### Ativação única do Google Apps Script
 
