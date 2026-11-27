@@ -3,6 +3,9 @@ main = "src/index.js"
 compatibility_date = "2026-11-26"
 workers_dev = true
 
+[vars]
+APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4mn8UBBcPENUq_UVml-y7HFlFiLtjOOZB6NUZBPS5Nii1tX2lqZqvy0jMIlEN1vj65A/exec"
+
 [observability]
 enabled = true
 
